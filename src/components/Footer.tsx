@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "./ArrowMark";
+import { withBasePath } from "@/lib/basePath";
 
 const SITEMAP = [
   { label: "Solutions", href: "#solutions" },
@@ -22,7 +23,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-1">
             <Image
-              src="/earrow-logo-white.png"
+              src={withBasePath("/earrow-logo-white.png")}
               alt="eArrow"
               width={220}
               height={91}

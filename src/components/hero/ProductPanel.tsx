@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import LightSweep from "../LightSweep";
+import { withBasePath } from "@/lib/basePath";
 
 /**
  * The hero's subject: the Arrow HR & Payroll mark, animated.
@@ -36,7 +37,7 @@ import LightSweep from "../LightSweep";
 /* The Payroll mark. Same artwork as the corporate Q — see `Payroll logo.png`,
    whose trimmed content is pixel-identical to this file. White on transparency,
    so `--logo-filter` inverts it to near-black on the light canvas. */
-const MARK = "/logos/payroll.png";
+const MARK = withBasePath("/logos/payroll.png");
 
 export default function ProductPanel() {
   return (

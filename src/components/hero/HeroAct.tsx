@@ -8,6 +8,7 @@ import LightSweep from "../LightSweep";
 import HeroPlate from "./HeroPlate";
 import StatsPlane from "./StatsPlane";
 import { curtainActive, onCurtainLift } from "../brand-curtain";
+import { withBasePath } from "@/lib/basePath";
 import {
   buildCalmIntro,
   buildIntro,
@@ -429,7 +430,7 @@ export default function HeroAct() {
                 only the declaration was throwing it away.
               */}
               <Image
-                src="/earrow-logo-white.png"
+                src={withBasePath("/earrow-logo-white.png")}
                 alt=""
                 width={1520}
                 height={626}
@@ -438,7 +439,7 @@ export default function HeroAct() {
                 className="h-auto w-full"
                 style={{ filter: "var(--logo-filter)" }}
               />
-              <LightSweep mask="/earrow-logo-white.png" />
+              <LightSweep mask={withBasePath("/earrow-logo-white.png")} />
             </div>
           </div>
         </div>

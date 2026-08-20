@@ -42,7 +42,7 @@ jobs:
 
       - name: Build
         env:
-          NEXT_BASE_PATH: ${{ steps.basepath.outputs.value }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.basepath.outputs.value }}
         run: npm run build
 
       - name: Add .nojekyll

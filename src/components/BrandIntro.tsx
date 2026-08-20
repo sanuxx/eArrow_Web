@@ -3,6 +3,7 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { withBasePath } from "@/lib/basePath";
 import { curtainActive, resetCurtain, signalCurtainLift } from "./brand-curtain";
 
 /**
@@ -273,7 +274,7 @@ export default function BrandIntro() {
           would produce a black logo on a black screen.
         */}
         <Image
-          src="/earrow-logo-white.png"
+          src={withBasePath("/earrow-logo-white.png")}
           alt=""
           width={1520}
           height={626}

@@ -4,6 +4,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { SectionLabel } from "./ui";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { withBasePath } from "@/lib/basePath";
 
 /*
  * Brief §09 — the quote, the person, the organisation.
@@ -87,7 +88,7 @@ const QUOTES: Quote[] = [
     name: "Dilhani Perera",
     role: "Head of Human Resources",
     org: "John Keells Infomate",
-    logo: "/logos/infomate.png",
+    logo: withBasePath("/logos/infomate.png"),
   },
   {
     quote:
@@ -96,7 +97,7 @@ const QUOTES: Quote[] = [
     name: "Rohan Wijeratne",
     role: "Head of Programmes",
     org: "Centre for Banking Studies",
-    logo: "/logos/cbs.png",
+    logo: withBasePath("/logos/cbs.png"),
   },
   {
     quote:
@@ -105,17 +106,17 @@ const QUOTES: Quote[] = [
     name: "Anushka Fernando",
     role: "Registrar",
     org: "Institute of Bankers of Sri Lanka",
-    logo: "/logos/ibsl.jpg",
+    logo: withBasePath("/logos/ibsl.jpg"),
   },
 ];
 
 /** Customers with artwork on disk. The rest of the roster runs in the ticker. */
 const CUSTOMER_LOGOS = [
-  { name: "John Keells Infomate", src: "/logos/infomate.png" },
-  { name: "Centre for Banking Studies (Central Bank of Sri Lanka)", src: "/logos/cbs.png" },
-  { name: "Institute of Bankers of Sri Lanka", src: "/logos/ibsl.jpg" },
-  { name: "Sri Lanka Institute of Tourism & Hotel Management", src: "/logos/slithm.png" },
-  { name: "Aquinas College of Higher Studies", src: "/logos/aquinas.png" },
+  { name: "John Keells Infomate", src: withBasePath("/logos/infomate.png") },
+  { name: "Centre for Banking Studies (Central Bank of Sri Lanka)", src: withBasePath("/logos/cbs.png") },
+  { name: "Institute of Bankers of Sri Lanka", src: withBasePath("/logos/ibsl.jpg") },
+  { name: "Sri Lanka Institute of Tourism & Hotel Management", src: withBasePath("/logos/slithm.png") },
+  { name: "Aquinas College of Higher Studies", src: withBasePath("/logos/aquinas.png") },
 ];
 
 /*

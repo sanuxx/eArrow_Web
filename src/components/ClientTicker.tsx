@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Marquee } from "./motion-kit";
+import { withBasePath } from "@/lib/basePath";
 
 /**
  * Infinite client ticker.
@@ -15,30 +16,30 @@ import { Marquee } from "./motion-kit";
 type Client = { name: string; short?: string; mono?: string; logo?: string };
 
 const CLIENTS: Client[] = [
-  { name: "John Keells Infomate", logo: "/logos/infomate.png" },
+  { name: "John Keells Infomate", logo: withBasePath("/logos/infomate.png") },
   { name: "Sri Lanka Cricket" },
   {
     name: "Centre for Banking Studies (Central Bank of Sri Lanka)",
     short: "Centre for Banking Studies",
-    logo: "/logos/cbs.png",
+    logo: withBasePath("/logos/cbs.png"),
   },
   { name: "H Connect" },
   { name: "Housing Finance Company (HFC)", short: "Housing Finance Company" },
   {
     name: "Institute of Bankers of Sri Lanka (IBSL)",
     short: "Institute of Bankers of Sri Lanka",
-    logo: "/logos/ibsl.jpg",
+    logo: withBasePath("/logos/ibsl.jpg"),
   },
   { name: "Chola" },
   { name: "Riviera Resort" },
   {
     name: "Sri Lanka Institute of Tourism & Hotel Management (SLITHM)",
     short: "SLITHM",
-    logo: "/logos/slithm.png",
+    logo: withBasePath("/logos/slithm.png"),
   },
   { name: "Switz" },
   { name: "KTS Logistics", mono: "KTS" },
-  { name: "Aquinas College of Higher Studies", logo: "/logos/aquinas.png" },
+  { name: "Aquinas College of Higher Studies", logo: withBasePath("/logos/aquinas.png") },
   {
     name: "International Institute of Health Sciences (IIHS)",
     short: "IIHS",
