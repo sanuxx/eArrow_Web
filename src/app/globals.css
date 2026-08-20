@@ -1,26 +1,717 @@
 @import "tailwindcss";
 
+/*
+ * eArrow brand system — light-first.
+ *
+ * Colour budget from the revamp brief: white 65% / black 20% / orange 15%.
+ * Orange is a punctuation mark, not a wash: the only large orange surface on
+ * the page is the final CTA. Everything else earns white or near-black.
+ *
+ * The greys are deliberately warm-neutral rather than pure #fff/#000 steps —
+ * a flat white page reads cheap, a page built from a tuned grey ramp reads
+ * expensive. Every surface below is a distinct, named step on that ramp.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-canvas: #ffffff;
+  --color-canvas-alt: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #fafafa;
+  --color-ink: #080808;
+  --color-ink-muted: #56565d;
+  --color-ink-soft: #8e8e97;
+  --color-border: rgba(8, 8, 8, 0.09);
+  --color-border-strong: rgba(8, 8, 8, 0.16);
+  --color-line: rgba(8, 8, 8, 0.035);
+
+  /* brand gradient, taken from the new logo artwork */
+  --color-orange: #e83b00;
+  --color-amber: #ffb13b;
+
+  /*
+   * The same two colours as raw channels, for the many places that need them at
+   * partial alpha — glows, scrims, hairline washes, hover halos.
+   *
+   * `rgba(var(--orange-ch), 0.2)` rather than `rgb(... / 0.2)` on purpose: the
+   * slash form is fine in plain CSS but these are also used inside Tailwind
+   * arbitrary values, where a `/` is parsed as the opacity modifier and splits
+   * the value in half. Commas have no such meaning.
+   *
+   * Anything written as a literal `rgba(232, 59, 0, …)` instead of this token
+   * is a bug: it will not follow the theme, and in dark mode it lands a full
+   * value-step below every accent around it.
+   */
+  --orange-ch: 232, 59, 0;
+  --amber-ch: 255, 177, 59;
+
+  /*
+   * The deep stop, for any fill that has to carry white text.
+   *
+   * Measured against white: amber is 1.81:1, #ff7a1a is 2.61:1, and even
+   * --color-orange itself is only 4.15:1 — so the whole logo gradient fails the
+   * 4.5:1 AA threshold, not merely its light end, and no rebalancing of the
+   * stops rescues it. White text needs luminance <= 0.183, which starts here:
+   * #c22e00 is 5.70:1.
+   *
+   * A gradient button has to pass along its *whole* width, not on average — the
+   * label spans it. So the AA pair below is both-ends-safe: #c22e00 is 5.70:1 and
+   * #d13400 is 5.00:1. Stopping at --color-orange instead would leave the right
+   * end of the label at 4.15:1, which is a fail however small the region.
+   *
+   * Amber keeps every role where nothing sits on top of it: the ember glow, the
+   * hairline sweeps, the nav progress bar, the large Stats numerals.
+   */
+  --color-ember: #c22e00;
+  --color-ember-light: #d13400;
+
+  /* The logo asset is white artwork on transparency, so light mode inverts it. */
+  --logo-filter: invert(1);
+
+  /* Multi-layer elevation: a tight contact shadow plus a wide ambient one.
+     A single blurred box-shadow is the fastest way to look generic. */
+  --shadow-sm:
+    0 1px 2px rgba(8, 8, 8, 0.04),
+    0 2px 8px -2px rgba(8, 8, 8, 0.06);
+  --shadow-card:
+    0 1px 2px rgba(8, 8, 8, 0.04),
+    0 8px 24px -8px rgba(8, 8, 8, 0.08),
+    0 24px 64px -24px rgba(8, 8, 8, 0.14);
+  --shadow-lift:
+    0 1px 2px rgba(8, 8, 8, 0.05),
+    0 16px 40px -12px rgba(8, 8, 8, 0.14),
+    0 40px 90px -30px rgba(8, 8, 8, 0.2);
+  --shadow-ember: 0 20px 50px -18px rgba(var(--orange-ch), 0.55);
+
+  /* Inner top highlight — the "lit edge" that makes a surface read as physical. */
+  --edge-light: rgba(255, 255, 255, 0.9);
+
+  --background: var(--color-canvas);
+  --foreground: var(--color-ink);
+}
+
+:root[data-theme="dark"] {
+  --color-canvas: #08080a;
+  --color-canvas-alt: #0d0d10;
+  --color-surface: #131317;
+  --color-surface-sunken: #0a0a0c;
+  --color-ink: #ffffff;
+  --color-ink-muted: #9d9da8;
+  --color-ink-soft: #6a6a76;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+  --color-line: rgba(255, 255, 255, 0.045);
+
+  /*
+   * The brand pair is LIFTED in dark, not inherited.
+   *
+   * The light-mode values are tuned against white, where a deep saturated
+   * orange reads as strong. Dropped onto #08080a the same ink loses its
+   * argument: a dark surface swallows warm hues, the eye adapts to the low
+   * ambient luminance, and #e83b00 comes back muddy — 4.85:1 against the
+   * canvas, barely above the AA floor for the accent that is supposed to be
+   * the loudest thing on the page. Everything the brand does with orange —
+   * hairlines, dots, eyebrow rules, indices — is small, and small is exactly
+   * where a dim accent disappears.
+   *
+   * So both stops move up the value scale rather than shifting hue: same
+   * orange, more light behind it. #ff5417 measures 6.29:1 on the dark canvas,
+   * and the amber gains enough glow to still register as the gradient's hot
+   * end at 1px stroke widths.
+   */
+  --color-orange: #ff5417;
+  --color-amber: #ffc25c;
+  --orange-ch: 255, 84, 23;
+  --amber-ch: 255, 194, 92;
+
+  /*
+   * The deep pair does NOT move. It exists for one job — carrying white text
+   * across a gradient fill at 4.5:1 — and that job is unchanged by the page
+   * behind it, since the text sits on the fill, not on the canvas. Lifting
+   * these to match would fail the large orange CTA field in dark mode only,
+   * which is the worst kind of regression to find.
+   */
+  --color-ember: #c22e00;
+  --color-ember-light: #d13400;
+  --logo-filter: none;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-card:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 8px 24px -8px rgba(0, 0, 0, 0.6),
+    0 24px 64px -24px rgba(0, 0, 0, 0.8);
+  --shadow-lift:
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 16px 40px -12px rgba(0, 0, 0, 0.7),
+    0 40px 90px -30px rgba(0, 0, 0, 0.9);
+
+  /* The ember glow follows the lifted orange, and reaches further: on white it
+     is a shadow that happens to be warm, on black it is the only light in the
+     frame, so it gets the wider falloff a real light source has. */
+  --shadow-ember: 0 24px 60px -18px rgba(var(--orange-ch), 0.5);
+
+  --edge-light: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: var(--color-canvas);
+  --color-canvas-alt: var(--color-canvas-alt);
+  --color-surface: var(--color-surface);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-line: var(--color-line);
+  --color-orange: var(--color-orange);
+  --color-amber: var(--color-amber);
+  --color-ember: var(--color-ember);
+  --color-ember-light: var(--color-ember-light);
+
+  /* Rounded rectangles are the core shape language of the identity. */
+  --radius-card: 24px;
+  --radius-panel: 32px;
+  --radius-tile: 16px;
+
+  --font-heading: var(--font-sora);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+/*
+ * No `scroll-behavior: smooth` here. Lenis owns the scroll position now (see
+ * SmoothScrollProvider.tsx) and writes it with `behavior: "instant"` every
+ * frame; native smooth scrolling animates the same value on its own clock, so
+ * the two produce a visible double-scroll on every anchor jump. Lenis handles
+ * hash links itself via `anchors: true`.
+ */
+html {
+  scroll-behavior: auto;
+}
+
+/* Lenis' required reset, hand-written rather than importing
+   `lenis/dist/lenis.css` so it stays inside this file's cascade order. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 body {
-  background: var(--background);
+  /*
+    Oversized decorative shapes are clipped by their own sections; this is a
+    backstop so a few stray pixels can never open a horizontal scrollbar.
+
+    `clip`, not `hidden`, and the distinction is load-bearing: per CSS Overflow
+    3, `overflow-y: visible` is coerced to `auto` when the other axis is
+    `hidden` — which quietly makes body a scroll container, and a scroll
+    container is the scrollport that `position: sticky` resolves against. The
+    hero stage would then stick to body's box instead of the viewport and
+    silently never pin. `clip` is exempt from that coercion.
+  */
+  overflow-x: clip;
+  background: var(--color-canvas);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+a, button {
+  outline-offset: 2px;
+}
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+/*
+ * Sections that pin themselves to one palette regardless of the site theme —
+ * the black Industries band and the orange CTA. Setting the tokens rather than
+ * hardcoding colours means the shared components inside them stay legible.
+ */
+.on-black {
+  --color-canvas: #080808;
+  --color-canvas-alt: #0d0d0f;
+  --color-surface: #141418;
+  --color-ink: #ffffff;
+  --color-ink-muted: #9d9da8;
+  --color-ink-soft: #6a6a76;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.22);
+  --color-line: rgba(255, 255, 255, 0.05);
+  --edge-light: rgba(255, 255, 255, 0.1);
+  --logo-filter: none;
+  color: #ffffff;
+}
+
+.on-orange {
+  --color-ink: #ffffff;
+  --color-ink-muted: rgba(255, 255, 255, 0.85);
+  --color-ink-soft: rgba(255, 255, 255, 0.6);
+  --color-border: rgba(255, 255, 255, 0.28);
+  --color-border-strong: rgba(255, 255, 255, 0.45);
+  --color-line: rgba(255, 255, 255, 0.12);
+  --edge-light: rgba(255, 255, 255, 0.35);
+  --logo-filter: none;
+  color: #ffffff;
+}
+
+/*
+ * Everything below lives in `@layer components` on purpose.
+ *
+ * Tailwind v4 puts its utilities in the `utilities` layer, and *unlayered* CSS
+ * beats any layer. An unlayered `.surface-card { position: relative }` would
+ * therefore silently override `absolute` on the same element — which is
+ * exactly what broke the hero's floating panels. Declaring these as components
+ * puts them below utilities in the cascade, so utility overrides win as
+ * expected.
+ */
+@layer components {
+
+/* ── Texture ──────────────────────────────────────────────────────────────
+   Three stacked textures give flat colour fields something to hold: a film
+   grain, a fine drafting grid, and a dot matrix for the dark band. All are
+   ::after layers so they never need an extra element in the markup. */
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.28'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] .grain::after {
+  mix-blend-mode: screen;
+  opacity: 0.2;
+}
+
+/* Precision grid — reads as technical drafting rather than decoration.
+   Faded out at the edges so it never boxes the section in. */
+.tech-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 45%, transparent 40%, #000 100%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 45%, transparent 40%, #000 100%);
+}
+
+.dot-matrix::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 40%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 40%, #000 30%, transparent 100%);
+  opacity: 0.5;
+}
+
+/* ── Surfaces ─────────────────────────────────────────────────────────────
+   A card is a border, a tuned multi-layer shadow, and a 1px lit top edge.
+   The lit edge is what separates "a div with a border" from a real material. */
+.surface-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.surface-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--edge-light), transparent);
+  border-radius: inherit;
+}
+
+/* Gradient hairline that sweeps across a card's top edge on hover. */
+.edge-sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  background: linear-gradient(90deg, var(--color-orange), var(--color-amber), transparent);
+  z-index: 1;
+}
+
+.group:hover .edge-sweep::before {
+  transform: scaleX(1);
+}
+
+/* Numerals that don't jitter while counting. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ── Ticker ───────────────────────────────────────────────────────────────
+   CSS-driven rather than JS: it keeps running on the compositor, costs no
+   main-thread work, and pausing is a single property change. */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-x var(--marquee-duration, 40s) linear infinite;
+  animation-direction: var(--marquee-direction, normal);
+  will-change: transform;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ── Product rail ─────────────────────────────────────────────────────────
+   A scrolling strip on a phone, a settled row from `md` up. The edge fade is
+   conditional on purpose: a mask that never lifts would permanently dim the
+   first and last tab even when the rail has nowhere left to scroll. */
+.rail-scroll {
+  scrollbar-width: none;
+}
+
+.rail-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .rail-scroll {
+    mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+  }
+}
+
+/* Edges dissolve so items enter and leave rather than popping at a hard cut. */
+.marquee-fade {
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+} /* @layer components */
+
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/*
+ * Infinite ticker. The track holds exactly two copies of its children, so
+ * translating it -50% lands copy 2 precisely where copy 1 began — a seamless
+ * loop with no JS measuring and no reflow per frame (transform only).
+ */
+@keyframes marquee-x {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Gentle continuous float for the hero panels and orbs. */
+@keyframes float-y {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+}
+
+/* Slow sweep used on the product mockup, so the UI reads as live. */
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(400%); opacity: 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
+
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+
+/*
+ * The mark's "breath", inherited from the client's `eArrow Cinematic Reveal`
+ * prototype (its `logoIn` keyframes, 52–76%) and re-tuned for a smaller
+ * subject.
+ *
+ * The prototype's ticks were 0.18% / 0.12% on a 760px wordmark — about 1.37px
+ * of real travel. The settled Q mark is ~168px, so the same percentages would
+ * be invisible; these are raised to 0.26% / 0.17%, which lands at ~0.44px.
+ * Deliberately *below* the prototype's absolute travel: a small object moving
+ * 1.3px reads as a rendering bug, where a large one breathing 1.3px reads as
+ * alive. Linear timing, easing encoded positionally in the bunched
+ * percentages — the prototype's own craft principle.
+ */
+@keyframes mark-breath {
+  0%,  30% { transform: scale(1); }
+  41.5%    { transform: scale(1.0026); }
+  53%      { transform: scale(1); }
+  64.5%    { transform: scale(1.0017); }
+  76%, 100% { transform: scale(1); }
+}
+
+/* Ambient drift for the hero's single background orb. */
+@keyframes orb-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(34px, -27px, 0) scale(1.06); }
+  66% { transform: translate3d(-20px, 17px, 0) scale(0.97); }
+}
+
+/* Slow drift for the floating UI cards. Nested inside the GSAP-driven
+   parallax wrapper, never on the same element — two writers on one transform
+   is the classic library-conflict bug. */
+@keyframes card-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -9px, 0); }
+}
+
+/*
+ * Specular bar travelling across the hero mark, clipped to the glyph's own
+ * alpha by LightSweep. Idles for most of the cycle — the sweep is an event, not
+ * a shimmer, and a continuous one would read as a loading state.
+ *
+ * Opacity is 0 at both 0% and 100% on purpose: the global reduced-motion rule
+ * collapses animations to 0.01ms with one iteration, which lands every element
+ * on its END frame. Authoring the end frame invisible is what keeps the bar
+ * from parking mid-glyph for anyone who asked for less motion.
+ */
+@keyframes mark-sweep {
+  0%,  58%  { transform: translateX(-150%); opacity: 0; }
+  63%       { opacity: 1; }
+  92%       { opacity: 1; }
+  100%      { transform: translateX(260%); opacity: 0; }
+}
+
+/*
+ * A single ring expanding out of the mark and dissolving. Same end-frame
+ * discipline as above.
+ */
+@keyframes ring-pulse {
+  0%,  55%  { transform: scale(0.82); opacity: 0; }
+  66%       { opacity: 0.5; }
+  100%      { transform: scale(1.18); opacity: 0; }
+}
+
+/* The scroll cue's travelling rule. */
+@keyframes cue-run {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  30% { opacity: 1; }
+  60% { transform: scaleY(1); transform-origin: top; }
+  61% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   The pinned hero act
+
+   Structure is `.hero-track > .hero-stage > (.hero-plate + .hero-iris)`.
+   Sticky rather than ScrollTrigger's `pin`, on purpose: `main` is
+   `display: flex`, and ScrollTrigger.js:1177 defaults `pinSpacing` to false
+   when the pinned element's parent is a flex container — the pin would create
+   no scroll space and release instantly. Sticky also derives page height from
+   CSS, so a restored scroll position is correct on first paint with no
+   refresh race.
+
+   Everything below `lg` and under reduced motion falls back to normal flow via
+   the media queries further down; the default here is the mobile/no-JS case.
+   ──────────────────────────────────────────────────────────────────────── */
+.hero-track {
+  position: relative;
+  /* defends the tall track against `main`'s flex-shrink */
+  flex-shrink: 0;
+}
+
+/*
+ * The pre-hydration hold. Set by the boot script in layout.tsx before first
+ * paint and cleared the instant the intro timeline exists (HeroAct), or by that
+ * script's own 4s failsafe if hydration never arrives.
+ *
+ * `visibility` rather than `display`, so the composition still lays out and the
+ * page height, the sticky track and the iris geometry are all correct on the
+ * first frame — only the paint is withheld.
+ */
+/*
+ * The brand curtain's ground, laid before React exists.
+ *
+ * Set by the boot script in layout.tsx and dropped by BrandIntro the instant
+ * its own overlay is painted, so there is never a white frame between the page
+ * loading and the reveal starting. z-index sits one below the component's own
+ * layer (120) so the handover is a straight swap of identical black.
+ *
+ * It is a pseudo-element rather than a real node so it costs nothing to remove
+ * and cannot be left behind in the markup if scripting fails.
+ */
+:root[data-curtain-boot]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 119;
+  background: #050505;
+  pointer-events: none;
+}
+
+:root[data-intro-pending] .hero-plate,
+:root[data-intro-pending] .hero-iris {
+  visibility: hidden;
+}
+
+.hero-plate {
+  position: relative;
+  min-height: 100svh;
+}
+
+.hero-iris {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .hero-track {
+    height: 280vh;
+  }
+
+  .hero-stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    width: 100%;
+    overflow: hidden;
+    /*
+      Required, not cosmetic. `.grain::after` uses `mix-blend-mode: multiply`;
+      without an isolated stacking context it blends against whatever sits
+      behind the stage — including the Stats plane it is revealing — and forces
+      a backdrop readback on every scrubbed frame.
+    */
+    isolation: isolate;
+  }
+
+  .hero-plate,
+  .hero-iris {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-iris {
+    /*
+      The resting aperture: zero area, since 50% + 50% and 68% + 32% each sum to
+      100%. This is only the pre-hydration frame — once the hero timeline is
+      built, `renderDerived` in hero-timeline.ts writes `style.clipPath` directly
+      each frame and takes over. (It composes the string itself because GSAP
+      cannot reliably animate CSS custom properties; it reads tween start values
+      through getComputedStyle, which does not resolve them usefully.)
+
+      These values must stay in step with `renderDerived`'s p=0 output, or the
+      aperture will jump on the first frame after hydration.
+    */
+    clip-path: inset(
+      var(--iris-t, 50%) var(--iris-r, 29%) var(--iris-b, 50%) var(--iris-l, 71%)
+      round var(--iris-round, 24px)
+    );
+  }
+}
+
+/*
+ * Reduced motion: collapse the whole act back to normal document flow in CSS,
+ * before first paint. Doing this from JS would mean a 280vh -> auto reflow
+ * after hydration. The `@media` block below the existing global one wins by
+ * source order for these selectors.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .hero-track {
+    height: auto !important;
+  }
+
+  .hero-stage {
+    position: static !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .hero-plate,
+  .hero-iris {
+    position: relative !important;
+    inset: auto !important;
+    clip-path: none !important;
+  }
+
+  /* The second UI card is normally earned by scrolling (scrub 0.06–0.18). With
+     no scrub to earn it, show it — otherwise the static frame is missing a
+     compositional element for no reason the visitor can see. */
+  [data-l="card-b"] {
+    opacity: 1 !important;
+  }
+
+  /* The specular pass is normally swept across the mark. Frozen at its start
+     position it sits off-canvas and reads as absent, so the static frame gets a
+     fixed highlight instead: the mark looks lit rather than stalled. This is the
+     one distinction that keeps the reduced-motion frame from looking paused. */
+  [data-sweep] {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+    inset: 0 !important;
+    width: 100% !important;
+    background: linear-gradient(
+      100deg,
+      transparent 34%,
+      rgba(255, 255, 255, 0.5) 47%,
+      transparent 60%
+    ) !important;
+  }
+}
+
+/*
+ * `data-hero-scrub` on <html> marks the range where the hero is pinned and
+ * scrubbing. HeroAct sets it; Nav reads it to drop its backdrop-blur, which is
+ * ruinously expensive over content that transforms every frame.
+ *
+ * That suppression deliberately lives in Nav.tsx rather than here. The obvious
+ * CSS version — `[data-hero-scrub="1"] header { backdrop-filter: none
+ * !important }` — does not survive the build: Tailwind's pipeline drops the
+ * declaration and emits only the neighbouring rule, so it reads as correct in
+ * source and silently does nothing in the browser.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /*
+   * The tickers need `animation: none`, not the 0.01ms above — collapsing the
+   * duration would snap the track straight to its -50% end state instead of
+   * stopping it. Marquee renders the same markup either way (branching on
+   * `useReducedMotion` in the component fails hydration), so the halt has to
+   * happen here.
+   */
+  .marquee-track {
+    animation: none !important;
+  }
 }
