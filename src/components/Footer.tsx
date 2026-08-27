@@ -1,13 +1,22 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight } from "./ArrowMark";
 import { withBasePath } from "@/lib/basePath";
 
 const SITEMAP = [
-  { label: "Solutions", href: "#solutions" },
-  { label: "Products", href: "#products" },
-  { label: "Industries", href: "#industries" },
-  { label: "About Us", href: "#why" },
-  { label: "Insights", href: "#insights" },
+  { label: "Solutions", href: "/solutions" },
+  { label: "Products", href: "/products" },
+  { label: "Industries", href: "/industries" },
+  { label: "Technology", href: "/technology" },
+  { label: "About Us", href: "/about" },
+];
+
+/* The pages that don't earn a slot in the primary nav still need a route in. */
+const COMPANY = [
+  { label: "Customer Success", href: "/customer-success" },
+  { label: "Insights", href: "/insights" },
+  { label: "Careers", href: "/careers" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const LEGAL = [
@@ -18,9 +27,9 @@ const LEGAL = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-canvas py-16">
+    <footer className="border-t border-border bg-canvas py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
             <Image
               src={withBasePath("/earrow-logo-white.png")}
@@ -44,12 +53,30 @@ export default function Footer() {
             <ul className="mt-4 space-y-2.5">
               {SITEMAP.map((l) => (
                 <li key={l.label}>
-                  <a
+                  <Link prefetch={false}
                     href={l.href}
                     className="text-sm text-ink transition-colors hover:text-orange"
                   >
                     {l.label}
-                  </a>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.26em] text-ink-soft">
+              Company
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {COMPANY.map((l) => (
+                <li key={l.label}>
+                  <Link prefetch={false}
+                    href={l.href}
+                    className="text-sm text-ink transition-colors hover:text-orange"
+                  >
+                    {l.label}
+                  </Link>
                 </li>
               ))}
             </ul>

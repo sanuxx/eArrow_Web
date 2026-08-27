@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="flex flex-1 flex-col">
+      <main id="main" className="flex flex-1 flex-col">
         {/* Section order follows the revamp brief: white through §06, black
             for Industries, back to white, then the orange CTA. The two
             tickers sit at the seams — client logos under the stats, and the

@@ -82,7 +82,7 @@ export default function WhyEarrow() {
     <section
       id="why"
       ref={sectionRef}
-      className="tech-grid relative overflow-hidden bg-canvas py-24 lg:py-32"
+      className="tech-grid relative overflow-hidden bg-canvas py-10 lg:py-16"
     >
       {/* ── Plane 1: the aurora, furthest back and slowest ──────────────── */}
       <motion.div
@@ -138,7 +138,7 @@ export default function WhyEarrow() {
             <span className="block overflow-hidden pb-2">
               <motion.span
                 variants={NUMERAL}
-                className="block font-heading text-[6.5rem] font-extrabold leading-[0.82] tracking-[-0.06em] sm:text-[8.5rem]"
+                className="block font-heading text-[5.59rem] font-extrabold leading-[0.82] tracking-[-0.06em] sm:text-[7.31rem]"
               >
                 <span className="bg-gradient-to-br from-orange to-amber bg-clip-text text-transparent">
                   <CountUp value="20+" duration={2} />
@@ -149,11 +149,11 @@ export default function WhyEarrow() {
             <p className="mt-5 font-mono text-[11px] font-medium uppercase tracking-[0.34em] text-ink">
               Years
             </p>
-            <p className="mt-8 max-w-sm text-[1.0625rem] leading-[1.75] text-ink-muted">
+            <p className="mt-8 max-w-sm text-base leading-[1.75] text-ink-muted">
               Building technology that helps organizations move forward.
             </p>
 
-            <GhostCta href="#contact" className="mt-10">
+            <GhostCta href="/contact" className="mt-10">
               Talk to our team
             </GhostCta>
             </motion.div>
@@ -266,14 +266,21 @@ export default function WhyEarrow() {
               whileHover={{ y: -8, scale: 1.03 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ ...SPRING_SOFT, delay: i * 0.08 }}
-              className="surface-card edge-sweep group relative overflow-hidden rounded-card px-7 py-8 transition-colors duration-400 hover:border-orange/30"
+              className="surface-card edge-sweep group relative overflow-hidden rounded-card px-5 py-7 transition-colors duration-400 hover:border-orange/30 sm:px-7 sm:py-8"
             >
               <span
                 aria-hidden
                 className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-700 group-hover:opacity-100"
                 style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.35), transparent 70%)" }}
               />
-              <p className="relative font-heading text-[1.75rem] font-extrabold leading-none tracking-[-0.03em] text-ink">
+              {/*
+                Sized down on narrow screens because one of these figures is a
+                word, not a number: "Enterprise" needs 143px at 1.75rem and the
+                card only offers ~107px on a phone, so it was being cut off by
+                the card's own `overflow-hidden`. The numerals never came close
+                to the edge, which is why it only showed on that one tile.
+              */}
+              <p className="relative font-heading text-[1.161rem] font-extrabold leading-none tracking-[-0.03em] text-ink sm:text-[1.505rem]">
                 <CountUp value={item.value} />
               </p>
               <p className="relative mt-3 font-mono text-[10px] font-medium uppercase tracking-[0.24em] text-ink-soft">

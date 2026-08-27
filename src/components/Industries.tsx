@@ -27,7 +27,7 @@ export default function Industries() {
   return (
     <section
       id="industries"
-      className="on-black grain dot-matrix relative overflow-hidden py-24 lg:py-32"
+      className="on-black grain dot-matrix relative overflow-hidden py-10 lg:py-16"
       style={{ background: "#080808" }}
     >
       <QMarkLight className="pointer-events-none absolute -left-28 bottom-0 h-auto w-[600px] opacity-[0.035]" />
@@ -41,7 +41,7 @@ export default function Industries() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-6 max-w-2xl font-heading text-[2.1rem] font-bold leading-[1.08] tracking-[-0.035em] text-white sm:text-[2.75rem] lg:text-5xl"
+          className="mt-6 max-w-2xl font-heading text-[1.806rem] font-bold leading-[1.08] tracking-[-0.035em] text-white sm:text-[2.365rem] lg:text-[2.58rem]"
         >
           Built for the way your industry works.
         </motion.h2>
@@ -50,7 +50,7 @@ export default function Industries() {
           {INDUSTRIES.map((name, i) => (
             <motion.a
               key={name}
-              href="#contact"
+              href="/contact"
               initial={{ opacity: 0, y: 28, scale: 0.97 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ scale: 1.02 }}
@@ -74,7 +74,7 @@ export default function Industries() {
                 <span className="font-mono text-[10px] tracking-[0.2em] text-white/30 transition-colors duration-300 group-hover:text-white/70">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="font-heading text-xl font-bold tracking-[-0.02em] text-white sm:text-[1.375rem]">
+                <span className="font-heading text-[1.075rem] font-bold tracking-[-0.02em] text-white sm:text-[1.182rem]">
                   {name}
                 </span>
               </span>
@@ -87,7 +87,7 @@ export default function Industries() {
         <p className="mt-14 font-mono text-[11px] uppercase tracking-[0.18em] text-white/45">
           Discover how we help businesses grow{" "}
           <a
-            href="#contact"
+            href="/contact"
             className="group ml-1 inline-flex items-center gap-1.5 font-medium text-amber"
           >
             across every sector

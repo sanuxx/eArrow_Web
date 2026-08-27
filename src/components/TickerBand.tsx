@@ -23,7 +23,7 @@ function Item({ text, outline }: { text: string; outline?: boolean }) {
   return (
     <span className="flex shrink-0 items-center">
       <span
-        className={`px-7 font-heading text-[2.5rem] font-extrabold uppercase tracking-[-0.02em] sm:text-[3.5rem] lg:text-[4.25rem] ${
+        className={`px-7 font-heading text-[2.15rem] font-extrabold uppercase tracking-[-0.02em] sm:text-[3.01rem] lg:text-[3.655rem] ${
           outline ? "text-transparent" : "text-ink"
         }`}
         style={
@@ -47,7 +47,7 @@ export default function TickerBand() {
   return (
     <section
       aria-hidden
-      className="relative overflow-hidden border-y border-border bg-canvas-alt py-14 lg:py-16"
+      className="relative overflow-hidden border-y border-border bg-canvas-alt py-7 lg:py-8"
     >
       <Marquee duration={34}>
         {PHRASES.map((p) => (

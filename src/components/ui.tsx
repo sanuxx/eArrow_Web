@@ -135,7 +135,7 @@ export function SectionHeading({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.7, ease: EASE_BACK }}
-      className={`mt-6 max-w-2xl font-heading text-[2.1rem] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-[2.75rem] lg:text-5xl ${className ?? ""}`}
+      className={`mt-6 max-w-2xl font-heading text-[1.806rem] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-[2.365rem] lg:text-[2.58rem] ${className ?? ""}`}
     >
       {children}
     </motion.h2>

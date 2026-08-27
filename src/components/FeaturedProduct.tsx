@@ -25,7 +25,7 @@ const CHART = [42, 58, 49, 71, 63, 82, 75, 91, 86, 97];
 
 export default function FeaturedProduct() {
   return (
-    <section className="relative bg-canvas py-24 lg:py-32">
+    <section className="relative bg-canvas py-10 lg:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="03">Featured Product</SectionLabel>
         <SectionHeading>
@@ -51,15 +51,15 @@ export default function FeaturedProduct() {
                 </span>
               </div>
 
-              <h3 className="mt-6 font-heading text-3xl font-extrabold leading-[1.1] tracking-[-0.035em] text-ink sm:text-4xl">
+              <h3 className="mt-6 font-heading text-[1.613rem] font-extrabold leading-[1.1] tracking-[-0.035em] text-ink sm:text-[1.935rem]">
                 Simplify workforce management.
               </h3>
-              <p className="mt-5 max-w-md text-[1.0625rem] leading-[1.75] text-ink-muted">
+              <p className="mt-5 max-w-md text-base leading-[1.75] text-ink-muted">
                 Manage employees, payroll, attendance and reporting from one
                 platform.
               </p>
 
-              <PrimaryCta href="#contact" className="mt-10">
+              <PrimaryCta href="/contact" className="mt-10">
                 Discover Product
               </PrimaryCta>
             </div>
@@ -103,8 +103,9 @@ export default function FeaturedProduct() {
                     ))}
                   </div>
 
-                  {/* main pane */}
-                  <div className="min-w-0 flex-1 p-5">
+                  {/* main pane — tighter gutters on a phone, where the whole
+                      mockup is only ~250px wide and every pixel is a tile */}
+                  <div className="min-w-0 flex-1 p-3.5 sm:p-5">
                     {/* metric tiles */}
                     <div className="grid grid-cols-3 gap-2.5">
                       {METRICS.map((m, i) => (
@@ -114,12 +115,14 @@ export default function FeaturedProduct() {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true, margin: "-80px" }}
                           transition={{ duration: 0.5, delay: 0.25 + i * 0.1 }}
-                          className="rounded-xl border border-border bg-canvas p-3"
+                          className="rounded-xl border border-border bg-canvas p-2.5 sm:p-3"
                         >
                           <p className="truncate font-mono text-[8.5px] uppercase tracking-[0.14em] text-ink-soft">
                             {m.label}
                           </p>
-                          <p className="tnum mt-1.5 font-heading text-base font-extrabold leading-none text-ink">
+                          {/* Steps up with the space — at 390px the tile is
+                              only ~45px wide and "98.7%" needs 51px at 16px. */}
+                          <p className="tnum mt-1.5 font-heading text-[12px] font-extrabold leading-none text-ink sm:text-base">
                             {m.value}
                           </p>
                           <p

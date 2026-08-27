@@ -1,6 +1,6 @@
 "use client";
 
-import { PrimaryCta, StatusChip } from "../ui";
+import { PrimaryCta, GhostCta, StatusChip } from "../ui";
 import ProductPanel from "./ProductPanel";
 
 /**
@@ -142,7 +142,7 @@ export default function HeroPlate({ ref }: { ref?: React.Ref<HTMLDivElement> }) 
             new boxes and the gradient restarts or bands per box. Two known
             lines beat a splitter, and this survives SSR.
           */}
-          <h1 className="mt-7 font-heading text-[1.95rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink sm:text-6xl lg:text-[2.9rem] xl:text-[3.6rem]">
+          <h1 className="mt-7 font-heading text-[1.677rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink sm:text-[3.225rem] lg:text-[2.494rem] xl:text-[3.096rem]">
             <span
               data-l="line-mask"
               className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
@@ -151,6 +151,16 @@ export default function HeroPlate({ ref }: { ref?: React.Ref<HTMLDivElement> }) 
                 Empowering People
               </span>
             </span>
+            {/*
+              A real space between the two lines.
+
+              Without it the h1's text content is "Empowering PeopleEnabling
+              Growth" — the two mask spans are separate blocks, so nothing
+              separates the words for anything reading the DOM rather than the
+              layout: assistive tech, search engines, and anyone copying the
+              headline. It costs nothing visually, because whitespace between
+              two block-level children collapses and is never rendered.
+            */}{" "}
             <span
               data-l="line-mask"
               className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
@@ -175,7 +185,7 @@ export default function HeroPlate({ ref }: { ref?: React.Ref<HTMLDivElement> }) 
 
           <p
             data-l="sub"
-            className="mt-6 max-w-md text-base leading-[1.7] text-ink-muted sm:text-[1.0625rem]"
+            className="mt-6 max-w-md text-base leading-[1.7] text-ink-muted sm:text-base"
           >
             Intelligent business solutions and technology services designed to
             help organizations work smarter, grow faster, and create lasting
@@ -187,14 +197,21 @@ export default function HeroPlate({ ref }: { ref?: React.Ref<HTMLDivElement> }) 
               write the same transform. */}
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <div data-l="cta" className="w-full sm:w-auto">
-              <PrimaryCta href="#solutions" className="w-full sm:w-auto">
+              <PrimaryCta href="/solutions" className="w-full sm:w-auto">
                 Explore Solutions
               </PrimaryCta>
             </div>
+            {/*
+              The second action is the ghost variant, not a second primary.
+              Both were the filled orange gradient at identical weight, which
+              gives the reader two equally loud instructions and therefore no
+              steer at all. "Explore Solutions" leads; "Let's Talk" is still
+              plainly available for anyone who arrived ready to talk.
+            */}
             <div data-l="cta" className="w-full sm:w-auto">
-              <PrimaryCta href="#contact" className="w-full sm:w-auto">
+              <GhostCta href="/contact" className="w-full sm:w-auto">
                 Let&apos;s Talk
-              </PrimaryCta>
+              </GhostCta>
             </div>
           </div>
 

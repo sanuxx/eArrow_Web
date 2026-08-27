@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import { ArrowGlyph } from "./ArrowMark";
 import { SectionLabel, SectionHeading } from "./ui";
 import { SPRING_SOFT } from "./motion-kit";
@@ -31,6 +31,24 @@ type IllustrationProps = { className?: string };
  * units, not CSS pixels, and would scale with the viewBox.
  */
 
+/*
+ * One row per platform named in the card's chips — HR & Payroll, Education,
+ * Hospital, Production, E-Billing — with the third lit.
+ *
+ * It was three pills and two dots. In the lead card's well that drawing had
+ * roughly 400px of height to fill and did not come close, so the card's largest
+ * element was also its emptiest. Five rows carry the same vocabulary at a
+ * density that suits the space, and they now correspond to something: the count
+ * matches the chips directly above.
+ */
+const SW_ROWS = [
+  { y: 8, w: 118, o: 0.2, lift: "group-hover:-translate-x-2" },
+  { y: 34, w: 96, o: 0.32, lift: "group-hover:translate-x-2" },
+  { y: 60, w: 140, o: 1, lift: "group-hover:translate-x-3" },
+  { y: 86, w: 84, o: 0.28, lift: "group-hover:-translate-x-1" },
+  { y: 112, w: 110, o: 0.18, lift: "group-hover:translate-x-1" },
+];
+
 function SoftwareIllustration({ className }: IllustrationProps) {
   return (
     <svg viewBox="0 0 200 140" fill="none" className={className} aria-hidden>
@@ -40,18 +58,16 @@ function SoftwareIllustration({ className }: IllustrationProps) {
           <stop offset="100%" style={{ stopColor: "var(--color-amber)" }} />
         </linearGradient>
       </defs>
-      {/* Three stacked pills that fan apart on hover — the logo mark, unpacked. */}
-      <g className="transition-transform duration-700 ease-out group-hover:-translate-x-2">
-        <rect x="18" y="16" width="128" height="30" rx="15" fill="url(#sol-a)" opacity="0.22" />
-      </g>
-      <g className="transition-transform duration-700 ease-out group-hover:translate-x-3">
-        <rect x="38" y="55" width="128" height="30" rx="15" fill="url(#sol-a)" opacity="0.5" />
-      </g>
-      <g className="transition-transform duration-700 ease-out group-hover:-translate-x-1">
-        <rect x="18" y="94" width="96" height="30" rx="15" fill="url(#sol-a)" />
-        <circle cx="132" cy="109" r="5" fill="url(#sol-a)" opacity="0.55" />
-        <circle cx="148" cy="109" r="5" fill="url(#sol-a)" opacity="0.3" />
-      </g>
+      {SW_ROWS.map((r, i) => (
+        <g
+          key={r.y}
+          className={`transition-transform duration-700 ease-out ${r.lift}`}
+          style={{ transitionDelay: `${i * 55}ms` }}
+        >
+          <rect x="14" y={r.y} width={r.w} height="20" rx="10" fill="url(#sol-a)" opacity={r.o} />
+          <circle cx={r.w + 28} cy={r.y + 10} r="6" fill="url(#sol-a)" opacity={r.o} />
+        </g>
+      ))}
     </svg>
   );
 }
@@ -210,7 +226,7 @@ function Well({
       {showIndex && (
         <span
           aria-hidden
-          className="pointer-events-none absolute -bottom-6 -left-2 font-heading text-[7rem] font-bold leading-none tracking-[-0.05em] text-ink opacity-[0.04]"
+          className="pointer-events-none absolute -bottom-6 -left-2 font-heading text-[6.02rem] font-bold leading-none tracking-[-0.05em] text-ink opacity-[0.04]"
         >
           {s.n}
         </span>
@@ -242,116 +258,155 @@ function CtaRow({ label, pin = false }: { label: string; pin?: boolean }) {
   );
 }
 
-/** Shared shell: the material, the spotlight, and the corner ember bloom. */
-function Card({
-  s,
-  i,
-  className,
-  children,
-}: {
-  s: Solution;
-  i: number;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <motion.a
-      href={s.href}
-      onMouseMove={trackPointer}
-      initial={{ opacity: 0, y: 34, scale: 0.96 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      whileHover={{ y: -10, scale: 1.01 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ ...SPRING_SOFT, delay: i * 0.1 }}
-      style={{ "--mx": "50%", "--my": "50%" } as React.CSSProperties}
-      className={`surface-card edge-sweep group flex flex-col overflow-hidden rounded-panel transition-[box-shadow,border-color] duration-500 hover:border-orange/30 hover:shadow-[var(--shadow-lift)] ${className ?? ""}`}
-    >
-      {/* cursor-tracked spotlight */}
-      <span
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          background:
-            "radial-gradient(420px circle at var(--mx) var(--my), rgba(var(--orange-ch), 0.07), transparent 70%)",
-        }}
-      />
-      {/* Ember bloom in the far corner — warmth without adding an orange field,
-          which the 65/20/15 colour budget does not have room for here. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-100"
-        style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.28), transparent 70%)" }}
-      />
-      {children}
-    </motion.a>
-  );
-}
-
+/*
+ * ─────────────────────────────────────────────────────────────────────────
+ * The section, redesigned: three panels that open.
+ *
+ * It was an asymmetric bento — one tall card beside two stacked ones. That
+ * satisfied the brief's "don't make them ordinary rectangular cards", but it
+ * was still three boxes sitting still, and the lead card's height was dictated
+ * by its neighbours rather than by anything it had to say.
+ *
+ * These are shutters instead. All three stand side by side; the one you point
+ * at opens to full width and shows its illustration, its copy and its chips,
+ * while the other two fall back to a spine carrying just an index and the name
+ * set vertically. One thing is open at a time, so the section holds a single
+ * focal point instead of asking the eye to choose between three.
+ *
+ * WHY IT IS NOT HOVER-ONLY. `onMouseEnter` alone would leave this inert on a
+ * phone and unusable from a keyboard. Focus opens a panel too, so tabbing
+ * through walks the three open states in order, and below `lg` the whole
+ * mechanism is dropped: every panel renders open and stacked, which is the only
+ * sensible shape in a single column.
+ *
+ * WHY `flex-grow` AND NOT `width`. The panels share one row, so animating grow
+ * lets the three settle against each other without any of them being told a
+ * pixel value — the row stays exactly the container's width at every frame of
+ * the transition, with no rounding gap opening at the right edge.
+ * ─────────────────────────────────────────────────────────────────────────
+ */
 export default function Solutions() {
-  const [lead, ...rest] = SOLUTIONS;
+  const [active, setActive] = useState(0);
 
   return (
-    <section id="solutions" className="tech-grid relative bg-canvas py-24 lg:py-32">
+    <section id="solutions" className="tech-grid relative bg-canvas py-10 lg:py-16">
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="01">Solutions</SectionLabel>
         <SectionHeading>Technology designed around your business.</SectionHeading>
 
-        {/*
-         * Asymmetric bento: one column on mobile; on `lg` a 12-column grid two
-         * rows tall, where the lead card takes 7 columns and both rows while the
-         * two supporting cards stack in the remaining 5.
-         */}
-        <div className="mt-16 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:grid-rows-2">
-          <Card s={lead} i={0} className="p-8 lg:col-span-7 lg:row-span-2 lg:p-10">
-            <h3 className="relative font-heading text-3xl font-bold tracking-[-0.025em] text-ink lg:text-[2.5rem] lg:leading-[1.1]">
-              {lead.title}
-            </h3>
-            <p className="relative mt-4 max-w-md text-[0.98rem] leading-[1.75] text-ink-muted">
-              {lead.body}
-            </p>
-            <div className="relative mt-6 flex flex-wrap gap-2">
-              {lead.chips.map((c) => (
-                <Chip key={c}>{c}</Chip>
-              ))}
-            </div>
+        <div className="mt-12 flex flex-col gap-4 lg:mt-14 lg:h-[27rem] lg:flex-row">
+          {SOLUTIONS.map((s, i) => {
+            const live = i === active;
+            return (
+              <motion.a
+                key={s.title}
+                href={s.href}
+                onMouseMove={trackPointer}
+                onMouseEnter={() => setActive(i)}
+                onFocus={() => setActive(i)}
+                aria-current={live ? "true" : undefined}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ ...SPRING_SOFT, delay: i * 0.1 }}
+                style={{ "--mx": "50%", "--my": "50%" } as React.CSSProperties}
+                className={`surface-card edge-sweep group relative overflow-hidden rounded-panel transition-[flex-grow,box-shadow,border-color] duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:basis-0 ${
+                  live
+                    ? "lg:grow-[2.7] lg:border-orange/25 lg:shadow-[var(--shadow-lift)]"
+                    : "lg:grow-[0.72]"
+                }`}
+              >
+                {/* cursor-tracked spotlight */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    background:
+                      "radial-gradient(420px circle at var(--mx) var(--my), rgba(var(--orange-ch), 0.07), transparent 70%)",
+                  }}
+                />
+                {/* ember bloom in the far corner, on the open panel only */}
+                <span
+                  aria-hidden
+                  className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full blur-3xl transition-opacity duration-700 ${
+                    live ? "opacity-100" : "opacity-0"
+                  }`}
+                  style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.28), transparent 70%)" }}
+                />
 
-            <Well
-              s={lead}
-              className="relative mt-10 min-h-[220px] flex-1 p-8"
-              svgClassName="transition-transform duration-700 group-hover:scale-[1.03]"
-            />
-
-            <CtaRow label={lead.cta} pin />
-          </Card>
-
-          {rest.map((s, i) => (
-            <Card key={s.title} s={s} i={i + 1} className="justify-center p-8 lg:col-span-5 lg:p-9">
-              {/*
-                Icon-beside-text at every width used to squeeze the text column
-                to ~110px on a 375px phone once the 128px icon and its gap were
-                subtracted — a single unbreakable word ("Experiences") then
-                overflowed past the card's own edge and was clipped by it.
-                Stacking below `sm` gives the heading the full card width; the
-                row returns once there is room for both.
-              */}
-              <div className="relative flex flex-col items-start gap-5 sm:flex-row sm:gap-6">
-                <Well s={s} className="h-32 w-32 shrink-0 p-5" showIndex={false} />
-                <div className="min-w-0">
-                  <h3 className="font-heading text-2xl font-bold tracking-[-0.02em] text-ink">
+                {/*
+                  The spine, for a closed panel. Desktop only — below `lg` there
+                  is no closed state to draw. `pointer-events-none` so it never
+                  intercepts the hover that would open the panel underneath it.
+                */}
+                <span
+                  aria-hidden
+                  className={`pointer-events-none absolute inset-0 hidden flex-col items-center justify-between py-8 transition-opacity duration-500 lg:flex ${
+                    live ? "opacity-0" : "opacity-100 delay-150"
+                  }`}
+                >
+                  <span className="font-mono text-[10px] tracking-[0.24em] text-orange">
+                    {s.n}
+                  </span>
+                  <span
+                    className="font-heading text-[1.15rem] font-bold tracking-[-0.02em] text-ink"
+                    style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                  >
                     {s.title}
-                  </h3>
-                  <p className="mt-2.5 text-[0.95rem] leading-[1.7] text-ink-muted">{s.body}</p>
-                </div>
-              </div>
+                  </span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border-strong text-ink-soft">
+                    <ArrowGlyph className="h-3 w-3" />
+                  </span>
+                </span>
 
-              <div className="relative mt-6 flex flex-wrap gap-2">
-                {s.chips.map((c) => (
-                  <Chip key={c}>{c}</Chip>
-                ))}
-              </div>
+                {/*
+                  The open panel. Held at `opacity-0` while closed rather than
+                  unmounted, so the text never reflows into a 90px column on the
+                  way in or out — the panel's own `overflow-hidden` clips it.
+                */}
+                <span
+                  className={`relative flex h-full flex-col p-8 transition-opacity duration-500 lg:p-9 ${
+                    live ? "opacity-100 delay-100" : "lg:opacity-0"
+                  }`}
+                >
+                  {/*
+                    Copy and drawing side by side once the panel is open.
 
-              <CtaRow label={s.cta} />
-            </Card>
-          ))}
+                    Stacked, the well inherited the panel's full open width and
+                    only ~180px of height. The drawing keeps its aspect ratio, so
+                    it scaled to that height and sat marooned in the middle of a
+                    680px box. Beside the copy it gets a column roughly as tall
+                    as it is wide, which is the proportion it was drawn for.
+                  */}
+                  <span className="flex h-full flex-col gap-7 lg:flex-row lg:items-stretch lg:gap-9">
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <h3 className="font-heading text-[1.45rem] font-bold tracking-[-0.025em] text-ink lg:text-[1.75rem]">
+                        {s.title}
+                      </h3>
+
+                      <p className="mt-3 max-w-md text-[0.95rem] leading-[1.7] text-ink-muted">
+                        {s.body}
+                      </p>
+
+                      <span className="mt-5 flex flex-wrap gap-2">
+                        {s.chips.map((c) => (
+                          <Chip key={c}>{c}</Chip>
+                        ))}
+                      </span>
+
+                      <CtaRow label={s.cta} pin />
+                    </span>
+
+                    <Well
+                      s={s}
+                      className="min-h-[150px] p-6 lg:h-full lg:w-[15rem] lg:shrink-0"
+                      svgClassName="transition-transform duration-700 group-hover:scale-[1.03]"
+                    />
+                  </span>
+                </span>
+              </motion.a>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -83,7 +83,7 @@ export default function StatsPlane({ ref }: { ref?: React.Ref<HTMLDivElement> })
                 0{i + 1}
               </span>
 
-              <span className="tnum font-heading text-[4rem] font-extrabold leading-[0.85] tracking-[-0.05em] sm:text-[5rem]">
+              <span className="tnum font-heading text-[3.44rem] font-extrabold leading-[0.85] tracking-[-0.05em] sm:text-[4.3rem]">
                 {/* Brief §02/§11's logo gradient, #E83B00 -> #FFB13B. See the note
                   in globals.css: as text this sits below 3:1 against
                       the canvas, and the amber end managed only 1.81:1. */}

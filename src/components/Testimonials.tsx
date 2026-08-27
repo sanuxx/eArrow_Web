@@ -444,7 +444,7 @@ export default function Testimonials() {
   return (
     <section
       id="customers"
-      className="relative overflow-hidden bg-canvas-alt py-24 lg:py-32"
+      className="relative overflow-hidden bg-canvas-alt py-10 lg:py-16"
       onPointerEnter={hold}
       onPointerLeave={resume}
       onFocusCapture={hold}
@@ -469,7 +469,7 @@ export default function Testimonials() {
             sentence sits on every corporate site in the country, and the
             eyebrow above already says TESTIMONIALS. This states the section's
             actual claim, in the voice the other headings use. */}
-        <h2 className="mt-6 font-heading text-2xl font-bold tracking-[-0.03em] text-ink sm:text-3xl">
+        <h2 className="mt-6 font-heading text-[1.29rem] font-bold tracking-[-0.03em] text-ink sm:text-[1.613rem]">
           Proof, in their own words.
         </h2>
 
@@ -492,14 +492,14 @@ export default function Testimonials() {
           />
           <span
             data-t="glyph"
-            className="relative block font-heading text-[16rem] font-extrabold leading-[0.7] text-orange opacity-[0.12] lg:text-[22rem]"
+            className="relative block font-heading text-[13.76rem] font-extrabold leading-[0.7] text-orange opacity-[0.12] lg:text-[18.92rem]"
           >
             &ldquo;
           </span>
         </span>
 
         <blockquote className="relative mt-14">
-          <p className="min-h-[150px] font-heading text-[1.75rem] font-bold leading-[1.3] tracking-[-0.035em] text-ink sm:text-[2.5rem] sm:leading-[1.25]">
+          <p className="min-h-[150px] font-heading text-[1.505rem] font-bold leading-[1.3] tracking-[-0.035em] text-ink sm:text-[2.15rem] sm:leading-[1.25]">
             {words.map((w, i) => (
               /* Two spans per word: the outer is the mask the word rises out of,
                  the inner is what GSAP moves. The right margin lives on the mask
@@ -545,7 +545,7 @@ export default function Testimonials() {
             <span>
               <span
                 data-t="attrib"
-                className="block font-heading text-lg font-bold tracking-[-0.02em] text-ink sm:text-xl"
+                className="block font-heading text-base font-bold tracking-[-0.02em] text-ink sm:text-[1.075rem]"
               >
                 {item.name}
               </span>
@@ -769,7 +769,7 @@ function QuoteLogo({ item }: { item: Quote }) {
           className="pointer-events-none absolute inset-y-[-40%] w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-black/[0.06] to-transparent"
           style={{ animation: "mark-sweep 9s ease-in-out infinite" }}
         />
-        <span className="relative bg-gradient-to-br from-orange to-amber bg-clip-text font-heading text-2xl font-extrabold tracking-[-0.04em] text-transparent">
+        <span className="relative bg-gradient-to-br from-orange to-amber bg-clip-text font-heading text-[1.29rem] font-extrabold tracking-[-0.04em] text-transparent">
           {monogram}
         </span>
       </span>

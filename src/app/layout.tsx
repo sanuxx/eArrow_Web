@@ -173,6 +173,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           matters here.
         */}
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+
+        {/*
+          Skip link — the first thing in the tab order.
+
+          The header carries seven nav items, a theme toggle and a CTA, and it
+          is repeated on all ten pages, so without this a keyboard user pays
+          ten stops before reaching the content on every single navigation.
+
+          Off-screen rather than `display: none`, because a hidden element is
+          not focusable and the link would never surface. `focus:` brings it
+          back into the viewport, and it sits above the fixed header's z-50.
+        */}
+        <a
+          href="#main"
+          className="sr-only z-[60] rounded-full bg-ink px-5 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-canvas focus:not-sr-only focus:fixed focus:left-6 focus:top-6"
+        >
+          Skip to content
+        </a>
         <SmoothScrollProvider>
           {/*
             The brand curtain — the logo on black, before the site.

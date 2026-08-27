@@ -2,19 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useScroll, useSpring } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { ArrowGlyph } from "./ArrowMark";
 import { useSmoothScroll } from "./SmoothScrollProvider";
 import { withBasePath } from "@/lib/basePath";
 
+/*
+ * Real routes rather than in-page anchors.
+ *
+ * The site began as a single scrolled composition, so every nav item was a
+ * hash. The revamp brief defines these as distinct pages, and a hash link from
+ * /about to "#solutions" would resolve against a document that has no such
+ * section — so the anchors could not survive the split.
+ */
 const LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "Solutions", href: "#solutions" },
-  { label: "Products", href: "#products" },
-  { label: "Industries", href: "#industries" },
-  { label: "About Us", href: "#why" },
-  { label: "Insights", href: "#insights" },
+  { label: "Home", href: "/" },
+  { label: "Solutions", href: "/solutions" },
+  { label: "Products", href: "/products" },
+  { label: "Industries", href: "/industries" },
+  { label: "Technology", href: "/technology" },
+  { label: "About Us", href: "/about" },
+  { label: "Insights", href: "/insights" },
 ];
 
 export default function Nav() {
@@ -22,6 +33,7 @@ export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroScrub, setHeroScrub] = useState(false);
   const lenis = useSmoothScroll();
+  const pathname = usePathname();
 
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, {
@@ -103,7 +115,7 @@ export default function Nav() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-12">
-        <a href="#home" onClick={() => setMenuOpen(false)}>
+        <Link prefetch={false} href="/" onClick={() => setMenuOpen(false)}>
           <Image
             src={withBasePath("/earrow-logo-white.png")}
             alt="eArrow"
@@ -113,37 +125,50 @@ export default function Nav() {
             style={{ filter: "var(--logo-filter)" }}
             priority
           />
-        </a>
+        </Link>
 
-        <ul className="hidden items-center gap-9 xl:flex">
-          {LINKS.map((link) => (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                className="group relative rounded-sm text-[0.8125rem] font-medium tracking-[0.01em] text-ink-muted transition-colors duration-300 hover:text-ink focus-visible:text-ink"
-              >
-                {link.label}
-                <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gradient-to-r from-orange to-amber transition-all duration-400 group-hover:w-full" />
-              </a>
-            </li>
-          ))}
+        <ul className="hidden items-center gap-5 lg:flex xl:gap-7">
+          {LINKS.map((link) => {
+            const active =
+              link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+            return (
+              <li key={link.label}>
+                <Link prefetch={false}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`group relative rounded-sm text-[0.8125rem] font-medium tracking-[0.01em] transition-colors duration-300 hover:text-ink focus-visible:text-ink ${
+                    active ? "text-ink" : "text-ink-muted"
+                  }`}
+                >
+                  {link.label}
+                  {/* The rule is the active indicator as well as the hover
+                      affordance — held open at full width on the current page. */}
+                  <span
+                    className={`absolute -bottom-1.5 left-0 h-px bg-gradient-to-r from-orange to-amber transition-all duration-400 group-hover:w-full ${
+                      active ? "w-full" : "w-0"
+                    }`}
+                  />
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="flex items-center gap-3 lg:gap-4">
           <ThemeToggle />
-          <a
-            href="#contact"
+          <Link prefetch={false}
+            href="/contact"
             className="group relative hidden items-center gap-2 overflow-hidden rounded-full border border-border-strong bg-surface px-5 py-2.5 text-[0.8125rem] font-semibold text-ink transition-colors duration-300 hover:border-orange hover:text-orange sm:inline-flex"
           >
             <span className="relative">Let&rsquo;s Talk</span>
             <ArrowGlyph className="relative h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-          </a>
+          </Link>
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-ink transition-colors hover:border-orange hover:text-orange xl:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-ink transition-colors hover:border-orange hover:text-orange lg:hidden"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               {menuOpen ? (
@@ -163,10 +188,10 @@ export default function Nav() {
       />
 
       {menuOpen && (
-        <ul className="flex flex-col gap-1 border-t border-border bg-canvas px-6 py-4 xl:hidden">
+        <ul className="flex flex-col gap-1 border-t border-border bg-canvas px-6 py-4 lg:hidden">
           {LINKS.map((link, i) => (
             <li key={link.label}>
-              <a
+              <Link prefetch={false}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-4 rounded-2xl px-2 py-3 text-base font-medium text-ink-muted transition-colors hover:bg-line hover:text-ink"
@@ -175,17 +200,17 @@ export default function Nav() {
                   0{i + 1}
                 </span>
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
           <li className="mt-2">
-            <a
-              href="#contact"
+            <Link prefetch={false}
+              href="/contact"
               onClick={() => setMenuOpen(false)}
               className="block rounded-full bg-gradient-to-r from-orange to-amber px-5 py-3 text-center text-sm font-semibold text-white"
             >
               Let&rsquo;s Talk
-            </a>
+            </Link>
           </li>
         </ul>
       )}

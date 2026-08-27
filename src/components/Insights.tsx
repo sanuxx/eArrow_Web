@@ -68,7 +68,7 @@ function Cover({ index }: { index: number }) {
 
 export default function Insights() {
   return (
-    <section id="insights" className="relative bg-canvas py-24 lg:py-32">
+    <section id="insights" className="relative bg-canvas py-10 lg:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="07">Insights</SectionLabel>
         <SectionHeading>Ideas shaping tomorrow&rsquo;s business.</SectionHeading>
@@ -76,7 +76,7 @@ export default function Insights() {
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
           {ARTICLES.map((a, i) => (
             <motion.a
-              href="#"
+              href="/insights"
               key={a.title}
               initial={{ opacity: 0, y: 32, scale: 0.96 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -94,7 +94,7 @@ export default function Insights() {
                   <span className="text-ink-soft">{a.date}</span>
                   <span className="ml-auto text-ink-soft">{a.read}</span>
                 </div>
-                <h3 className="mt-4 font-heading text-[1.0625rem] font-bold leading-snug tracking-[-0.015em] text-ink">
+                <h3 className="mt-4 font-heading text-base font-bold leading-snug tracking-[-0.015em] text-ink">
                   {a.title}
                 </h3>
                 <span className="mt-6 inline-flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-orange">

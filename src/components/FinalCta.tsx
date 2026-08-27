@@ -8,7 +8,7 @@ export default function FinalCta() {
   return (
     <section
       id="contact"
-      className="on-orange grain relative overflow-hidden py-28 lg:py-36"
+      className="on-orange grain relative overflow-hidden py-10 lg:py-16"
       /*
        * Gradient taken straight from the new logo artwork, and deliberately
        * NOT switched to the theme tokens.
@@ -88,10 +88,17 @@ export default function FinalCta() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-8 font-heading text-[2.25rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.75rem]"
+          className="mt-8 font-heading text-[1.935rem] font-extrabold leading-[1.08] tracking-[-0.04em] text-white sm:text-[2.58rem] lg:text-[3.225rem]"
         >
+          {/*
+            The `{" "}` is load-bearing. JSX strips the newlines either side of
+            the <br/>, so without it the heading's text content runs together as
+            "…your people.Let's enable…" for assistive tech and search engines.
+            A space at the start of a wrapped line is not rendered, so the
+            headline looks identical.
+          */}
           Let&rsquo;s empower your people.
-          <br />
+          <br />{" "}
           Let&rsquo;s enable your growth.
         </motion.h2>
 
