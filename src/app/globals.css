@@ -715,3 +715,40 @@ a:focus-visible, button:focus-visible {
     animation: none !important;
   }
 }
+
+/*
+ * Product mosaic — pointing at one tile recedes the other seven.
+ *
+ * Written here rather than as a Tailwind arbitrary variant: the obvious
+ * `[&:has(a:hover)>*]:opacity-45` sits on the element and reads correctly in
+ * the class list, but Tailwind never emits a rule for it — the `:has()` plus
+ * child-combinator combination silently produces nothing, so the effect is
+ * simply absent with no error anywhere. Verified by inspecting the compiled
+ * stylesheet, not by reading the markup.
+ *
+ * `:has()` does the sibling selection in CSS, so there is no hover state in
+ * React and no re-render as the pointer crosses eight tiles.
+ *
+ * The recede is `filter: opacity()`, NOT the `opacity` property, and that is
+ * not a stylistic choice. Each tile is a framer-motion element with an entrance
+ * `animate={{ opacity: 1 }}`, so it carries `style="opacity: 1"` inline once
+ * that finishes — and an inline style beats any stylesheet rule, however
+ * specific. The dim silently did nothing. Using `filter` leaves framer as the
+ * only writer of `opacity` and CSS as the only writer of `filter`, which is the
+ * same one-writer-per-property rule the GSAP sections follow.
+ */
+.mosaic > * {
+  transition:
+    filter 400ms ease,
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 400ms ease,
+    border-color 400ms ease;
+}
+
+.mosaic:has(a:hover) > * {
+  filter: opacity(0.45);
+}
+
+.mosaic > a:hover {
+  filter: opacity(1);
+}

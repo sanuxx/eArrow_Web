@@ -245,12 +245,15 @@ const ANATOMY = [
 
 /**
  * The catalogue as a single object: the eArrow Q holding the corner and the
- * seven product marks tiled around it.
+ * seven product marks tiled around it. This is also the page's only jump list.
  *
- * The masthead said "one ecosystem, multiple possibilities" beside an empty
- * half-page. This shows the claim — eight tiles, one of them the identity —
- * and doubles as a preview of the seven showcases below. It is deliberately
- * not the home page's orbit: that is a selector, this is a still.
+ * It used to be one of two. A sticky bar beneath the masthead carried the same
+ * seven marks, linking to the same seven anchors, about 100px further down —
+ * so the reader met the whole catalogue twice before reaching any of it, and
+ * the unlabelled version came first. The bar is gone and its job moved here,
+ * which is why every tile now carries its name: without one you could not tell
+ * the mortarboard from the shield, and the labelled bar was the only thing
+ * making that survivable.
  */
 function EcosystemMosaic() {
   return (
@@ -258,18 +261,34 @@ function EcosystemMosaic() {
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-      className="relative mx-auto max-w-md lg:ml-auto lg:mr-0"
+      className="relative mx-auto w-full max-w-lg lg:ml-auto lg:mr-0"
     >
+      {/* Ambient bloom, warmest behind the identity tile in the top-left. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -inset-6 rounded-panel"
+        className="pointer-events-none absolute -inset-10 rounded-panel blur-2xl"
         style={{
           background:
-            "radial-gradient(circle at 60% 40%, rgba(var(--orange-ch), 0.14), transparent 68%)",
+            "radial-gradient(circle at 22% 26%, rgba(var(--orange-ch), 0.20), transparent 62%)",
+        }}
+      />
+      {/* A drafting grid under the tiles, so they sit on a surface rather than
+          on nothing — the same device the hero section uses at page scale. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-8 opacity-[0.5]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, var(--color-line) 1px, transparent 1px), linear-gradient(to bottom, var(--color-line) 1px, transparent 1px)",
+          backgroundSize: "34px 34px",
+          maskImage: "radial-gradient(closest-side, #000 55%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(closest-side, #000 55%, transparent 100%)",
         }}
       />
 
-      <div className="relative grid grid-cols-4 gap-2.5">
+      {/* `.mosaic` carries the hover-recede behaviour — see globals.css for why
+          it is a real rule rather than an arbitrary variant. */}
+      <div className="mosaic relative grid grid-cols-4 gap-2.5">
         {/* The identity tile, carrying the brand gradient. */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
@@ -282,7 +301,17 @@ function EcosystemMosaic() {
           }}
         >
           <span aria-hidden className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" />
-          <QMarkLight className="relative h-auto w-[52%]" />
+          {/* a broad specular streak, so the identity tile catches light */}
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(104deg, transparent 34%, rgba(255,255,255,0.20) 48%, transparent 62%)",
+            }}
+          />
+          <span aria-hidden className="absolute inset-[7%] rounded-[18%] border border-white/25" />
+          <QMarkLight className="relative h-auto w-[44%]" />
         </motion.div>
 
         {PRODUCTS.map((p, i) => {
@@ -291,23 +320,45 @@ function EcosystemMosaic() {
             <motion.a
               key={p.key}
               href={`#${p.key}`}
-              title={p.label}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 + i * 0.05 }}
-              className="surface-card group flex aspect-square items-center justify-center rounded-card transition-all duration-400 hover:-translate-y-1 hover:border-orange/40 hover:shadow-[var(--shadow-lift)]"
+              className="surface-card group relative flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-card px-1.5 hover:-translate-y-1 hover:border-orange/40 hover:shadow-[var(--shadow-lift)]"
             >
+              {/* warm wash that rises from the foot of the tile on hover */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-400 group-hover:opacity-100"
+                style={{
+                  background:
+                    "linear-gradient(to top, rgba(var(--orange-ch), 0.12), transparent 62%)",
+                }}
+              />
+
+              {/*
+                The mark sits in its own well rather than floating in the middle
+                of a white square — it gives each tile an interior, which is what
+                the grid was missing when every cell was one small grey glyph on
+                an otherwise empty field.
+              */}
               {Mark && (
-                <Mark className="h-[42%] w-[42%] text-ink-soft transition-colors duration-400 group-hover:text-orange" />
+                <span className="relative flex h-11 w-11 items-center justify-center rounded-tile border border-border bg-surface-sunken transition-colors duration-400 group-hover:border-orange/30 group-hover:bg-white">
+                  <Mark className="h-6 w-6 text-ink-muted transition-colors duration-400 group-hover:text-orange" />
+                </span>
               )}
+
+              {/*
+                `ink-muted`, not `ink-soft`. These labels are 8.5px, and at that
+                size the softer grey sat around 3.2:1 — over the line for a
+                graphic but nowhere near the 4.5:1 that text this small needs.
+              */}
+              <span className="relative text-center font-mono text-[8.5px] uppercase leading-tight tracking-[0.1em] text-ink-muted transition-colors duration-400 group-hover:text-ink">
+                {p.label.replace("Arrow ", "")}
+              </span>
             </motion.a>
           );
         })}
       </div>
-
-      <p className="relative mt-5 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft lg:text-right">
-        07 platforms · one ecosystem
-      </p>
     </motion.div>
   );
 }
@@ -350,50 +401,36 @@ export default function ProductsContent() {
         </div>
       </PageHero>
 
-      {/*
-        The index. Seven marks in a row, each jumping to its showcase — the page
-        is long by design, and this is what stops that being a cost. Sticky under
-        the nav so the catalogue is always one click away.
-      */}
-      <div className="sticky top-[4.5rem] z-30 border-y border-border bg-canvas/85 backdrop-blur-xl lg:top-[5.25rem]">
-        <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <ul className="rail-scroll flex items-center gap-2 overflow-x-auto py-3">
-            {PRODUCTS.map((p) => {
-              const Mark = PRODUCT_MARKS[p.key];
-              return (
-                <li key={p.key} className="shrink-0">
-                  <a
-                    href={`#${p.key}`}
-                    className="group flex items-center gap-2.5 rounded-full border border-border bg-surface px-4 py-2 transition-colors duration-300 hover:border-orange/40"
-                  >
-                    {Mark && (
-                      <Mark className="h-4 w-4 text-orange transition-transform duration-300 group-hover:scale-110" />
-                    )}
-                    <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.16em] text-ink-muted transition-colors group-hover:text-ink">
-                      {p.label.replace("Arrow ", "")}
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </div>
-
       {/* ── The showcases ─────────────────────────────────────────────────── */}
       {PRODUCTS.map((product, i) => {
         const Mark = PRODUCT_MARKS[product.key];
         const flipped = i % 2 === 1;
+        /*
+         * Ground, kept separate from `flipped`.
+         *
+         * These used to be the same flag, which meant the first showcase — not
+         * flipped — took `tech-grid bg-canvas`, the identical treatment to the
+         * masthead directly above it. With the sticky index bar between them
+         * that was fine; the bar's border was the seam. Once the bar was
+         * removed the two merged, and "WF-01 · Workforce" read as part of the
+         * hero rather than as the first product.
+         *
+         * Offsetting the tint by one starts the alternation on the sunken
+         * ground, so the first showcase is separated from the hero and the
+         * copy still leads on the left.
+         */
+        const tinted = i % 2 === 0;
 
         return (
           <section
             key={product.key}
             id={product.key}
-            /* `scroll-mt` clears both the fixed nav and the sticky index, so a
-               jump from the catalogue lands on the heading rather than behind
-               two stacked bars. */
-            className={`relative overflow-hidden py-10 scroll-mt-32 lg:py-16 lg:scroll-mt-40 ${
-              flipped ? "bg-canvas-alt" : "tech-grid bg-canvas"
+            /* `scroll-mt` clears the fixed header so a jump from the mosaic
+               lands on the heading rather than behind it. Reduced from 32/40
+               when the sticky index bar was removed — that offset was sized to
+               clear two stacked bars, and left a gap once there was only one. */
+            className={`relative overflow-hidden py-10 scroll-mt-24 lg:py-16 lg:scroll-mt-28 ${
+              tinted ? "bg-canvas-alt" : "tech-grid bg-canvas"
             }`}
           >
             <QMark
