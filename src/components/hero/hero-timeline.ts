@@ -281,25 +281,44 @@ export function buildIntro(
     filter: "blur(9px)",
     duration: 0.86,
   });
-  arrive(q("[data-l='panel-row']"), 3.16, {
-    opacity: 0,
-    x: -10,
-    duration: 0.4,
-    stagger: 0.045,
-  });
-  arrive(q("[data-l='panel-tile']"), 3.24, {
-    opacity: 0,
-    y: 14,
-    scale: 0.96,
-    duration: 0.5,
-    stagger: 0.08,
-  });
-  arrive(q("[data-l='panel-bar']"), 3.36, {
-    scaleY: 0,
-    duration: 0.44,
-    stagger: 0.035,
+  /*
+   * The subject draws itself.
+   *
+   * Every stroke in HeroVector carries `pathLength="1"`, so a dash offset of
+   * 1 is "undrawn" and 0 is "finished" whatever the geometry actually
+   * measures — no arc lengths to read back, and the shapes can be reworked
+   * without touching a number here.
+   *
+   * Order is the order a person would draw it in: the baseline, then the
+   * construction circle, then the mark it was constructed around, then the
+   * trajectory, and last the two things that only make sense once the line
+   * exists — the crossing node and the head. The credential follows as the
+   * annotation it is.
+   */
+  arrive(q("[data-l='mark-axis']"), 2.95, {
+    strokeDashoffset: 1,
+    duration: 0.8,
     ease: "power2.out",
   });
+  arrive(q("[data-l='mark-ring']"), 3.02, {
+    strokeDashoffset: 1,
+    duration: 1.0,
+    ease: "power2.inOut",
+  });
+  arrive(q("[data-l='mark-logo']"), 3.12, {
+    opacity: 0,
+    scale: 0.94,
+    duration: 0.66,
+    ease: "power2.out",
+  });
+  arrive(q("[data-l='mark-path']"), 3.22, {
+    strokeDashoffset: 1,
+    duration: 0.8,
+    ease: "power2.out",
+  });
+  arrive(q("[data-l='mark-node']"), 3.86, { opacity: 0, duration: 0.26 });
+  arrive(q("[data-l='mark-head']"), 3.94, { opacity: 0, duration: 0.28 });
+  arrive(q("[data-l='mark-cap']"), 3.98, { opacity: 0, y: 8, duration: 0.34 });
   arrive(q("[data-l='slab-a']"), 2.928, { opacity: 0, scale: 1.06, duration: 1.1 });
   arrive(q("[data-l='slab-b']"), 2.988, { opacity: 0, scale: 1.05, duration: 1.1 });
   arrive(q("[data-l='grid']"), 3.0, { opacity: 0, duration: 0.9, ease: "power1.out" });

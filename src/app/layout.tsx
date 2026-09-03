@@ -1,11 +1,31 @@
 import type { Metadata } from "next";
-import { Sora, Inter, JetBrains_Mono } from "next/font/google";
+import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import BrandIntro from "@/components/BrandIntro";
 import "./globals.css";
 
-const sora = Sora({
-  variable: "--font-sora",
+/**
+ * The display voice — every headline, section title and product name.
+ *
+ * Archivo replaces Sora, which was doing the job accurately and without much
+ * conviction: a wide, even geometric sans that stayed calm at exactly the
+ * sizes this site wants to shout. Archivo is a grotesque built for editorial
+ * headlines — narrower, with squarer bowls and flat terminals, so at the 800
+ * weight and tight tracking these headlines already use it lands harder and
+ * fits more words per line. Narrower type at the same size reads faster,
+ * which is most of what makes a page feel energetic rather than composed.
+ *
+ * It also keeps the full weight range to 900. That was a live constraint, not
+ * a nicety: the headings are set at `font-extrabold`, and several livelier
+ * candidates — Space Grotesk among them — stop at 700, where 800 would have
+ * been synthesised into a faux-bold smear on the largest type on the site.
+ *
+ * The CSS variable is named for its role rather than its face, so changing
+ * the family again is this file only — `--font-heading` in globals.css points
+ * here and never needs to know which grotesque is currently in the slot.
+ */
+const display = Archivo({
+  variable: "--font-display",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
@@ -152,7 +172,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       suppressHydrationWarning
       data-theme="light"
-      className={`${sora.variable} ${inter.variable} ${jetbrains.variable} antialiased`}
+      className={`${display.variable} ${inter.variable} ${jetbrains.variable} antialiased`}
     >
       {/*
         `h-full` on <html> and `min-h-full` on <body> are gone. Lenis' own reset

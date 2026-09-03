@@ -444,23 +444,26 @@ export default function Testimonials() {
   return (
     <section
       id="customers"
-      className="relative overflow-hidden bg-canvas-alt py-10 lg:py-16"
+      className="relative overflow-hidden bg-canvas-alt py-10 lg:py-12"
       onPointerEnter={hold}
       onPointerLeave={resume}
       onFocusCapture={hold}
       onBlurCapture={resume}
     >
-      {/* Ambient wash — two soft fields rather than the orb component, so
-          nothing here runs its own competing rAF loop. */}
+      {/*
+        One ambient field, not two.
+
+        The previous section (WhyEarrow) already opens with the identical
+        two-corner-blob recipe — amber and orange, opposite corners, near
+        enough the same blur and opacity. Doing it again immediately below
+        is the section reaching for the same trick twice in one screen's
+        travel. One softer, more central wash still gives the band depth
+        without echoing what the reader just scrolled past.
+      */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-0 h-[520px] w-[520px] rounded-full opacity-70 blur-[140px]"
-        style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.20), transparent 70%)" }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -left-32 bottom-0 h-[460px] w-[460px] rounded-full opacity-60 blur-[130px]"
-        style={{ background: "radial-gradient(circle, rgba(var(--orange-ch), 0.16), transparent 70%)" }}
+        className="pointer-events-none absolute -right-24 top-0 h-[520px] w-[520px] rounded-full opacity-50 blur-[140px]"
+        style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.16), transparent 70%)" }}
       />
 
       <div ref={rootRef} className="relative mx-auto max-w-5xl px-6 lg:px-12">
@@ -498,7 +501,7 @@ export default function Testimonials() {
           </span>
         </span>
 
-        <blockquote className="relative mt-14">
+        <blockquote className="relative mt-10">
           <p className="min-h-[150px] font-heading text-[1.505rem] font-bold leading-[1.3] tracking-[-0.035em] text-ink sm:text-[2.15rem] sm:leading-[1.25]">
             {words.map((w, i) => (
               /* Two spans per word: the outer is the mask the word rises out of,
@@ -569,7 +572,7 @@ export default function Testimonials() {
         </blockquote>
 
         {/* ── Controls ─────────────────────────────────────────────────── */}
-        <div data-t="controls" className="mt-12 flex items-center gap-4">
+        <div data-t="controls" className="mt-9 flex items-center gap-4">
           <NavButton label="Previous testimonial" onClick={() => go(-1)}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 5l-7 7 7 7" />
@@ -635,7 +638,7 @@ export default function Testimonials() {
         </div>
 
         {/* ── The current ──────────────────────────────────────────────── */}
-        <div className="relative mt-12 h-[150px]">
+        <div className="relative mt-9 h-[150px]">
           {/*
            * The current: a horizontal gradient line running the full bleed of
            * the section.
@@ -707,7 +710,7 @@ export default function Testimonials() {
         </div>
 
         {/* ── Customer logo wall ───────────────────────────────────────── */}
-        <div data-t="wall-group" className="mt-4 border-t border-border pt-10">
+        <div data-t="wall-group" className="mt-4 border-t border-border pt-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-soft">
             Organizations we work with
           </p>
@@ -769,7 +772,9 @@ function QuoteLogo({ item }: { item: Quote }) {
           className="pointer-events-none absolute inset-y-[-40%] w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-black/[0.06] to-transparent"
           style={{ animation: "mark-sweep 9s ease-in-out infinite" }}
         />
-        <span className="relative bg-gradient-to-br from-orange to-amber bg-clip-text font-heading text-[1.29rem] font-extrabold tracking-[-0.04em] text-transparent">
+        {/* Flat orange, not gradient-clipped — a two-letter fallback
+            monogram is not the moment that needs the brand gradient. */}
+        <span className="relative font-heading text-[1.29rem] font-extrabold tracking-[-0.04em] text-orange">
           {monogram}
         </span>
       </span>

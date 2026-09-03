@@ -1,269 +1,225 @@
 "use client";
 
-import { PrimaryCta, GhostCta, StatusChip } from "../ui";
-import ProductPanel from "./ProductPanel";
+import { motion, type Transition } from "framer-motion";
+import Link from "next/link";
+import { ArrowGlyph } from "../ArrowMark";
 
 /**
- * Everything the hero stage shows at rest — the settled 0% composition.
+ * Hero section matching the reference design:
+ * - Pitch black obsidian canvas (#000000)
+ * - Sweeping top fluid orange/amber glowing light dome with radiant lit rim
+ * - Bottom-right counter-wave with soft ambient light
+ * - Centered dual-tone eyebrow capsule: [Strategy] Business Growth
+ * - Monumental centered headline: Empowering People / Enabling Growth
+ * - Centered supporting subtext
+ * - High-contrast CTA pill pair: Glowing Orange [Get Started] + Solid White [See Features]
  *
- * This file is markup only: no timelines, no state, no `motion.*`. Both the
- * intro and the scrub timeline target it through stable `data-l` ("layer")
- * attributes, which keeps art direction (hero-timeline.ts) separate from
- * composition (here).
- *
- * The state authored here IS the settled frame, and that is a structural
- * contract rather than a convention: the intro is built from `.from()` tweens
- * only, so it animates *into* this state, and the scrub from `.to()` tweens
- * only, so it animates *away from* it. `intro.progress(1)` and
- * `scrub.progress(0)` are therefore the same frame by construction — no
- * coordination needed between the two clocks, and under reduced motion (where
- * neither runs) this is what paints, with no second authoring of a fallback.
- *
- * The background is a field of soft overlapping washes plus a lower-right
- * swoosh — ambient rather than focal.
+ * Preserves GSAP data-l attributes for seamless scroll and intro transitions.
+ * The placeholder client-logo strip (LOGO IPSUM / BRAND AI / NEXUS / ORBIT /
+ * PULSE) that used to close the composition is gone — it carried
+ * `data-l="panel-outer"`, and hero-timeline.ts's tweens on that selector are
+ * harmless no-ops with no element to match, same as the other retired layers
+ * (`panel-row`, `panel-tile`, `panel-bar`) it already tolerates.
  */
 
-/*
- * Four overlapping soft washes. `slab-a` / `slab-b` keep their handles because
- * hero-timeline.ts parallaxes and fades them by name in both the intro and the
- * scrub; the two unnamed washes are static.
- */
-const SLABS = [
-  { key: "a", className: "right-[-10%] top-[-6%] h-[520px] w-[1120px]", rotate: -14, opacity: 0.085 },
-  { key: "b", className: "bottom-[-16%] left-[-12%] h-[380px] w-[900px]", rotate: 8, opacity: 0.05 },
-  { key: "c", className: "left-[22%] top-[18%] h-[440px] w-[760px]", rotate: 22, opacity: 0.06 },
-  { key: "d", className: "bottom-[4%] right-[16%] h-[300px] w-[680px]", rotate: -36, opacity: 0.045 },
-];
+const SPRING: Transition = { type: "spring", stiffness: 380, damping: 28 };
 
 export default function HeroPlate({ ref }: { ref?: React.Ref<HTMLDivElement> }) {
   return (
-    <div ref={ref} className="hero-plate grain z-0 overflow-hidden bg-canvas-alt">
-      {/* ── Ambient: one drifting orb, not two. Three bloom systems was one
-             too many; this one is atmosphere and nothing else. ── */}
+    <div
+      ref={ref}
+      className="hero-plate relative z-0 flex min-h-[100svh] flex-col justify-center overflow-hidden bg-[#000000] text-white"
+    >
+      {/* ─────────────────────────────────────────────────────────────
+          1. TOP FLUID GLOWING LIGHT DOME (Signature Visual Feature)
+         ───────────────────────────────────────────────────────────── */}
+      {/* Ambient Diffuse Light Bleed behind the top arch */}
       <div
         aria-hidden
         data-l="orb"
-        className="pointer-events-none absolute right-[2%] top-[6%] h-[560px] w-[560px] rounded-full"
+        className="pointer-events-none absolute left-1/2 -top-[18%] h-[560px] w-[min(1280px,120vw)] -translate-x-1/2 rounded-full opacity-65 blur-[90px]"
         style={{
-          opacity: 0.15,
-          filter: "blur(160px)",
           background:
-            "radial-gradient(circle at 35% 35%, var(--color-amber), var(--color-orange) 70%, transparent 72%)",
-          // Transform only, so the 160px blur is rasterised once and the drift
-          // runs on the compositor — the same discipline the old FloatingOrbs
-          // used. Animating the blur or the size instead would re-raster a
-          // 620px gaussian every frame.
-          animation: "orb-drift 30s ease-in-out infinite",
+            "radial-gradient(ellipse at 50% 30%, #ff8a00 0%, #ff4500 45%, #941700 70%, transparent 85%)",
         }}
       />
 
-      {/* ── The slab field ── */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/*
-          Two nested elements per slab, and the split matters. GSAP animates the
-          outer one (x / y / scale / opacity) while the base rotation lives on
-          the inner one as the standalone `rotate` property. Put both on one node
-          and CSS's transform order (translate, rotate, scale, then `transform`)
-          means GSAP's translate resolves inside the rotated frame — at slab B's
-          8deg, a 132px parallax drift would land ~18px off course. Keeping the
-          rotation on a child also means it survives reduced motion, where GSAP
-          never runs at all.
-        */}
-        {SLABS.map((s) => (
-          <div
-            key={s.key}
-            data-l={`slab-${s.key}`}
-            className={`absolute ${s.className}`}
-            style={{ opacity: s.opacity }}
-          >
-            <div
-              className="h-full w-full rounded-[200px]"
-              style={{
-                rotate: `${s.rotate}deg`,
-                background: "linear-gradient(135deg, var(--color-orange), var(--color-amber))",
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* ── Lower-right swoosh ── */}
+      {/* High-definition Top Curved Fluid Light Arch SVG */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-[22%] -right-[14%] h-[760px] w-[760px] rounded-full border-[70px] border-transparent"
+        data-l="slab-a"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[320px] w-full"
+      >
+        <svg
+          viewBox="0 0 1440 360"
+          fill="none"
+          preserveAspectRatio="none"
+          className="h-full w-full"
+        >
+          <defs>
+            <linearGradient id="topArchGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+              <stop offset="0%" stopColor="#400a00" />
+              <stop offset="25%" stopColor="#871b00" />
+              <stop offset="60%" stopColor="#e83e00" />
+              <stop offset="85%" stopColor="#ff7a00" />
+              <stop offset="100%" stopColor="#ffaa2b" />
+            </linearGradient>
+            <linearGradient id="topRimGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stopColor="#ff4500" stopOpacity="0.4" />
+              <stop offset="20%" stopColor="#ff7a00" stopOpacity="0.85" />
+              <stop offset="50%" stopColor="#ffca42" stopOpacity="1" />
+              <stop offset="80%" stopColor="#ff7a00" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#ff4500" stopOpacity="0.4" />
+            </linearGradient>
+            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" result="blur1" />
+              <feGaussianBlur stdDeviation="14" result="blur2" />
+              <feMerge>
+                <feMergeNode in="blur2" />
+                <feMergeNode in="blur1" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Solid Curved Light Horizon Body */}
+          <path
+            d="M 0,0 L 1440,0 L 1440,60 Q 1120,240 720,268 Q 320,295 0,170 Z"
+            fill="url(#topArchGrad)"
+          />
+          {/* Luminous Glowing Lower Edge Highlight */}
+          <path
+            d="M 0,170 Q 320,295 720,268 Q 1120,240 1440,60"
+            fill="none"
+            stroke="url(#topRimGrad)"
+            strokeWidth="3"
+            filter="url(#neonGlow)"
+          />
+        </svg>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          2. BOTTOM-RIGHT COUNTER WAVE (Fluid Framing)
+         ───────────────────────────────────────────────────────────── */}
+      <div
+        aria-hidden
+        data-l="bloom"
+        className="pointer-events-none absolute -bottom-[12%] -right-[8%] h-[460px] w-[580px] rounded-full opacity-50 blur-[95px]"
         style={{
-          borderTopColor: "rgba(var(--orange-ch), 0.05)",
-          borderRightColor: "rgba(var(--amber-ch), 0.05)",
-          rotate: "38deg",
-          filter: "blur(18px)",
+          background:
+            "radial-gradient(circle at 60% 70%, #ff8a00 0%, #d13400 50%, transparent 75%)",
         }}
       />
 
-      {/* ── Drafting grid ── */}
-      <div aria-hidden data-l="grid" className="tech-grid absolute inset-0" />
-
-      {/* ── Drafting rule down the left edge with measurement ticks ── */}
       <div
         aria-hidden
-        data-l="rule"
-        className="pointer-events-none absolute inset-y-0 left-6 hidden w-px origin-top bg-border lg:block"
+        data-l="slab-b"
+        className="pointer-events-none absolute -bottom-2 right-0 z-0 h-[280px] w-[min(760px,70vw)]"
       >
-        {[18, 34, 50, 66, 82].map((t) => (
-          <span
-            key={t}
-            data-l="tick"
-            className="absolute -left-1 h-px w-2 bg-border-strong"
-            style={{ top: `${t}%` }}
+        <svg
+          viewBox="0 0 760 280"
+          fill="none"
+          preserveAspectRatio="none"
+          className="h-full w-full"
+        >
+          <defs>
+            <linearGradient id="bottomWaveGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#1a0400" />
+              <stop offset="35%" stopColor="#7a1700" />
+              <stop offset="70%" stopColor="#e84000" />
+              <stop offset="100%" stopColor="#ffa026" />
+            </linearGradient>
+            <linearGradient id="bottomRimGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ff4500" stopOpacity="0.2" />
+              <stop offset="50%" stopColor="#ff8500" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#ffca42" stopOpacity="1" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M 0,280 Q 280,240 480,150 Q 640,75 760,45 L 760,280 Z"
+            fill="url(#bottomWaveGrad)"
           />
-        ))}
+          <path
+            d="M 0,280 Q 280,240 480,150 Q 640,75 760,45"
+            fill="none"
+            stroke="url(#bottomRimGrad)"
+            strokeWidth="3"
+            filter="url(#neonGlow)"
+          />
+        </svg>
       </div>
 
-      {/* Vertical padding is kept at every breakpoint, not zeroed on `lg`. When
-          the stage is pinned, `h-full items-center` centres within it and the
-          padding barely matters — but under reduced motion the stage is static,
-          and without it the eyebrow chip slides up behind the fixed nav. */}
-      <div className="relative z-10 mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-14 px-6 pb-24 pt-32 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-12 lg:py-28">
-        {/* ────────────── Copy column ────────────── */}
-        <div>
-          <div data-l="chip" className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <StatusChip>Business Technology</StatusChip>
-          </div>
+      {/* ─────────────────────────────────────────────────────────────
+          3. CENTERED HERO CONTENT COMPOSITION
+         ───────────────────────────────────────────────────────────── */}
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-6 pb-16 pt-[110px] text-center sm:pb-20 lg:pb-24">
 
-          {/*
-            Masked line reveal rather than a fade: each line sits in its own
-            `overflow-hidden` wrapper and slides up from below its baseline, so
-            the type reads as *uncovered* rather than as materialising. The
-            `pb`/`-mb` pair gives descenders room inside the mask without
-            changing the line box.
+        {/* Dual-Tone Eyebrow Badge */}
+        <div
+          data-l="chip"
+          className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-[#141419]/90 p-1.5 pr-4 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+        >
+          <span className="rounded-full bg-gradient-to-r from-[#d13400] via-[#e83b00] to-[#ff7a1a] px-3.5 py-1 text-[11px] font-semibold tracking-wide text-white shadow-[0_0_14px_rgba(232,59,0,0.7)]">
+            Strategy
+          </span>
+          <span className="text-[12px] font-medium tracking-wide text-neutral-300">
+            Business Growth
+          </span>
+        </div>
 
-            Deliberately hand-authored instead of SplitText: line 2 is
-            `bg-clip-text`, which clips the parent's background to its
-            descendants' glyphs — a runtime splitter redistributes the text into
-            new boxes and the gradient restarts or bands per box. Two known
-            lines beat a splitter, and this survives SSR.
-          */}
-          <h1 className="mt-7 font-heading text-[1.677rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink sm:text-[3.225rem] lg:text-[2.494rem] xl:text-[3.096rem]">
-            <span
-              data-l="line-mask"
-              className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
-            >
-              <span data-l="h1a" className="block">
-                Empowering People
-              </span>
-            </span>
-            {/*
-              A real space between the two lines.
-
-              Without it the h1's text content is "Empowering PeopleEnabling
-              Growth" — the two mask spans are separate blocks, so nothing
-              separates the words for anything reading the DOM rather than the
-              layout: assistive tech, search engines, and anyone copying the
-              headline. It costs nothing visually, because whitespace between
-              two block-level children collapses and is never rendered.
-            */}{" "}
-            <span
-              data-l="line-mask"
-              className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
-            >
-              {/*
-                The gradient is *painted onto* this line rather than faded in
-                with it: the background is 220% wide and slides from `120% 0` to
-                `0% 0`, so line 1 lands while line 2 is brushed across. Two
-                arrival mechanisms is what makes the second line read as the
-                payoff instead of as more text — and on scroll it runs the other
-                way, so the colour drains out of the words as they track off.
-              */}
-              <span
-                data-l="h1b"
-                className="block bg-gradient-to-r from-orange via-[#ff7a1a] to-amber bg-clip-text text-transparent"
-                style={{ backgroundSize: "220% 100%", backgroundPosition: "0% 0" }}
-              >
-                Enabling Growth
-              </span>
-            </span>
-          </h1>
-
-          <p
-            data-l="sub"
-            className="mt-6 max-w-md text-base leading-[1.7] text-ink-muted sm:text-base"
+        {/* Monumental Headline */}
+        <h1 className="mt-8 max-w-4xl font-heading text-[2.1rem] font-extrabold leading-[1.1] tracking-[-0.03em] text-white sm:text-5xl md:text-[3.5rem] lg:text-[3.75rem] xl:text-[4rem]">
+          <span
+            data-l="line-mask"
+            className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
           >
-            Intelligent business solutions and technology services designed to
-            help organizations work smarter, grow faster, and create lasting
-            impact.
-          </p>
-
-          {/* The CTAs keep their framer-motion hover springs. GSAP tweens these
-              wrappers, never the buttons themselves, so the two libraries never
-              write the same transform. */}
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <div data-l="cta" className="w-full sm:w-auto">
-              <PrimaryCta href="/solutions" className="w-full sm:w-auto">
-                Explore Solutions
-              </PrimaryCta>
-            </div>
-            {/*
-              The second action is the ghost variant, not a second primary.
-              Both were the filled orange gradient at identical weight, which
-              gives the reader two equally loud instructions and therefore no
-              steer at all. "Explore Solutions" leads; "Let's Talk" is still
-              plainly available for anyone who arrived ready to talk.
-            */}
-            <div data-l="cta" className="w-full sm:w-auto">
-              <GhostCta href="/contact" className="w-full sm:w-auto">
-                Let&apos;s Talk
-              </GhostCta>
-            </div>
-          </div>
-
-          <div className="relative mt-12 flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
-            <span
-              aria-hidden
-              data-l="strip-rule"
-              className="absolute inset-x-0 top-0 h-px origin-left bg-border"
-            />
-            {["Enterprise Software", "Managed Services", "Digital Platforms"].map(
-              (c) => (
-                <span key={c} data-l="strip" className="flex items-center gap-2">
-                  <span data-l="strip-dot" className="h-1 w-1 rounded-full bg-orange" />
-                  {c}
-                </span>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* ────────────── The subject: the product ────────────── */}
-        <div className="relative flex h-full items-center justify-center">
-          <div
-            aria-hidden
-            data-l="bloom"
-            className="pointer-events-none absolute left-[18%] top-[64%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(var(--amber-ch), 0.3) 0%, rgba(var(--orange-ch), 0.09) 46%, rgba(var(--orange-ch), 0) 72%)",
-              filter: "blur(28px)",
-            }}
-          />
-
-          <ProductPanel />
-        </div>
-      </div>
-
-      {/* ── Scroll cue ── */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-8 mx-auto hidden max-w-7xl px-6 lg:block lg:px-12"
-      >
-        <div data-l="cue" className="inline-flex items-center gap-3">
-        <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-soft">
-          Scroll
-        </span>
-        <span className="relative h-7 w-px overflow-hidden bg-border">
+            <span data-l="h1a" className="block text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              Empowering People
+            </span>
+          </span>
+          {" "}
           <span
-            className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-orange to-amber"
-            style={{ animation: "cue-run 2.6s ease-in-out infinite" }}
-          />
-        </span>
+            data-l="line-mask"
+            className="-mb-[0.08em] block overflow-hidden pb-[0.08em]"
+          >
+            <span data-l="h1b" className="block text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              Enabling Growth
+            </span>
+          </span>
+        </h1>
+
+        {/* Supporting Subtext */}
+        <p
+          data-l="sub"
+          className="mt-7 max-w-2xl text-center text-[0.9375rem] leading-[1.8] text-neutral-400 sm:text-[1rem]"
+        >
+          Intelligent business solutions and technology services designed to help
+          organizations work smarter, grow faster, and create lasting impact.
+        </p>
+
+        {/* Action Buttons */}
+        <div
+          data-l="cta"
+          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
+          <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={SPRING}>
+            <Link
+              href="/solutions"
+              className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-8 py-3.5 text-sm font-semibold text-white shadow-[0_0_28px_rgba(232,59,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.4)] transition-all duration-300 hover:shadow-[0_0_40px_rgba(232,59,0,0.85)]"
+            >
+              <span>Get Started</span>
+              <ArrowGlyph className="ml-2 h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={SPRING}>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition-all duration-300 hover:bg-neutral-100"
+            >
+              <span>See Features</span>
+            </Link>
+          </motion.div>
         </div>
       </div>
     </div>

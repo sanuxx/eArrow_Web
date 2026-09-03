@@ -16,7 +16,7 @@ import { SPRING_SOFT } from "@/components/motion-kit";
 
 const CATEGORIES = [
   { name: "HR Technology", line: "Workforce systems, payroll and the operating model around them." },
-  { name: "AI", line: "Where intelligent automation genuinely earns its place — and where it doesn't." },
+  { name: "AI", line: "Where intelligent automation earns its place, and the honest cases where it hasn't yet." },
   { name: "Digital Transformation", line: "Replacing fragmented manual process with connected systems." },
   { name: "Payroll", line: "Compliance, accuracy and the cost of getting it wrong." },
   { name: "Education Technology", line: "Admissions, academics and administration at institutional scale." },
@@ -31,7 +31,7 @@ export default function InsightsContent() {
         index="07"
         eyebrow="Insights"
         title="Perspectives from the people building the systems."
-        lead="Practical writing on technology, operations and transformation — from the team doing the implementations, not the marketing department."
+        lead="Practical writing on technology, operations and transformation, written by the team doing the implementations."
       />
 
       <PageSection
@@ -40,7 +40,7 @@ export default function InsightsContent() {
         label="Categories"
         title="What we write about."
       >
-        <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {CATEGORIES.map((category, i) => (
             <motion.a
               key={category.name}
@@ -50,7 +50,7 @@ export default function InsightsContent() {
               whileHover={{ scale: 1.02 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ ...SPRING_SOFT, delay: (i % 3) * 0.06 }}
-              className="surface-card edge-sweep group relative flex flex-col overflow-hidden rounded-card px-7 py-8 transition-colors duration-400 hover:border-orange/30"
+              className="surface-card edge-sweep group relative flex flex-col overflow-hidden rounded-card px-7 py-5 transition-colors duration-400 hover:border-orange/30"
             >
               <div className="flex items-start justify-between gap-4">
                 <span className="font-mono text-[10px] tracking-[0.22em] text-ink-soft">
@@ -70,7 +70,7 @@ export default function InsightsContent() {
         </div>
 
         {/* An honest empty state rather than fabricated article cards. */}
-        <div className="mt-14 rounded-card border border-dashed border-border-strong bg-surface px-8 py-10 text-center">
+        <div className="mt-8 rounded-card border border-dashed border-border-strong bg-surface px-8 py-6 text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-orange">
             Publishing soon
           </p>

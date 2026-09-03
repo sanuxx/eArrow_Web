@@ -1,41 +1,55 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PageHero, PageSection, NumberedBlocks, PageCta } from "@/components/page-kit";
-import { ArrowGlyph, QMarkLight } from "@/components/ArrowMark";
-import { SPRING_SOFT } from "@/components/motion-kit";
+import { PageHero, PageCta } from "@/components/page-kit";
+import SignalWeave from "./SignalWeave";
+import RewireScene from "./RewireScene";
 
 /*
  * From the brief's "Customer Success" sheet.
  *
  * The sheet is explicit that measurable results are only to be shown "where you
  * have verified figures" — so this page deliberately ships no metrics. The one
- * case study below is the worked example the sheet itself gives, told as a
- * before/after rather than with invented percentages. Real numbers belong here
- * once the client supplies verified ones.
+ * case study is the worked example the sheet itself gives, told as a before and
+ * after rather than with invented percentages. Real numbers belong here once
+ * the client supplies verified ones.
+ *
+ * ── The shape of the page ──
+ * Dark masthead, light middle, dark case study. The alternation is the point:
+ * three dark bands in a row is a mood rather than a sequence, and the bright
+ * middle is what makes the case study land as the thing it was building to.
+ *
+ * The masthead is `tone="dark"`, which is the first one on the site — see the
+ * note in page-kit's `PageHero` about how it tells the fixed header to turn its
+ * links white while it is on screen.
  */
 
+/* The four questions every story here answers. The question is set as the
+   headline and the label demoted above it, because the questions are the
+   interesting half — "Customer Challenge" is a filing category, "What problem
+   did they have?" is the thing being asked. */
 const STAGES = [
   {
-    title: "Customer Challenge",
-    body: "What problem did they have? The processes, systems and constraints as they stood before we were involved.",
+    label: "Customer Challenge",
+    question: "What problem did they have?",
+    body: "The processes, systems and constraints exactly as they stood before we were involved.",
   },
   {
-    title: "Our Solution",
-    body: "What did eArrow implement? The platforms, modules and integrations put in place, and why those.",
+    label: "Our Solution",
+    question: "What did eArrow implement?",
+    body: "The platforms, modules and integrations put in place — and the reasoning for those over the alternatives.",
   },
   {
-    title: "Transformation",
-    body: "What changed? How the day-to-day work of the team is different now that the system is live.",
+    label: "Transformation",
+    question: "What changed?",
+    body: "How the day-to-day work of the team is different now that the system is live and in their hands.",
   },
   {
-    title: "Impact",
-    body: "The measurable outcome — reported against verified figures from the customer, never estimated.",
+    label: "Impact",
+    question: "What did it measurably do?",
+    body: "The outcome, reported against figures verified with the customer. Never estimated, never rounded up.",
   },
 ];
-
-const BEFORE = ["Multiple spreadsheets", "Manual approvals", "Delayed reporting"];
-const AFTER = ["Integrated HRIS", "Automated workflows", "Real-time dashboards"];
 
 export default function CustomerSuccessContent() {
   return (
@@ -43,92 +57,91 @@ export default function CustomerSuccessContent() {
       <PageHero
         index="06"
         eyebrow="Customer Success"
-        title="Real operations, measurably changed."
-        lead="How organisations moved from fragmented manual processes to connected digital operations — told through the work, not the adjectives."
+        tone="dark"
+        backdrop={<SignalWeave />}
+        contentY="top"
+        title={
+          <>
+            Fragmented processes,
+            <br />
+            <span className="text-amber">rewired into one system.</span>
+          </>
+        }
+        lead="Every engagement here starts as scattered manual work and ends as connected digital operations. These are those stories, told through what actually changed."
+        footer={
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/55">
+            <span className="flex items-center gap-2.5">
+              <span aria-hidden className="h-1 w-1 rounded-full bg-amber" />
+              Verified outcomes only
+            </span>
+            <span className="flex items-center gap-2.5">
+              <span aria-hidden className="h-1 w-1 rounded-full bg-amber" />
+              Named systems, named changes
+            </span>
+          </div>
+        }
       />
 
-      <PageSection
-        tone="sunken"
-        index="07"
-        label="How we tell it"
-        title="Every story, the same four questions."
-      >
-        <NumberedBlocks items={STAGES} />
-      </PageSection>
+      {/* ── The four questions ─────────────────────────────────────────────
+          Set on a rail: a hairline runs the width with a node above each
+          column, so four separate cards read as one method with four beats.
+          On the stacked column the rail turns vertical and does the same job
+          down the left edge. */}
+      <section className="relative overflow-hidden bg-canvas-alt py-14 lg:py-20">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-orange">
+            07 — How we tell it
+          </p>
+          <h2 className="mt-5 max-w-2xl font-heading text-[1.8rem] font-extrabold leading-[1.06] tracking-[-0.038em] text-ink sm:text-[2.3rem] lg:text-[2.6rem]">
+            Every story answers the same four questions.
+          </h2>
 
-      <PageSection tone="black" index="08" label="Case Study">
-        <QMarkLight className="pointer-events-none absolute -right-24 -top-10 h-auto w-[520px] opacity-[0.04]" />
+          <div className="relative mt-14">
+            {/* The rail. Horizontal above the columns on desktop, down the
+                left edge when they stack — one element, two orientations,
+                because it is decoration and can be redrawn by breakpoint. */}
+            <span
+              aria-hidden
+              className="absolute left-0 top-0 h-full w-px bg-border lg:h-px lg:w-full"
+            />
 
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-6 max-w-3xl font-heading text-[1.806rem] font-bold leading-[1.08] tracking-[-0.035em] text-white sm:text-[2.365rem] lg:text-[2.58rem]"
-        >
-          From manual HR to digital workforce management.
-        </motion.h2>
+            <div className="grid grid-cols-1 gap-y-10 lg:grid-cols-4 lg:gap-x-10">
+              {STAGES.map((stage, i) => (
+                <motion.div
+                  key={stage.label}
+                  initial={{ opacity: 0, y: 22 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-70px" }}
+                  transition={{
+                    duration: 0.55,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: i * 0.09,
+                  }}
+                  className="relative pl-7 lg:pl-0 lg:pt-8"
+                >
+                  {/* The node where this beat meets the rail. */}
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-1.5 h-2 w-2 -translate-x-1/2 rounded-full bg-orange lg:left-0 lg:top-0 lg:-translate-x-0 lg:-translate-y-1/2"
+                  />
 
-        {/* Before / after, joined by the brand arrow. The arrow turns to follow
-            the flow on desktop and stays vertical in the stacked column. */}
-        <div className="mt-14 flex flex-col items-stretch gap-6 lg:flex-row lg:items-center lg:gap-8">
-          {[
-            { key: "Before", items: BEFORE, dim: true },
-            { key: "After", items: AFTER, dim: false },
-          ].map((panel, p) => (
-            <motion.div
-              key={panel.key}
-              initial={{ opacity: 0, y: 26 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ ...SPRING_SOFT, delay: p * 0.14 }}
-              className={`relative flex-1 overflow-hidden rounded-card border px-8 py-9 ${
-                panel.dim
-                  ? "border-white/10 bg-white/[0.02]"
-                  : "border-transparent"
-              }`}
-              style={
-                panel.dim
-                  ? undefined
-                  : { background: "linear-gradient(125deg, var(--color-orange), var(--color-amber))" }
-              }
-            >
-              <p
-                className={`font-mono text-[10px] font-medium uppercase tracking-[0.28em] ${
-                  panel.dim ? "text-white/35" : "text-white/80"
-                }`}
-              >
-                {panel.key}
-              </p>
-
-              <ul className="mt-6 space-y-4">
-                {panel.items.map((item, i) => (
-                  <li key={item} className="flex items-baseline gap-4">
-                    <span
-                      className={`font-mono text-[10px] tracking-[0.2em] ${
-                        panel.dim ? "text-white/25" : "text-white/60"
-                      }`}
-                    >
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      className={`font-heading text-base font-bold tracking-[-0.02em] ${
-                        panel.dim ? "text-white/55" : "text-white"
-                      }`}
-                    >
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
+                    {String(i + 1).padStart(2, "0")} · {stage.label}
+                  </p>
+                  <h3 className="mt-3 font-heading text-[1.15rem] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink lg:text-[1.28rem]">
+                    {stage.question}
+                  </h3>
+                  <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">
+                    {stage.body}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="pointer-events-none mt-6 flex justify-center lg:hidden">
-          <ArrowGlyph className="h-5 w-5 rotate-90 text-amber" />
-        </div>
-      </PageSection>
+      <RewireScene />
 
       <PageCta
         title="Your operation could be the next story."

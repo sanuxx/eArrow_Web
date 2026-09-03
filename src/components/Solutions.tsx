@@ -289,7 +289,95 @@ export default function Solutions() {
   const [active, setActive] = useState(0);
 
   return (
-    <section id="solutions" className="tech-grid relative bg-canvas py-10 lg:py-16">
+    <section id="solutions" className="tech-grid relative overflow-hidden bg-canvas py-10 lg:py-16">
+      {/*
+        The light the panels are made of.
+
+        These are not background decoration that could be dropped. The panels
+        below are frosted glass, and `backdrop-filter` blurs whatever is
+        painted underneath it — over a flat white section that is flat white,
+        so the glass would render as a faintly grey rectangle and read as
+        nothing at all. Colour behind the panes is what gives the blur
+        something to carry, and it is why the effect looks like glass rather
+        than like opacity.
+
+        Placed to sit under the row rather than around it, and soft enough that
+        the type on top never loses contrast — measured, not assumed.
+      */}
+      {/* Clipped to the band the panels occupy. Unclipped, the sharp shapes
+          rose above the row and read as stray blobs floating over the heading
+          rather than as light sitting behind glass. They still show crisp in
+          the margins to the left and right of the row, which is where the
+          contrast with the blurred version is visible. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-[23%] h-[60%] overflow-hidden"
+      >
+        {/*
+          What the glass is made of — and it has to be *sharp*.
+          
+          Two earlier attempts failed for the same reason from opposite ends.
+          The first put soft washes at the section margins, where they passed
+          behind almost none of the panes. The second moved them under the row
+          but left them blurred at 90-100px, and a pre-blurred gradient gives
+          `backdrop-filter` nothing to do: blurring a soft gradient returns the
+          same soft gradient, so the panes still read as warm white cards.
+
+          Frosted glass is legible only when something with structure is behind
+          it — edges the pane can diffuse. So these are near-hard-edged now,
+          and the blur that matters is the one in `.frost-card`. The tell is the
+          gaps between the panels: the same shapes read crisp there and soft
+          through the glass, which is the whole effect.
+        */}
+        <div
+          className="absolute left-[14%] top-[6%] h-[290px] w-[290px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(var(--amber-ch), 0.85), rgba(var(--orange-ch), 0.5) 62%, transparent 74%)",
+            filter: "blur(6px)",
+          }}
+        />
+        <div
+          className="absolute left-[40%] top-[38%] h-[230px] w-[230px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(var(--orange-ch), 0.7), rgba(var(--ember-ch, 194,46,0), 0.3) 60%, transparent 74%)",
+            filter: "blur(5px)",
+          }}
+        />
+        <div
+          className="absolute right-[13%] top-[2%] h-[270px] w-[270px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(var(--amber-ch), 0.8), rgba(var(--orange-ch), 0.42) 60%, transparent 74%)",
+            filter: "blur(6px)",
+          }}
+        />
+
+        {/* Rings, for edges rather than mass. A gradient blob has no contour
+            once blurred; a stroke does, and it is contours that make a pane
+            look like it is standing in front of something. */}
+        <div
+          className="absolute left-[24%] top-[18%] h-[330px] w-[330px] rounded-full border-[14px]"
+          style={{ borderColor: "rgba(var(--orange-ch), 0.28)", filter: "blur(3px)" }}
+        />
+        <div
+          className="absolute right-[24%] top-[10%] h-[300px] w-[300px] rounded-full border-[12px]"
+          style={{ borderColor: "rgba(var(--amber-ch), 0.42)", filter: "blur(3px)" }}
+        />
+
+        {/* A soft floor under all of it, so the sharp shapes sit in warmth
+            rather than on bare white. */}
+        <div
+          className="absolute inset-x-0 top-0 h-full"
+          style={{
+            background:
+              "radial-gradient(60% 70% at 50% 50%, rgba(var(--amber-ch), 0.16), transparent 72%)",
+            filter: "blur(60px)",
+          }}
+        />
+      </div>
+
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="01">Solutions</SectionLabel>
         <SectionHeading>Technology designed around your business.</SectionHeading>
@@ -310,7 +398,7 @@ export default function Solutions() {
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ ...SPRING_SOFT, delay: i * 0.1 }}
                 style={{ "--mx": "50%", "--my": "50%" } as React.CSSProperties}
-                className={`surface-card edge-sweep group relative overflow-hidden rounded-panel transition-[flex-grow,box-shadow,border-color] duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:basis-0 ${
+                className={`frost-card edge-sweep group relative overflow-hidden rounded-panel transition-[flex-grow,box-shadow,border-color] duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:basis-0 ${
                   live
                     ? "lg:grow-[2.7] lg:border-orange/25 lg:shadow-[var(--shadow-lift)]"
                     : "lg:grow-[0.72]"

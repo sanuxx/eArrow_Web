@@ -1,44 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { PageHero, PageCta } from "@/components/page-kit";
 import { withBasePath } from "@/lib/basePath";
 import { SectionLabel } from "@/components/ui";
 import { ArrowUpRight, QMark, QMarkLight, StackedRects } from "@/components/ArrowMark";
 import { SOLUTION_ART } from "@/components/solution-art";
 import { CountUp, SPRING_SOFT } from "@/components/motion-kit";
-
-/* Marks for the vision and mission statements, in the site's stroke language. */
-
-const STROKE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-} as const;
-
-/** Vision — a scope trained on a point. */
-function ScopeMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden {...STROKE}>
-      <circle cx="50" cy="50" r="30" />
-      <circle cx="50" cy="50" r="11" />
-      <path d="M50 8v10M50 82v10M8 50h10M82 50h10" />
-    </svg>
-  );
-}
-
-/** Mission — a flag planted on the ground taken. */
-function FlagMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden {...STROKE}>
-      <path d="M30 88V16" />
-      <path d="M30 20h44l-12 16 12 16H30" />
-    </svg>
-  );
-}
 
 /*
  * About eArrow. Content transcribed from the brief's "About Us" sheet.
@@ -109,10 +78,6 @@ const STATS = [
  * against the supplied Images folder and re-encoded to a 4:5 webp (the source
  * files were up to 2MB each, and `images.unoptimized` is set for the static
  * export, so nothing would have compressed them at build time).
- *
- * P A Nandasena has no photograph in that folder. His plate keeps the monogram
- * rather than borrowing someone else's face — drop `nandasena.webp` into
- * /public/team and add the `photo` key here and it will appear.
  */
 const LEADERSHIP: {
   name: string;
@@ -133,15 +98,16 @@ const LEADERSHIP: {
     photo: "/team/dhanushka.webp",
   },
   {
+    name: "P A Nandasena",
+    role: "Director — Strategic Business & Corporate Affairs",
+    remit: "Strategic Relationships, Corporate Affairs & Business Development",
+    photo: "/team/nandasena.webp",
+  },
+  {
     name: "Shihari Wattarachchi",
     role: "Chief Manager — Operations, HR & Compliance",
     remit: "People, Operations & Governance",
     photo: "/team/shihari.webp",
-  },
-  {
-    name: "P A Nandasena",
-    role: "Director — Strategic Business & Corporate Affairs",
-    remit: "Strategic Relationships, Corporate Affairs & Business Development",
   },
   {
     name: "Malith Haschendre",
@@ -150,10 +116,52 @@ const LEADERSHIP: {
     photo: "/team/malith.webp",
   },
   {
+    name: "Bihara Ranaweera",
+    role: "Project Manager",
+    remit: "Project Management, Operations & Delivery",
+    photo: "/team/bihara.webp",
+  },
+  {
     name: "Awantha Yohan",
     role: "Head of Systems & Infrastructure",
     remit: "Infrastructure, Cloud & IT Operations",
     photo: "/team/awantha.webp",
+  },
+  {
+    name: "Malinda Deshapriya",
+    role: "Senior Tech Lead",
+    remit: "Technology, Engineering & Technical Leadership",
+    photo: "/team/malinda.webp",
+  },
+  {
+    name: "Thilina Dananjaya",
+    role: "Associate Tech Lead",
+    remit: "Technology, Engineering & Technical Delivery",
+    photo: "/team/thilina.webp",
+  },
+  {
+    name: "Udara Ekanayake",
+    role: "Senior Software Engineer",
+    remit: "Software Engineering, Development & Technical Solutions",
+    photo: "/team/udara.webp",
+  },
+  {
+    name: "Ravija Salpitikorala",
+    role: "DevOps Engineer",
+    remit: "Cloud Infrastructure, Automation & Deployment",
+    photo: "/team/ravija.webp",
+  },
+  {
+    name: "Kenula Dissanayake",
+    role: "Growth Marketing & Revenue Lead",
+    remit: "Growth Strategy, Marketing & Revenue",
+    photo: "/team/kenula.webp",
+  },
+  {
+    name: "Poornima Sathsarani",
+    role: "Senior Executive Customer Success",
+    remit: "Customer Support, Service & Technical Assistance",
+    photo: "/team/poornima.webp",
   },
 ];
 
@@ -166,12 +174,94 @@ const VALUES = [
   { word: "Grow", line: "Grow together." },
 ];
 
-const initials = (name: string) =>
-  name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("");
+/*
+ * First initial and surname initial, not the first two words.
+ *
+ * Taking the first two gave "P A Nandasena" the monogram "PA" — two given
+ * initials and nothing of the name anyone would recognise. First-and-last is
+ * identical for every two-word name in the roster and correct for the ones
+ * that carry a middle initial.
+ */
+const initials = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+/**
+ * A statement that arrives a word at a time from behind a mask.
+ *
+ * The device is a film title: each word sits in its own `overflow-hidden` box
+ * and slides up into it, so the line assembles rather than fading in. At
+ * display size that reads as something being *said*, which is the right
+ * register for a vision and a mission — they are the only two sentences on
+ * this page the company is actually committing to.
+ *
+ * Words, not lines. Splitting by rendered line means measuring the wrap, which
+ * changes with viewport, font loading and the length of the sentence; splitting
+ * on spaces is exact and needs no measurement. The stagger is small enough
+ * (28ms) that a twenty-word sentence still lands in well under a second.
+ *
+ * The mask box carries `pb`/`-mb` of a fifth of an em. Without it the
+ * `overflow-hidden` crops the descenders of g, p and y — the clipping that is
+ * doing the reveal does not know the difference between a word that has not
+ * arrived and the tail of one that has.
+ */
+function RevealWords({ text, className }: { text: string; className?: string }) {
+  const still = useReducedMotion();
+
+  /*
+   * One observer on the paragraph, not thirty-six on the words.
+   *
+   * Each word used to carry its own `whileInView`. Measured after scrolling the
+   * whole section past on a phone, three of them were still parked inside
+   * their masks at an identical 34px offset — they had never animated, because
+   * thirty-six separate IntersectionObservers on inline-block boxes is
+   * thirty-six chances for one not to fire. Invisible words in a company's
+   * mission statement is the worst version of that bug.
+   *
+   * Variants fix it structurally: the paragraph is the only thing being
+   * observed, and it propagates `shown` to its children with a stagger. One
+   * observer, and the children cannot be missed individually.
+   *
+   * Reduced motion changes the transition's duration and the stagger, never
+   * the markup — two earlier attempts branched on the markup instead and both
+   * broke. A plain <p> was a hydration mismatch, and `initial={false}` left
+   * the server's inline `translateY(108%)` in place, so reduced-motion readers
+   * got two empty statements.
+   */
+  return (
+    <motion.p
+      className={className}
+      aria-label={text}
+      initial="hidden"
+      whileInView="shown"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={{
+        hidden: {},
+        shown: { transition: { staggerChildren: still ? 0 : 0.028 } },
+      }}
+    >
+      {text.split(" ").map((word, i) => (
+        <span
+          key={`${word}-${i}`}
+          aria-hidden
+          /* `pb`/`-mb` of a fifth of an em: without it the `overflow-hidden`
+             doing the reveal also crops the descenders of g, p and y. */
+          className="inline-block overflow-hidden pb-[0.2em] -mb-[0.2em] align-bottom"
+        >
+          <motion.span
+            className="inline-block"
+            variants={{ hidden: { y: "108%" }, shown: { y: 0 } }}
+            transition={{ duration: still ? 0 : 0.62, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {word}
+            {" "}
+          </motion.span>
+        </span>
+      ))}
+    </motion.p>
+  );
+}
 
 export default function AboutContent() {
   return (
@@ -200,10 +290,12 @@ export default function AboutContent() {
           <div className="flex gap-10 lg:shrink-0">
             {STATS.map((s) => (
               <div key={s.label}>
-                <p className="font-heading text-[1.935rem] font-extrabold leading-none tracking-[-0.04em]">
-                  <span className="bg-gradient-to-br from-orange to-amber bg-clip-text text-transparent">
-                    <CountUp value={s.value} />
-                  </span>
+                {/* Flat orange, not gradient-clipped — the gradient-text
+                    treatment is reserved for the hero and the closing CTA;
+                    used on every number on the site it stops meaning
+                    anything. */}
+                <p className="font-heading text-[1.935rem] font-extrabold leading-none tracking-[-0.04em] text-orange">
+                  <CountUp value={s.value} />
                 </p>
                 <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
                   {s.label}
@@ -216,7 +308,7 @@ export default function AboutContent() {
 
       {/* ── What we do: sticky editorial spread ──────────────────────────
           No `overflow-hidden` on this section — see the note at the top. */}
-      <section className="relative bg-canvas-alt py-10 lg:py-16">
+      <section className="relative bg-canvas-alt py-10 lg:py-12">
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           <QMark className="absolute -right-24 top-10 h-auto w-[420px] opacity-[0.04]" />
         </div>
@@ -291,72 +383,112 @@ export default function AboutContent() {
       </section>
 
       {/* ── Vision & mission ─────────────────────────────────────────────── */}
+      {/*
+        Two statements, staged rather than boxed.
+
+        This was a pair of bordered panels side by side, which is the shape the
+        rest of the page already uses for cards and made the company's two
+        commitments look like two more tiles. They are the only sentences on
+        this page eArrow is actually promising anything in, so they are set at
+        display scale, stacked so neither is the junior of the other, and given
+        a word-by-word reveal — the section performs the statements instead of
+        displaying them.
+
+        Scaled back from a first pass that set the statements at 2.9rem over a
+        1,129px band: at that size a twenty-word sentence filled most of a
+        laptop screen on its own and the section stopped being a section. The
+        reveal is the thing carrying the drama; the type only has to be large
+        enough to read as a statement rather than as body copy.
+
+        The giant ghosted word behind each is the section's one piece of pure
+        scale. It is `select-none` and `aria-hidden`: it repeats the kicker
+        beside it, so to a screen reader it is noise, and to a cursor it is a
+        200px word that should never be draggable.
+      */}
       <section
         className="on-black grain dot-matrix relative overflow-hidden py-10 lg:py-16"
         style={{ background: "#080808" }}
       >
         <StackedRects className="pointer-events-none absolute -left-20 bottom-0 h-auto w-[420px] opacity-[0.04]" />
 
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-          <SectionLabel index="03" className="!text-amber">
-            Vision & mission
-          </SectionLabel>
+        {/* The light the statements stand in — it drifts, so the band is never
+            a flat black rectangle behind two blocks of type. */}
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute right-[-10%] top-[-25%] h-[120%] w-[60%] rounded-full blur-[150px]"
+          animate={{ x: [0, -70, 0], y: [0, 50, 0] }}
+          transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            background:
+              "radial-gradient(circle, rgba(var(--orange-ch), 0.26), rgba(var(--amber-ch), 0.08) 48%, transparent 72%)",
+          }}
+        />
 
-          <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
+            <SectionLabel index="03" className="!text-amber">
+              Vision & mission
+            </SectionLabel>
+            <p className="max-w-sm text-sm leading-relaxed text-white/45 lg:pb-1 lg:text-right">
+              Where the company is going, and what it does every day to get
+              there.
+            </p>
+          </div>
+
+          <div className="mt-10 lg:mt-12">
             {[
               {
                 k: "Our Vision",
+                ghost: "VISION",
                 v: "To become a trusted technology partner that enables organisations to operate smarter, faster, and more efficiently.",
-                Icon: ScopeMark,
               },
               {
                 k: "Our Mission",
+                ghost: "MISSION",
                 v: "To create innovative, reliable, and user-centric technology solutions that solve real-world business challenges and deliver measurable value to our customers.",
-                Icon: FlagMark,
               },
             ].map((item, i) => (
-              <motion.div
-                key={item.k}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ ...SPRING_SOFT, delay: i * 0.1 }}
-                className="relative border-t border-white/15 pt-8"
-              >
-                <span
-                  aria-hidden
-                  className="absolute left-0 top-0 h-px w-16 bg-gradient-to-r from-orange to-amber"
-                />
+              /*
+                No rules between the statements and no icon tile beside the
+                kicker.
 
-                {/* An oversized ghost of the mark, bled off the column's own
-                    edge, so the statement sits on something rather than on
-                    bare black. Clipped by its own wrapper — the section's
-                    overflow already handles the rest. */}
+                Both were doing the job the type already does. The hairlines
+                boxed two sentences that are separated perfectly well by the
+                space around them, and the gradient tile put a small loud
+                object next to a 10px label — the brightest thing in the band
+                was the decoration rather than the words. What is left is the
+                kicker, the numeral and the statement, which is all the section
+                has ever actually been saying.
+
+                The rules went with the borders, so the separation is now
+                purely spatial: a wide gap between the two blocks, and enough
+                of it that they cannot be misread as one run of type.
+              */
+              <div key={item.k} className="relative first:mb-16 lg:first:mb-24">
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -right-6 -top-4 hidden text-white/[0.045] lg:block"
+                  className="pointer-events-none absolute -top-4 right-0 select-none font-heading text-[3.4rem] font-extrabold leading-none tracking-[-0.06em] text-white/[0.04] sm:text-[5rem] lg:-top-6 lg:text-[6.5rem]"
                 >
-                  <item.Icon className="h-40 w-40" />
+                  {item.ghost}
                 </span>
 
                 <div className="relative flex items-center gap-4">
-                  <span
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-tile text-white shadow-[0_12px_30px_-10px_rgba(var(--orange-ch),0.7)]"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, var(--color-orange), var(--color-amber))",
-                    }}
-                  >
-                    <item.Icon className="h-[52%] w-[52%]" />
-                  </span>
+                  {/* A short amber rule instead of the tile — it marks the
+                      kicker without competing with it. */}
+                  <span aria-hidden className="h-px w-8 shrink-0 bg-amber/70" />
                   <p className="font-mono text-[10px] font-medium uppercase tracking-[0.26em] text-amber">
                     {item.k}
                   </p>
+                  <span className="ml-auto font-mono text-[10px] tracking-[0.24em] text-white/25">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                 </div>
-                <p className="mt-6 font-heading text-[1.29rem] font-bold leading-[1.3] tracking-[-0.025em] text-white lg:text-[1.505rem]">
-                  {item.v}
-                </p>
-              </motion.div>
+
+                <RevealWords
+                  text={item.v}
+                  className="relative mt-6 max-w-3xl font-heading text-[1.25rem] font-bold leading-[1.3] tracking-[-0.025em] text-white sm:text-[1.5rem] lg:text-[1.9rem]"
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -372,13 +504,33 @@ export default function AboutContent() {
                 People powering innovation.
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-ink-muted lg:pb-2 lg:text-right">
-              Meet the people turning ideas into technology, and technology into
-              business impact.
-            </p>
+            <div className="flex items-end gap-8 lg:pb-1">
+              <p className="max-w-sm text-sm leading-relaxed text-ink-muted lg:text-right">
+                Meet the people turning ideas into technology, and technology
+                into business impact.
+              </p>
+              {/* Counted from the roster, never typed, so it cannot drift as
+                  people join. */}
+              <div className="shrink-0 text-right">
+                <p className="font-heading text-[2.15rem] font-extrabold leading-none tracking-[-0.04em] text-orange">
+                  {LEADERSHIP.length}
+                </p>
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
+                  People
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-14 lg:grid-cols-3">
+          {/*
+            Two columns on a phone, not one.
+
+            The roster is thirteen people now rather than six. At one card per
+            row a 4:5 plate plus its type runs the section past 6,000px on a
+            390px screen — a scroll nobody finishes. Two-up halves it and the
+            plates are still large enough to read a face in.
+          */}
+          <div className="ensemble mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:mt-14 lg:grid-cols-3">
             {LEADERSHIP.map((person, i) => (
               <motion.article
                 key={person.name}
@@ -386,87 +538,149 @@ export default function AboutContent() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ ...SPRING_SOFT, delay: (i % 3) * 0.07 }}
-                className="group"
+                /*
+                  The middle column rides low.
+
+                  Thirteen plates on a strict three-column baseline read as a
+                  staff directory — every card starting at the same y is what
+                  makes a grid feel administrative. Dropping the centre column
+                  by a plate's shoulder breaks the horizon without breaking the
+                  grid, so the eye travels through the set instead of scanning
+                  rows. It is a plain responsive class rather than an
+                  `nth-child` variant because arbitrary variants have compiled
+                  to nothing in this project before, silently.
+                */
+                className={`group ${i % 3 === 1 ? "lg:mt-14" : ""}`}
               >
                 {/*
-                  Portrait plate, 4:5. The photograph fills it when there is
-                  one; otherwise the gradient plate and monogram stand in, which
-                  is why the frame was built at this ratio in the first place.
+                  Portrait plate, 4:5, carrying the whole card.
+
+                  Name, role and remit used to sit under the plate, where roles
+                  run one or two lines and remits one to three — so six cards
+                  finished at six different heights and the grid's bottom edge
+                  was ragged. On the plate, every card ends exactly where the
+                  4:5 ratio says it does.
                 */}
                 <div
-                  className="relative aspect-[4/5] overflow-hidden rounded-panel shadow-[0_28px_70px_-30px_rgba(var(--orange-ch),0.55)]"
-                  style={
-                    person.photo
-                      ? { background: "var(--color-surface-sunken)" }
-                      : {
-                          background:
-                            "linear-gradient(150deg, var(--color-ember), var(--color-orange) 55%, var(--color-amber))",
-                        }
-                  }
+                  className="relative aspect-[4/5] overflow-hidden rounded-panel bg-surface-sunken shadow-[0_28px_70px_-30px_rgba(var(--orange-ch),0.55)]"
                 >
-                  {person.photo ? (
-                    <>
+                  {/* `duotone` wraps whichever of the two fills the plate, so
+                      the monogram is desaturated alongside the photographs and
+                      stops being the loudest tile in the section. */}
+                  {/*
+                    The orange gradient lives on THIS span, not on the plate
+                    behind it. On the plate it sat outside the filter, so the
+                    monogram card stayed fully saturated while the five
+                    photographs went duotone — the exact tile the treatment was
+                    meant to calm down was the only one it did not touch.
+                  */}
+                  <span
+                    aria-hidden
+                    className="duotone absolute inset-0"
+                    style={
+                      person.photo
+                        ? undefined
+                        : {
+                            background:
+                              "linear-gradient(150deg, var(--color-ember), var(--color-orange) 55%, var(--color-amber))",
+                          }
+                    }
+                  >
+                    {person.photo ? (
                       <Image
                         src={withBasePath(person.photo)}
-                        alt={`${person.name}, ${person.role}`}
+                        alt=""
                         fill
-                        sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+                        sizes="(min-width: 1024px) 30vw, 45vw"
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       />
-                      {/* A low scrim at the foot so the index stays legible
-                          whatever the photograph does down there. */}
-                      <span
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to top, rgba(8,8,8,0.55) 0%, rgba(8,8,8,0.12) 26%, transparent 52%)",
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 opacity-[0.14]"
-                        style={{
-                          backgroundImage:
-                            "linear-gradient(to right, rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.7) 1px, transparent 1px)",
-                          backgroundSize: "34px 34px",
-                        }}
-                      />
-                      <span
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0"
-                        style={{
-                          background:
-                            "radial-gradient(120% 90% at 30% 15%, transparent 40%, rgba(78,18,0,0.5) 100%)",
-                        }}
-                      />
-                      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-white/45" />
-
-                      <QMarkLight className="pointer-events-none absolute -bottom-8 -right-6 h-auto w-36 opacity-[0.16]" />
-
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <span className="font-heading text-[3.01rem] font-extrabold leading-none tracking-[-0.05em] text-white/95 transition-transform duration-700 ease-out group-hover:scale-105">
-                          {initials(person.name)}
+                    ) : (
+                      <>
+                        <span
+                          className="absolute inset-0 opacity-[0.14]"
+                          style={{
+                            backgroundImage:
+                              "linear-gradient(to right, rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.7) 1px, transparent 1px)",
+                            backgroundSize: "34px 34px",
+                          }}
+                        />
+                        <span
+                          className="absolute inset-0"
+                          style={{
+                            background:
+                              "radial-gradient(120% 90% at 30% 15%, transparent 40%, rgba(78,18,0,0.5) 100%)",
+                          }}
+                        />
+                        <span className="absolute inset-x-0 top-0 h-px bg-white/45" />
+                        <QMarkLight className="absolute -bottom-8 -right-6 h-auto w-36 opacity-[0.16]" />
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="font-heading text-[3.01rem] font-extrabold leading-none tracking-[-0.05em] text-white/95 transition-transform duration-700 ease-out group-hover:scale-105">
+                            {initials(person.name)}
+                          </span>
                         </span>
-                      </span>
-                    </>
-                  )}
+                      </>
+                    )}
+                  </span>
 
-                  <span className="absolute bottom-4 left-5 font-mono text-[9px] uppercase tracking-[0.22em] text-white/70">
+                  {/*
+                    The scrim, strengthened and given a taller ramp.
+
+                    At its previous 0.55 foot it was carrying a 9px index and
+                    nothing else. It now has to hold a name, a role and a remit
+                    over five photographs of very different exposure, so it runs
+                    to 0.92 and starts higher up the plate. Measured against the
+                    lightest of the five, not assumed.
+                  */}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to top, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.72) 26%, rgba(8,8,8,0.28) 52%, transparent 78%)",
+                    }}
+                  />
+
+                  {/* The index as a numeral rather than a 9px label — at this
+                      size it reads as a plate number on a contact sheet, which
+                      is the register the whole grid is going for. */}
+                  <span className="absolute right-3 top-2 font-heading text-[1.1rem] font-extrabold leading-none tracking-[-0.04em] text-white/35 transition-colors duration-500 group-hover:text-white/80 sm:right-5 sm:top-4 sm:text-[1.5rem]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                </div>
 
-                <h3 className="mt-5 font-heading text-base font-bold tracking-[-0.02em] text-ink">
-                  {person.name}
-                </h3>
-                <p className="mt-1.5 text-sm font-medium text-orange">{person.role}</p>
-                <p className="mt-2.5 text-sm leading-relaxed text-ink-muted">
-                  {person.remit}
-                </p>
+                  {/*
+                    Type steps down at the two-up breakpoint.
+
+                    The plate carries its text, and that only works while the
+                    text fits inside it. At two cards across a 390px screen the
+                    card is ~170px wide, where a name wraps to two lines, a role
+                    like "Director — Strategic Business & Corporate Affairs" to
+                    three, and the remit to four more — so the block outgrew the
+                    4:5 plate, climbed out of its scrim and sat across the
+                    subject's face. Smaller type, tighter padding, and the remit
+                    held back until there is room for it.
+                  */}
+                  <div className="absolute inset-x-0 bottom-0 p-3 sm:p-6">
+                    <h3 className="font-heading text-[12.5px] font-bold leading-tight tracking-[-0.02em] text-white sm:text-base">
+                      {person.name}
+                    </h3>
+                    <p className="mt-1 text-[10.5px] font-medium leading-snug text-amber sm:text-sm">
+                      {person.role}
+                    </p>
+
+                    {/*
+                      The remit opens on hover at `lg`, where there is a pointer
+                      to open it with. Between `sm` and `lg` it is simply always
+                      there — a touch device would otherwise never reach it.
+                      Below `sm` it is dropped: at two cards across a phone
+                      there is no room for a fourth block of text on the plate,
+                      and a remit that overflows onto the subject's face is
+                      worse than one a reader has to open the page to see.
+                    */}
+                    <p className="mt-2 hidden text-[13px] leading-relaxed text-white/70 sm:block lg:mt-0 lg:max-h-0 lg:overflow-hidden lg:opacity-0 lg:transition-all lg:duration-500 lg:ease-out lg:group-hover:mt-2 lg:group-hover:max-h-24 lg:group-hover:opacity-100">
+                      {person.remit}
+                    </p>
+                  </div>
+                </div>
               </motion.article>
             ))}
           </div>

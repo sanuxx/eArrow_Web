@@ -82,7 +82,7 @@ export default function WhyEarrow() {
     <section
       id="why"
       ref={sectionRef}
-      className="tech-grid relative overflow-hidden bg-canvas py-10 lg:py-16"
+      className="tech-grid relative overflow-hidden bg-canvas py-8 lg:py-6"
     >
       {/* ── Plane 1: the aurora, furthest back and slowest ──────────────── */}
       <motion.div
@@ -114,7 +114,7 @@ export default function WhyEarrow() {
         <SectionLabel index="05">Why eArrow</SectionLabel>
         <SectionHeading>Experience that creates impact.</SectionHeading>
 
-        <div className="mt-16 grid grid-cols-1 items-center gap-14 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div className="mt-6 grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-14">
           {/* ── Plane 2: the headline figure ─────────────────────────────── */}
           <motion.div style={still}>
             <motion.div
@@ -149,11 +149,11 @@ export default function WhyEarrow() {
             <p className="mt-5 font-mono text-[11px] font-medium uppercase tracking-[0.34em] text-ink">
               Years
             </p>
-            <p className="mt-8 max-w-sm text-base leading-[1.75] text-ink-muted">
+            <p className="mt-6 max-w-sm text-base leading-[1.75] text-ink-muted">
               Building technology that helps organizations move forward.
             </p>
 
-            <GhostCta href="/contact" className="mt-10">
+            <GhostCta href="/contact" className="mt-8">
               Talk to our team
             </GhostCta>
             </motion.div>
@@ -166,7 +166,13 @@ export default function WhyEarrow() {
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={SPRING_SOFT}
-              className="on-orange group relative aspect-square w-full overflow-hidden rounded-panel shadow-[var(--shadow-lift)]"
+              /* `5/4`, not `aspect-square`. At 1920 the column is ~564px wide, so a
+                 square panel was a 564px-tall box — on its own more than half a
+                 900px viewport, and the single reason this section could not fit
+                 one screen. It also overhung its grid cell far enough that the
+                 stat row below collided with it. A slightly landscape panel holds
+                 the same composition and gives back ~110px. */
+              className="on-orange group relative aspect-[5/4] w-full overflow-hidden rounded-panel shadow-[var(--shadow-lift)]"
             >
               {/*
                * The gradient's focal point pans with the scroll, so the light on
@@ -257,7 +263,7 @@ export default function WhyEarrow() {
         {/* ── Proof points ─────────────────────────────────────────────────
             The figures count up as they arrive, which turns four static labels
             into the moment the claim is actually made. */}
-        <div className="relative z-10 mt-24 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="relative z-10 mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {PROOF.map((item, i) => (
             <motion.div
               key={item.label}
@@ -293,7 +299,7 @@ export default function WhyEarrow() {
         {/* ── The years rail ───────────────────────────────────────────────
             A timeline that fills as the section passes: the span from founding
             to now, drawn rather than asserted. */}
-        <div className="mt-12 flex items-center gap-5">
+        <div className="mt-9 flex items-center gap-5">
           <span className="font-mono text-[10px] tracking-[0.22em] text-ink-soft">{FOUNDED}</span>
           <span className="relative h-px flex-1 overflow-hidden bg-border">
             <motion.span

@@ -68,7 +68,7 @@ function Cover({ index }: { index: number }) {
 
 export default function Insights() {
   return (
-    <section id="insights" className="relative bg-canvas py-10 lg:py-16">
+    <section id="insights" className="relative bg-canvas py-10 lg:py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="07">Insights</SectionLabel>
         <SectionHeading>Ideas shaping tomorrow&rsquo;s business.</SectionHeading>

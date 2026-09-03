@@ -19,7 +19,7 @@ import { SPRING_SOFT } from "@/components/motion-kit";
 const WHY = [
   {
     title: "Why eArrow",
-    body: "You work on platforms real organisations depend on daily — payroll that must be right, records that must be complete. The stakes make the engineering interesting.",
+    body: "You work on platforms real organisations depend on daily: payroll that has to be right, records that have to be complete. That's what makes the engineering interesting.",
   },
   {
     title: "Culture",

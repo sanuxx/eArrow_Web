@@ -5,6 +5,7 @@ import { PageHero, PageCta } from "@/components/page-kit";
 import { PRODUCT_MARKS } from "@/components/ProductMarks";
 import { ArrowUpRight, QMark, QMarkLight } from "@/components/ArrowMark";
 import ProductShell, { type ShellConfig } from "@/components/ProductShell";
+import ProductRing from "@/components/ProductRing";
 import { SPRING_SOFT } from "@/components/motion-kit";
 
 /*
@@ -39,7 +40,7 @@ const PRODUCTS: Product[] = [
     label: "Arrow HR & Payroll",
     domain: "Workforce",
     blurb:
-      "One employee record from hiring through payroll, attendance and appraisals — so the same person is not re-entered into four systems.",
+      "One employee record from hiring through payroll, attendance and appraisals. The same person is never re-entered into four systems.",
     problem:
       "Employee data spread across spreadsheets, with manual approvals and delayed reporting.",
     modules: ["Payroll", "Attendance", "Self-Service", "Performance", "Reporting"],
@@ -123,7 +124,7 @@ const PRODUCTS: Product[] = [
     label: "Arrow Production",
     domain: "Operations",
     blurb:
-      "Live visibility into production runs, inventory levels and quality checks — the floor as it is now, not as it was this morning.",
+      "Live visibility into production runs, inventory levels and quality checks. You see the floor as it is now, not as it was this morning.",
     problem: "No live view of production runs, stock levels or quality exceptions.",
     modules: ["Production", "Inventory", "Quality Control", "Reporting"],
     shell: {
@@ -179,7 +180,7 @@ const PRODUCTS: Product[] = [
     label: "Arrow Visitors",
     domain: "Security",
     blurb:
-      "Controlled, auditable access across sites and facilities — every entry logged, every log searchable.",
+      "Controlled, auditable access across sites and facilities: every entry logged and searchable.",
     problem: "Site access logged on paper, with no auditable trail.",
     modules: ["Visitor Management", "Access Control", "Audit Trail"],
     shell: {
@@ -209,7 +210,7 @@ const PRODUCTS: Product[] = [
     label: "Arrow Digital",
     domain: "Experience",
     blurb:
-      "Websites, portals and commerce platforms built for growth — and measured against it once they are live.",
+      "Websites, portals and commerce platforms built for growth, and measured against it once they're live.",
     problem: "A web presence that can't keep pace with how the business sells.",
     modules: ["Web Platforms", "E-Commerce", "Portals"],
     shell: {
@@ -225,7 +226,7 @@ const PRODUCTS: Product[] = [
         caption: "Core web vitals",
         value: 0.94,
         centre: "94",
-        note: "Measured on real visits, not a lab score — the number the business is judged on.",
+        note: "Measured on real visits rather than a lab score. This is the number the business is actually judged on.",
       },
       action: { label: "Ship checkout experiment", state: "Staged" },
     },
@@ -363,6 +364,14 @@ function EcosystemMosaic() {
   );
 }
 
+/* Labels are already prefixed "Arrow " by the page heading above each
+   showcase; on a 96px card the prefix is seven repetitions of one word. */
+const RING_ITEMS = PRODUCTS.map((p) => ({
+  key: p.key,
+  label: p.label.replace("Arrow ", ""),
+  href: `#${p.key}`,
+}));
+
 export default function ProductsContent() {
   return (
     <>
@@ -370,8 +379,16 @@ export default function ProductsContent() {
         index="03"
         eyebrow="Products & Platforms"
         title="One ecosystem. Multiple possibilities."
-        lead="Seven platforms built on shared foundations — adopt one, or connect them into a single digital operating layer."
-        aside={<EcosystemMosaic />}
+        lead="Seven platforms built on shared foundations. Adopt one, or connect them into a single digital operating layer."
+        /*
+          The ecosystem as a ring rather than a grid. Seven platforms plus the
+          identity mark orbiting one centre says "these are one system" in a
+          way a static 4×2 block of tiles never did — and it puts the page's
+          own claim, "one ecosystem", on screen instead of only in the
+          headline. The flat grid is still built, and is what a visitor who
+          asks for reduced motion gets.
+        */
+        aside={<ProductRing items={RING_ITEMS} fallback={<EcosystemMosaic />} />}
       >
         {/*
           The brief's product-page anatomy, surfaced as a promise about what

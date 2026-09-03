@@ -174,7 +174,7 @@
   --radius-panel: 32px;
   --radius-tile: 16px;
 
-  --font-heading: var(--font-sora);
+  --font-heading: var(--font-display);
   --font-body: var(--font-inter);
   --font-mono: var(--font-jetbrains);
 }
@@ -255,6 +255,27 @@ a:focus-visible, button:focus-visible {
   --edge-light: rgba(255, 255, 255, 0.1);
   --logo-filter: none;
   color: #ffffff;
+}
+
+/*
+ * Type sitting on a colour field, rather than on a flat dark ground.
+ *
+ * `.on-black` gives `--color-ink-muted` a mid grey (#9d9da8). On flat black
+ * that is a correct, restful secondary tone. Over a lit gradient it is the
+ * worst available choice: measured against the solutions hero's warm lobes it
+ * came out at 1.00:1 — a grey with the same luminance as the orange behind it,
+ * which is text that disappears rather than text that is merely low contrast.
+ *
+ * A grey cannot be fixed by darkening the picture enough to carry it; the
+ * scrim needed to reach 4.5:1 would have taken the field almost to black. So
+ * the secondary type goes white-transparent instead, which is exactly what
+ * `.on-orange` already does, for exactly this reason.
+ *
+ * Layered after `.on-black` so it overrides it, and only these two tokens.
+ */
+.on-field {
+  --color-ink-muted: rgba(255, 255, 255, 0.9);
+  --color-ink-soft: rgba(255, 255, 255, 0.66);
 }
 
 .on-orange {
@@ -385,25 +406,6 @@ a:focus-visible, button:focus-visible {
 
 .marquee:hover .marquee-track {
   animation-play-state: paused;
-}
-
-/* ── Product rail ─────────────────────────────────────────────────────────
-   A scrolling strip on a phone, a settled row from `md` up. The edge fade is
-   conditional on purpose: a mask that never lifts would permanently dim the
-   first and last tab even when the rail has nowhere left to scroll. */
-.rail-scroll {
-  scrollbar-width: none;
-}
-
-.rail-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  .rail-scroll {
-    mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
-  }
 }
 
 /* Edges dissolve so items enter and leave rather than popping at a hard cut. */
@@ -751,4 +753,1300 @@ a:focus-visible, button:focus-visible {
 
 .mosaic > a:hover {
   filter: opacity(1);
+}
+
+/*
+ * The home hero's ground — a soft peach-and-coral high-key field, not the
+ * brand-orange wash it replaced.
+ *
+ * The brief was explicit: glows from the upper-left and lower-right corners,
+ * a creamy off-white centre, pastel tones, "no objects." That inverts the
+ * old constraint. The previous ground was strong colour anchored clear of
+ * the copy column because strong colour and body text cannot share space; a
+ * pastel field on a cream base has so much headroom over the 4.5:1 floor —
+ * `--color-ink-muted` on near-white is already north of 7:1 — that it can run
+ * under the copy at every width instead of standing down on mobile.
+ *
+ * Four soft stops rather than two: the corner glows are large and faint, and
+ * a third, smaller warm core sits low-centre so the "creamy" middle has a
+ * little life in it instead of being flatly one colour.
+ */
+/*
+ * The home hero's ground.
+ *
+ * The canvas token, and one wash so faint it reads as warmth rather than as
+ * colour. This replaced a peach-and-coral corner-glow field, which replaced a
+ * brand-gradient slab field before that: both were backgrounds competing with
+ * the headline for the eye, and the current composition's whole argument is
+ * that the type and one drawn diagram are enough.
+ *
+ * Using `--color-canvas` rather than a literal keeps the hero theme-aware —
+ * the previous literal cream stayed cream in dark mode, where every token
+ * around it had flipped.
+ */
+.hero-canvas {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(
+    62% 52% at 88% 6%,
+    rgba(var(--amber-ch), 0.11),
+    transparent 64%
+  );
+}
+
+/*
+ * The pulse travelling the hero's trajectory.
+ *
+ * `offset-path` takes the same curve the visible stroke is drawn from, so the
+ * dot follows the line exactly rather than approximating it with hand-tuned
+ * keyframes that would drift the moment the path changed. The element is a
+ * circle at the origin: with no explicit `offset-anchor` the browser puts its
+ * transform-origin — the centre of its own box — on the path.
+ *
+ * A long cycle with a slow-in, slow-out ease, so it reads as a signal
+ * travelling a route rather than as something orbiting.
+ */
+/*
+ * Hidden unless the path can actually be resolved. Safari on iOS < 16 has no
+ * `offset-path`, and the failure mode is not "no animation" — the circle is
+ * authored at the origin so the path can place it, so without motion-path
+ * support it strands at (0,0), which on this composition is a stray orange
+ * dot in the top-left corner of the frame. Opting *in* behind `@supports`
+ * means the unsupported case renders the drawing exactly as intended, minus
+ * one ambient flourish.
+ */
+.hero-vector-pulse {
+  opacity: 0;
+}
+
+@supports (offset-path: path("M 0 0 L 1 1")) {
+  .hero-vector-pulse {
+    offset-path: path("M 30 168 Q 104 150 178 44");
+    offset-rotate: 0deg;
+    animation: hero-vector-pulse 6.5s cubic-bezier(0.55, 0, 0.45, 1) infinite;
+  }
+}
+
+@keyframes hero-vector-pulse {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* Nothing to travel to for a reader who asked for stillness. The drawing is
+   already complete without it — the pulse is the one purely ambient element
+   in the composition, so it simply goes. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-vector-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/*
+ * Leadership — rack focus.
+ *
+ * Pointing at one portrait pulls it into focus and pushes the other twelve
+ * back: they lose saturation, drop in weight and go very slightly soft. It is
+ * the one thing photography can do that a diagram cannot, and it turns a grid
+ * of thirteen equal tiles into a set with a subject.
+ *
+ * Written here rather than as a Tailwind arbitrary variant for the same reason
+ * `.mosaic` above is: `:has()` with a child combinator has been observed
+ * compiling to nothing in this project, silently, with the class sitting in
+ * the markup looking correct.
+ *
+ * `filter`, not `opacity`. Every card is a framer-motion element that writes
+ * `style="opacity: 1"` inline once its entrance finishes, and an inline style
+ * beats any stylesheet rule however specific — the dim would simply not
+ * happen. Using `filter` leaves framer as the only writer of `opacity` and CSS
+ * as the only writer of `filter`, which is the same one-writer-per-property
+ * rule the GSAP sections follow.
+ *
+ * The blur is deliberately small. At 1.2px it reads as depth of field; much
+ * more and twelve simultaneously blurred photographs become expensive to
+ * composite and start to look like a mistake rather than a focus pull.
+ */
+.ensemble > * {
+  transition: filter 520ms ease;
+}
+
+.ensemble:has(article:hover) > * {
+  filter: opacity(0.45) saturate(0.55) blur(1.2px);
+}
+
+.ensemble > article:hover {
+  filter: none;
+}
+
+/*
+ * The lift goes on the plate inside the card, never on the card.
+ *
+ * Written first as `transform` on `article:hover`, where it did nothing at all
+ * and said nothing about it: the article is the framer element, so it carries
+ * an inline `transform` from its entrance and an inline style beats a
+ * stylesheet rule. Measured as `transform: none` on a hovered card. The plate
+ * is a plain div that framer never touches, which makes CSS its only writer.
+ */
+.ensemble > article > div {
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ensemble > article:hover > div {
+  transform: translateY(-6px);
+}
+
+/*
+ * No hover on a touch screen, so none of the above ever fires there — which is
+ * correct, the resting state is the whole grid in focus. But a coarse pointer
+ * must never be left with a permanently receded set, so the rule is scoped
+ * away from it entirely rather than relying on `:hover` never matching.
+ */
+@media (hover: none) {
+  .ensemble:has(article:hover) > * {
+    filter: none;
+  }
+  .ensemble > article:hover > div {
+    transform: none;
+  }
+}
+
+/*
+ * Leadership portraits — a warm duotone at rest, full colour on hover.
+ *
+ * The five supplied photographs were shot in five different places: a grey
+ * studio, an office with framed art, foliage, and two more besides. Side by
+ * side in a three-column grid they read as five separate photos rather than
+ * one leadership team, and the sixth plate — the monogram standing in for the
+ * director with no photograph — was the most saturated tile of the six, so the
+ * gap drew the most attention in the section. One treatment over all six fixes
+ * both: the photographs cohere, and the gap joins the set.
+ *
+ * `filter`, and only `filter`, is written here. The card is a framer-motion
+ * element that owns `transform` for its entrance, and the image inside owns
+ * `transform` again for its hover scale — so this is the same
+ * one-writer-per-property rule the `.mosaic` block above follows, for the same
+ * reason.
+ *
+ * Written as a class rather than a Tailwind arbitrary value because the chain
+ * is five functions long and unreadable inline — and because a complex
+ * arbitrary variant in this project has already been observed compiling to
+ * nothing at all, silently.
+ */
+.duotone {
+  filter: grayscale(1) contrast(1.04) sepia(0.3) saturate(1.35) hue-rotate(-12deg);
+  transition: filter 600ms ease;
+}
+
+.group:hover .duotone {
+  filter: none;
+}
+
+/*
+ * No hover on touch, so the colour reveal never fires there — that is fine,
+ * the duotone is the intended resting state. But a device that cannot hover
+ * must not be left with a permanently dimmed set either, so coarse pointers
+ * get a little of the colour back at rest.
+ */
+@media (hover: none) {
+  .duotone {
+    filter: grayscale(0.55) contrast(1.02) sepia(0.16) saturate(1.2);
+  }
+}
+
+/*
+ * Journey rows — the spine's x position, and parity for touch.
+ *
+ * `--spine-x` is set once here rather than repeated inline on three segments:
+ * it is the row's own left padding (`sm:px-4`, 1rem) plus half the width of a
+ * two-digit numeral at 1.72rem, which is what puts the line through the middle
+ * of the index rather than beside it.
+ *
+ * The rest of the section's richness — the orange wipe, the inverted type, the
+ * arrow — is all `:hover`, so on a phone the band was 1,026px of completely
+ * static rows. A coarse pointer cannot hover and never will, so those rows get
+ * a permanent lit marker instead: not the full treatment, but the section is
+ * no longer inert for the readers most likely to be scrolling it.
+ */
+.journey-rows {
+  /* 2.05rem, not a rounded 2: measured, the numeral centres land at 159.7px
+     ("01" — the 1 is a narrow glyph) and 162.5px ("02"/"03"), so the line sits
+     between them rather than on the wider pair and visibly left of the first. */
+  --spine-x: 2.05rem;
+}
+
+@media (hover: none) {
+  .journey-rows .journey-index {
+    color: rgba(255, 255, 255, 0.55);
+  }
+}
+
+/*
+ * Product ring — the seven platforms and the identity mark carried round a
+ * horizontal circle in 3D.
+ *
+ * Three nested transforms, each owned by exactly one rule, because that is the
+ * only way this stays legible:
+ *
+ *   .ring-stage   perspective + tilt. Static. Never animated.
+ *   .ring-spin    the one moving part: rotateY, 0 -> -360, linear, forever.
+ *   .ring-slot    static rotateY(--a) translateZ(--ring-r) — places a card on
+ *                 the circle. Set inline from React because it is per-index.
+ *   .ring-face    counter-rotation. Cancels the spin so every card faces the
+ *                 viewer instead of turning its back through half the orbit.
+ *   .ring-depth   opacity and blur by distance, phase-locked to the spin with
+ *                 a negative animation-delay derived from the card's angle.
+ *
+ * The counter-rotation is what makes this a ring of *logos* rather than a
+ * novelty. Without it the four cards on the far side are mirrored and their
+ * labels unreadable, and `backface-visibility: hidden` would only trade that
+ * for half the ring blinking out.
+ *
+ * Nothing here is a Tailwind arbitrary variant. Keyframes that read a custom
+ * property and a media query that swaps two subtrees are exactly the shapes
+ * that have already been observed compiling to nothing in this project.
+ */
+.ring-stage {
+  --ring-dur: 30s;
+  --ring-r: clamp(126px, 21vw, 180px);
+  /*
+   * Card size tracks the ring. At 390px the radius bottoms out at its clamp
+   * floor while a fixed 96px card does not, so the eight cards ended up wider
+   * apart than the circle they sit on and the ring collapsed into a pile.
+   */
+  --ring-card: clamp(78px, 18vw, 96px);
+  --globe: clamp(92px, 23vw, 150px);
+  /*
+   * A short focal length on purpose. At 1000px the near and far cards were
+   * within a few pixels of each other and the ring read as a flat row of
+   * tiles; 700 exaggerates the recession enough that the circle is legible as
+   * a circle from a still frame.
+   */
+  perspective: 700px;
+  perspective-origin: 50% 42%;
+}
+
+.ring-tilt {
+  transform-style: preserve-3d;
+  /*
+   * Enough tilt that the orbit is an ellipse rather than a line — and enough
+   * that the near cards sit low enough to clear the Q. At 20deg the card
+   * passing in front covered the mark on a phone for a third of every lap.
+   */
+  transform: rotateX(-26deg);
+}
+
+.ring-spin {
+  transform-style: preserve-3d;
+  animation: ring-spin var(--ring-dur) linear infinite;
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotateY(-360deg);
+  }
+}
+
+.ring-slot {
+  transform-style: preserve-3d;
+}
+
+.ring-face {
+  transform-style: preserve-3d;
+  animation: ring-face var(--ring-dur) linear infinite;
+}
+
+@keyframes ring-face {
+  from {
+    transform: rotateY(calc(0deg - var(--a)));
+  }
+  to {
+    transform: rotateY(calc(360deg - var(--a)));
+  }
+}
+
+/*
+ * Depth. The far side only fades to 0.58, not to near-nothing: these are
+ * white cards on a white canvas in light mode, and anything deeper turned the
+ * back half of the ring into pale smudges rather than distant objects. Blur
+ * and perspective scale (90px at the back against 134px at the front) carry
+ * most of the distance; opacity only supports them.
+ *
+ * `filter`, not `opacity`, for the fade: the stage above is a
+ * framer-motion element and framer writes `opacity` inline, so leaving the
+ * property alone here keeps one writer per property — the same rule
+ * `.mosaic` and `.duotone` follow above, for the same reason.
+ */
+.ring-depth {
+  animation: ring-depth var(--ring-dur) linear infinite;
+}
+
+@keyframes ring-depth {
+  0%,
+  100% {
+    filter: opacity(1);
+  }
+  25%,
+  75% {
+    filter: opacity(0.82) blur(0.5px);
+  }
+  50% {
+    filter: opacity(0.58) blur(1.2px);
+  }
+}
+
+/*
+ * The globe at the centre of the ring.
+ *
+ * It is a sibling of `.ring-spin`, not a child, so it sits still at z = 0
+ * while the cards orbit it — and because it shares the same preserve-3d
+ * context, the browser depth-sorts it against them for free: cards on the near
+ * side pass in front of it, cards on the far side pass behind. That occlusion
+ * is the whole reason the arrangement reads as a sphere with things going
+ * round it rather than a circle with things beside it, and it is not something
+ * a z-index could fake, because which cards are in front changes every frame.
+ *
+ * `rotateX(26deg)` cancels the stage tilt exactly. Without it the sphere is an
+ * ellipse — a tilted circle is just an oval, whereas a real sphere presents
+ * the same disc from every angle.
+ */
+.ring-globe {
+  width: var(--globe);
+  height: var(--globe);
+  margin-left: calc(var(--globe) / -2);
+  margin-top: calc(var(--globe) / -2);
+  transform: rotateX(26deg);
+}
+
+/* The light it throws. Sits outside the sphere and is never clipped by it. */
+.globe-glow {
+  position: absolute;
+  inset: -60%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(var(--orange-ch), 0.55) 0%,
+    rgba(var(--amber-ch), 0.28) 32%,
+    transparent 68%
+  );
+  filter: blur(26px);
+  animation: globe-breathe 6.5s ease-in-out infinite;
+}
+
+@keyframes globe-breathe {
+  0%,
+  100% {
+    opacity: 0.78;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.09);
+  }
+}
+
+/*
+ * The sphere itself. The off-centre light source at 34%/26% is what turns a
+ * flat orange circle into a ball: one highlight, one terminator, one dark limb.
+ * The inset shadows do the last two — a plain radial gradient alone leaves the
+ * edge lit, which reads as a disc.
+ */
+.globe-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 26%,
+    #ffe0b0 0%,
+    var(--color-amber) 20%,
+    var(--color-orange) 52%,
+    var(--color-ember) 86%
+  );
+  box-shadow:
+    inset -10px -12px 26px rgba(120, 24, 0, 0.55),
+    inset 6px 7px 18px rgba(255, 226, 180, 0.42),
+    0 18px 44px -14px rgba(var(--orange-ch), 0.9);
+}
+
+/* Meridians and latitudes, drawn over the sphere at low contrast. */
+.globe-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/*
+ * A meridian's projected width is the cosine of how far it has turned, so it
+ * narrows to an edge-on line at the limb and widens again on the far side.
+ * Animating `rx` through 1 -> 0 -> -1 -> 0 with an ease either side of the
+ * extremes approximates that closely enough; the three meridians share one
+ * keyframe and differ only by a third of the cycle in delay, which is what
+ * makes the surface look like it is turning.
+ */
+.globe-meridian {
+  transform-origin: 50% 50%;
+  animation: globe-meridian 14s ease-in-out infinite;
+}
+
+@keyframes globe-meridian {
+  0% {
+    transform: scaleX(1);
+  }
+  25% {
+    transform: scaleX(0.04);
+  }
+  50% {
+    transform: scaleX(-1);
+  }
+  75% {
+    transform: scaleX(-0.04);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.ring-stage:hover .globe-meridian,
+.ring-stage:hover .globe-glow,
+.ring-stage:focus-within .globe-meridian,
+.ring-stage:focus-within .globe-glow {
+  animation-play-state: paused;
+}
+
+/* Pointing at the ring stops it, so a label can actually be read and clicked. */
+.ring-stage:hover .ring-spin,
+.ring-stage:hover .ring-face,
+.ring-stage:hover .ring-depth,
+.ring-stage:focus-within .ring-spin,
+.ring-stage:focus-within .ring-face,
+.ring-stage:focus-within .ring-depth {
+  animation-play-state: paused;
+}
+
+/*
+ * Reduced motion gets the flat grid instead, not a paused ring: a stopped
+ * carousel leaves four cards overlapping behind four others with no way to
+ * reach them. Both subtrees are always rendered and one is switched off here,
+ * so the choice is made in CSS and never depends on a hydration-time read of
+ * the media query.
+ */
+.ring-fallback {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-stage {
+    display: none;
+  }
+  .ring-fallback {
+    display: block;
+  }
+}
+
+/*
+ * Home hero globe — the sphere carrying two marks on opposite faces.
+ *
+ * `.hero-globe` itself never turns — it is `.globe-body` / `.globe-glow` /
+ * `.globe-grid`, the same sphere shading `ProductRing` uses, and that shading
+ * assumes a fixed light source. Spinning the shaded disc with the logos was
+ * tried first and looked wrong at 90deg: an orange ellipse, because the
+ * highlight and terminator rotated with the geometry instead of staying put.
+ * Only `.hero-globe-spin`, a plain child holding just the two faces, gets the
+ * rotation — the sphere stays a circle throughout and the badges turn inside
+ * it, which is exactly how `ProductRing`'s meridians fake rotation without
+ * moving the sphere's own shading.
+ *
+ * ── The marks orbit, they do not pivot ──────────────────────────────────
+ * Each face is pushed out along z before it turns, so it travels around the
+ * sphere the way something printed on the surface would: widest and centred
+ * when it faces you, swinging toward the limb as it turns, gone round the
+ * back for half the cycle.
+ *
+ * They were built at z = 0 first — both marks at the sphere's centre, turning
+ * in place — and that is a spinning coin, not a globe. The tell was ugly and
+ * specific: mid-turn the mark squeezed into a narrow vertical sliver in the
+ * dead centre of the ball, which reads as a stretched, broken image rather
+ * than as anything rotating. Nothing on a sphere's surface narrows without
+ * also moving toward the edge; supplying the missing travel is the whole fix.
+ *
+ * `--globe-r` is the orbit radius, in container query units so it tracks the
+ * globe at every breakpoint — `translateZ` takes a length, never a
+ * percentage, and a `clamp()` guess would put the marks off the surface at
+ * the sizes it guessed wrong. The container is declared on `.hero-globe-frame`
+ * (the outer box), deliberately not on an element inside the 3D chain:
+ * containment can force `transform-style: flat` and would silently collapse
+ * the whole effect.
+ *
+ * It is 40cqw against a 50cqw sphere radius — the marks ride at 0.8 R, just
+ * under the surface, not on it. At exactly R a mark's own width carries its
+ * outer edge past the silhouette near the limb and it visibly pokes out of
+ * the ball; at 0.8 R the peak extent is 0.94 R, so it stays inside the
+ * outline through the whole pass. The depth difference is invisible without
+ * stereo; the overhang was not.
+ */
+.hero-globe-frame {
+  container-type: inline-size;
+}
+
+.hero-globe-stage {
+  /*
+   * The fallback comes first and is a real length, not a placeholder. Custom
+   * properties accept any token sequence, so `40cqw` would be stored happily
+   * on a browser that cannot resolve it (Safari on iOS < 16) and only fail
+   * when `translateZ()` tried to use it — and a substitution failure makes
+   * the whole `transform` invalid at computed-value time, which would drop
+   * the `rotateY` with it and stop the globe dead. The `@supports` gate below
+   * means that browser keeps this approximation and still turns.
+   */
+  --globe-r: clamp(110px, 30vw, 176px);
+  transform-style: preserve-3d;
+  /*
+   * Longer than the ring's 700px. The marks now sit ~0.8 R nearer the viewer
+   * than the centre, and at 700px that alone scaled them ~34% larger head-on
+   * — the badge ballooned every time it came round the front. At 1200px the
+   * same travel costs ~17%, which reads as depth instead of as a zoom.
+   */
+  perspective: 1200px;
+  perspective-origin: 50% 45%;
+}
+
+@supports (container-type: inline-size) {
+  .hero-globe-stage {
+    --globe-r: 40cqw;
+  }
+}
+
+.hero-globe {
+  border-radius: 50%;
+}
+
+/*
+ * ── The material ────────────────────────────────────────────────────────
+ *
+ * The hero sphere has its own body and halo rather than the shared
+ * `.globe-body` / `.globe-glow` that `ProductRing` uses. Those stay exactly
+ * as they are: the ring's globe is a 92-150px marble with seven cards
+ * orbiting it, and the treatment below is built for something 440px wide
+ * standing on its own, where every shortcut a small object hides is visible.
+ *
+ * The wireframe grid that used to sit on top is gone. Latitude and meridian
+ * lines are what make a sphere read as a clip-art globe icon; without them
+ * the surface can carry an actual material, and the marks orbiting across it
+ * are a clearer rotation cue than the lines ever were.
+ *
+ * Five layers, each doing one job a single radial gradient cannot:
+ *   halo      light thrown outward, behind everything
+ *   body      the material — key light, terminator, hue-shifted shadow
+ *   rim       fresnel: the bright arc along the shadowed edge
+ *   grain     dither, so 440px of smooth gradient does not band
+ *   specular  the hot spot, plus the bloom around it
+ */
+
+/*
+ * Grounds the sphere, in two parts: a tight core directly beneath it and a
+ * wide ambient falloff around that. One ellipse alone reads as a grey smudge;
+ * real contact shadows are dark and small where the object nearly touches,
+ * and broad and faint further out.
+ */
+.hero-globe-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -6%;
+  width: 58%;
+  height: 12%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(96, 20, 0, 0.5), transparent 72%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.hero-globe-shadow::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 190%;
+  height: 210%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(120, 40, 0, 0.22), transparent 70%);
+  filter: blur(18px);
+}
+
+/* The light the sphere throws. Wider and softer than the ring's, because at
+   this size a tight glow reads as a halo effect rather than as spill. */
+.hero-globe-halo {
+  position: absolute;
+  inset: -46%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(var(--orange-ch), 0.42) 0%,
+    rgba(var(--amber-ch), 0.26) 34%,
+    rgba(var(--amber-ch), 0.08) 52%,
+    transparent 70%
+  );
+  filter: blur(34px);
+  animation: globe-breathe 6.5s ease-in-out infinite;
+}
+
+/*
+ * The body. Key light upper-left at 34%/26%, and the stops run warm-white
+ * through amber and orange into a deep crimson rather than into a darker
+ * orange — shadows on a real surface shift hue as they fall off, and that
+ * shift is most of what separates a rendered ball from a coloured circle.
+ *
+ * The inset shadows supply what a gradient cannot: a deep core shadow, the
+ * light wrapping the top-left edge, and a warm bounce coming back up off the
+ * ground into the lower limb.
+ */
+.hero-globe-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 26%,
+    #fff2dc 0%,
+    #ffcf7d 12%,
+    var(--color-amber) 24%,
+    #fb8324 44%,
+    var(--color-orange) 62%,
+    #ad2300 84%,
+    #8a1a04 100%
+  );
+  box-shadow:
+    inset -16px -20px 44px rgba(88, 14, 0, 0.6),
+    inset 12px 14px 30px rgba(255, 234, 196, 0.28),
+    inset -8px -14px 30px -8px rgba(255, 146, 46, 0.34),
+    0 34px 64px -26px rgba(150, 40, 0, 0.5);
+}
+
+/*
+ * Fresnel rim. A thin bright arc hugging the shadowed edge, which is the cue
+ * that separates an object from its background in every product render —
+ * and the one thing whose absence keeps a shaded circle looking flat.
+ *
+ * Built from offset inset shadows with negative spread rather than a radial
+ * gradient: a gradient's stops are measured to the farthest corner of the
+ * box, so on a circle the band lands outside the visible edge and disappears.
+ * An inset shadow follows the border radius exactly, so the arc hugs the limb
+ * by construction, and the offset puts it on the lower-right — opposite the
+ * key light, where a rim belongs.
+ */
+.hero-globe-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  box-shadow:
+    inset -5px -6px 8px -5px rgba(255, 240, 214, 0.95),
+    inset -14px -16px 28px -18px rgba(255, 198, 132, 0.85),
+    inset 8px 9px 20px -14px rgba(255, 226, 180, 0.5);
+}
+
+/*
+ * Dither. 440px of smooth gradient bands visibly on an 8-bit display — you
+ * see it as concentric rings through the falloff — and noise at this
+ * amplitude is invisible on its own but breaks the banding up completely.
+ * Same noise the page-level `.grain` uses, at a fraction of the strength.
+ */
+.hero-globe-grain {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.28'/%3E%3C/svg%3E");
+}
+
+/* The hot spot, in two parts: a tight near-white core and the broader bloom
+   that surrounds it. A single blob reads as a smudge of light; the pair
+   reads as a glossy surface catching a source. `screen`, so it only ever
+   brightens what is underneath. */
+.hero-globe-specular {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      15% 10% at 31% 21%,
+      rgba(255, 255, 255, 1),
+      rgba(255, 255, 255, 0.28) 56%,
+      transparent 76%
+    ),
+    radial-gradient(
+      36% 27% at 34% 25%,
+      rgba(255, 242, 214, 0.36),
+      rgba(255, 236, 200, 0.1) 52%,
+      transparent 74%
+    );
+  mix-blend-mode: screen;
+  filter: blur(1.2px);
+}
+
+/* The glass sheen: a diagonal band that crosses the sphere once every 8.5s,
+   idle the rest of the time — the same "long idle, quick pass" rhythm the
+   old panel's specular sweep used, rather than a continuous shimmer that
+   would read as a shader loop instead of a reflection. */
+.hero-globe-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-globe-sheen::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.55) 49%,
+    rgba(255, 255, 255, 0.08) 54%,
+    transparent 62%
+  );
+  mix-blend-mode: screen;
+  animation: hero-globe-sheen 8.5s ease-in-out infinite;
+}
+
+@keyframes hero-globe-sheen {
+  0%,
+  62% {
+    transform: translateX(-60%);
+  }
+  85%,
+  100% {
+    transform: translateX(60%);
+  }
+}
+
+/*
+ * The bezel each mark sits in — a fine metallic ring plus an inset shadow, so
+ * the mark reads as a medallion struck into the surface rather than a flat
+ * image floating in front of it. Sized per-face inline (payroll and the ISO
+ * disc are not the same proportion of the globe), so only the ring and shadow
+ * live here.
+ */
+.hero-globe-plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  /* Warm, not neutral. A white-grey bezel on an orange sphere reads as
+     plastic; carrying the ring toward gold makes it read as struck metal
+     and costs nothing. */
+  box-shadow:
+    0 0 0 1px rgba(255, 226, 178, 0.55),
+    0 0 0 3px rgba(122, 32, 0, 0.3),
+    inset 0 2px 6px rgba(40, 8, 0, 0.4),
+    inset 0 -1.5px 3px rgba(255, 236, 200, 0.42),
+    0 5px 14px rgba(70, 16, 0, 0.4);
+  background: radial-gradient(circle at 34% 26%, rgba(255, 244, 220, 0.18), transparent 62%);
+}
+
+.hero-globe-spin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: hero-globe-spin 26s linear infinite;
+}
+
+@keyframes hero-globe-spin {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.hero-globe-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  backface-visibility: hidden;
+}
+
+/*
+ * `rotateY` then `translateZ` — order matters. The rotation aims the face,
+ * the translate then pushes it out along the direction it now points, which
+ * is what puts one mark on the near side of the sphere and the other on the
+ * far side of it.
+ */
+.hero-globe-face--front {
+  transform: rotateY(0deg) translateZ(var(--globe-r));
+  animation: hero-globe-face-a 26s linear infinite;
+}
+
+.hero-globe-face--back {
+  transform: rotateY(180deg) translateZ(var(--globe-r));
+  animation: hero-globe-face-b 26s linear infinite;
+}
+
+/*
+ * The limb fade, phase-locked to the spin.
+ *
+ * `backface-visibility` alone cuts the mark off at exactly 90deg, and the
+ * few degrees before that are a hairline sliver standing at the very edge of
+ * the ball — the same artefact the centre pivot produced, just relocated.
+ * Fading each mark out by ~72deg of travel retires it while it is still a
+ * legible shape, so it reads as going round the back rather than as being
+ * sliced off at the edge.
+ *
+ * The two keyframes are one curve half a cycle apart: whichever mark is on
+ * the near hemisphere is the one being shown, so there is never a moment with
+ * no mark on the globe at all.
+ */
+@keyframes hero-globe-face-a {
+  0%,
+  14% {
+    opacity: 1;
+  }
+  20%,
+  80% {
+    opacity: 0;
+  }
+  86%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes hero-globe-face-b {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  36%,
+  64% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/*
+ * The emboss. `overlay` blends the mark into the sphere's own highlight and
+ * shadow instead of sitting flat on top of it, and the paired drop-shadows —
+ * one light, up-left; one dark, down-right — are the actual "pressed into
+ * the surface" cue; blend mode alone reads as a sticker.
+ */
+.hero-emboss {
+  mix-blend-mode: overlay;
+  filter: drop-shadow(-1.5px -1.5px 1px rgba(255, 236, 214, 0.55))
+    drop-shadow(1.5px 1.5px 1.5px rgba(90, 20, 0, 0.65));
+}
+
+/*
+ * The seal takes a drop shadow but no blend mode. `.hero-emboss` blends the Q
+ * into the sphere's own light, which is right for a mark pressed into the
+ * surface — but a certification seal is an applied object, and blending it
+ * put the orange straight through the ivory face and cost it its legibility.
+ * The shadow alone is what seats it on the surface.
+ */
+.hero-globe-seal {
+  filter: drop-shadow(0 1.5px 2px rgba(70, 14, 0, 0.5))
+    drop-shadow(0 0 1px rgba(255, 240, 214, 0.5));
+}
+
+.hero-globe-stage:hover .hero-globe-spin,
+.hero-globe-stage:focus-within .hero-globe-spin {
+  animation-play-state: paused;
+}
+
+/*
+ * Reduced motion does not mean "frozen on the front face" — that would
+ * permanently hide the ISO badge from anyone who asked for less motion, which
+ * is a worse outcome than the motion itself. Both marks stay reachable
+ * through a slow opacity crossfade instead of the 3D spin. Both faces have
+ * their transform cancelled, not just the back one's `rotateY(180deg)`: each
+ * now also carries a `translateZ` for the orbit, and leaving that on the
+ * front face would park it 0.8 R nearer the viewer, where the perspective
+ * renders it noticeably larger than the badge it is crossfading with. Flat
+ * and coplanar is the only state in which the two can swap cleanly.
+ *
+ * The pair then alternate on a plain opacity fade — the one kind of "motion"
+ * reduced-motion guidance treats as acceptable, unlike rotation or parallax.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .hero-globe-spin {
+    animation: none;
+  }
+  .hero-globe-halo {
+    animation: none;
+  }
+  .hero-globe-sheen::before {
+    animation: none;
+    opacity: 0;
+  }
+  .hero-globe-face--front,
+  .hero-globe-face--back {
+    transform: none;
+  }
+  .hero-globe-face--front {
+    animation: hero-globe-crossfade-a 9s ease-in-out infinite;
+  }
+  .hero-globe-face--back {
+    animation: hero-globe-crossfade-b 9s ease-in-out infinite;
+  }
+}
+
+@keyframes hero-globe-crossfade-a {
+  0%,
+  40% {
+    opacity: 1;
+  }
+  50%,
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes hero-globe-crossfade-b {
+  0%,
+  40% {
+    opacity: 0;
+  }
+  50%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/*
+ * Customer Success masthead — the signal field.
+ *
+ * The lines drift only at their chaotic end, which is what `transform-origin`
+ * on the right does: the resolved side is pinned and the noisy side breathes
+ * against it. Skew rather than translate, so the settled right-hand latitudes
+ * stay exactly where the nodes are drawn.
+ */
+.weave-line {
+  transform-origin: 100% 50%;
+  animation: weave-drift 26s ease-in-out infinite;
+}
+
+@keyframes weave-drift {
+  0%,
+  100% {
+    transform: skewY(0deg) translateY(0);
+  }
+  50% {
+    transform: skewY(0.55deg) translateY(-8px);
+  }
+}
+
+/* The arrival nodes, breathing on their own longer cycle so the field never
+   pulses as one unit. */
+.weave-node {
+  animation: weave-node 7s ease-in-out infinite;
+}
+
+@keyframes weave-node {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weave-line,
+  .weave-node {
+    animation: none;
+  }
+  .weave-node {
+    opacity: 0.7;
+  }
+}
+
+
+
+/*
+ * Solutions delta — the travelling glint on each ribbon spine.
+ *
+ * `pathLength="1"` on the paths means the dash pattern is in 0-1 units
+ * whatever the curve actually measures, so one declaration lights the same
+ * proportion of every ribbon regardless of its length.
+ */
+.delta-glint {
+  animation-name: delta-glint;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.5, 1);
+  animation-iteration-count: infinite;
+}
+
+@keyframes delta-glint {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: -0.07;
+  }
+}
+
+/*
+ * The delta already reverts to a still composition under reduced motion — see
+ * the guard in RibbonDelta — so the glint follows it. The spines themselves
+ * stay: they are structure, not movement.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .delta-glint {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/*
+ * The client wall — a lit stage rather than a logo strip.
+ */
+
+/*
+ * Rows dissolve into the ground at both edges instead of being cut by
+ * `overflow: hidden`. A hard edge says the row stops there; a soft one lets
+ * the marks arrive out of the dark and leave into it, which is what makes the
+ * wall read as continuing past the frame.
+ */
+.client-row {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+}
+
+/*
+ * A light that travels the wall, so the stage is never evenly lit.
+ *
+ * `left` is animated rather than `transform`, deliberately: this is one
+ * absolutely-positioned element in its own layer with nothing to reflow, and
+ * `transform` is already carrying the vertical centring. Keeping the two
+ * apart is the same one-writer-per-property rule the rest of the page follows.
+ */
+.client-sweep {
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  height: 140%;
+  width: 48%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(120px);
+  background: radial-gradient(
+    circle,
+    rgba(var(--amber-ch), 0.22),
+    rgba(var(--orange-ch), 0.08) 45%,
+    transparent 70%
+  );
+  animation: client-sweep 19s ease-in-out infinite alternate;
+}
+
+@keyframes client-sweep {
+  from {
+    left: -22%;
+  }
+  to {
+    left: 74%;
+  }
+}
+
+/*
+ * The panels. White cards on near-black need no drop shadow — there is nothing
+ * for a shadow to fall on — so the depth comes from a hairline edge and a
+ * warm bloom that only appears under the pointer, which is what makes hovering
+ * feel like bringing one mark into the light.
+ */
+/* The receding rows: still lit, just less of it. */
+.client-row--back {
+  opacity: 0.78;
+}
+
+.client-panel {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 14px 34px -18px rgba(0, 0, 0, 0.9);
+}
+
+.client-panel:hover {
+  box-shadow:
+    0 0 0 1px rgba(var(--amber-ch), 0.45),
+    0 18px 40px -16px rgba(0, 0, 0, 0.9),
+    0 0 30px -4px rgba(var(--amber-ch), 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-sweep {
+    animation: none;
+    left: 26%;
+  }
+}
+
+/*
+ * The journey — three lit cards.
+ *
+ * Built to a supplied reference: a near-black card with the artwork floating
+ * in a domed pool of light. The card is a shade lighter than the section it
+ * sits on, which is what separates it from the ground without a border doing
+ * the work — the reference has no visible card edge at all.
+ */
+.journey-card {
+  background: #0d0d12;
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 26px 60px -30px rgba(0, 0, 0, 0.9);
+  transition:
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 600ms ease;
+}
+
+.journey-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.09) inset,
+    0 40px 80px -34px rgba(0, 0, 0, 0.95);
+}
+
+/* The pool of light breathes, so the set is not three still images. Scale
+   only — the core is a 28px-blurred element, and animating its size or blur
+   would re-rasterise that gaussian every frame. */
+.journey-core {
+  animation: journey-core 7s ease-in-out infinite;
+}
+
+@keyframes journey-core {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.09);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-core {
+    animation: none;
+  }
+}
+
+
+/*
+ * Frosted glass, for the home page's solutions panels.
+ *
+ * A sibling of `.surface-card` rather than a change to it: that material is
+ * opaque and is used by roughly a dozen components, and glass is only worth
+ * having where something has been put behind it to refract.
+ *
+ * ── The part that is easy to get wrong ──
+ * `backdrop-filter` blurs whatever is painted underneath. On a flat white
+ * section that is flat white, so a translucent card over it renders as a
+ * slightly grey rectangle and the effect is invisible. The blobs behind these
+ * panels (see `Solutions.tsx`) are not decoration — they are the thing the
+ * glass is made of. Remove them and this class stops reading as glass.
+ *
+ * Three layers make it read as a physical pane: the tint, a lit top edge where
+ * light catches the bevel, and a shadow that is softer and wider than an
+ * opaque card's, because glass sits closer to what is behind it.
+ */
+.frost-card {
+  position: relative;
+  background: color-mix(in oklab, var(--color-surface) 52%, transparent);
+  -webkit-backdrop-filter: blur(30px) saturate(1.7);
+  backdrop-filter: blur(30px) saturate(1.7);
+  border: 1px solid color-mix(in oklab, var(--color-ink) 8%, transparent);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.55) inset,
+    0 10px 30px -12px rgba(8, 8, 8, 0.1),
+    0 30px 70px -30px rgba(8, 8, 8, 0.16);
+}
+
+/* The bevel highlight, brightest in the middle of the top edge. */
+.frost-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.9),
+    transparent
+  );
+}
+
+/*
+ * Dark mode inverts what glass is: a pane over a dark ground is a dark tint
+ * with a faint lit edge, not a white one. Keeping the light-mode values would
+ * put a milky white sheet over the page.
+ */
+:root[data-theme="dark"] .frost-card {
+  background: color-mix(in oklab, var(--color-surface) 55%, transparent);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.08) inset,
+    0 18px 50px -20px rgba(0, 0, 0, 0.8);
+}
+
+:root[data-theme="dark"] .frost-card::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+}
+
+/*
+ * `backdrop-filter` is the one property here with a real cost — it re-reads
+ * the page behind every pane on each composite. Anyone who has asked for less
+ * motion is also the audience most likely to be on modest hardware, so they
+ * get the tint without the blur.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .frost-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  }
 }

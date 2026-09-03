@@ -41,7 +41,7 @@ const LAYERS: Layer[] = [
     code: "L04",
     tier: "Experience",
     pillars: ["Mobile Technology"],
-    note: "Self-service, approvals and dashboards that work wherever your people actually are — not only at a desk.",
+    note: "Self-service, approvals and dashboards that work wherever your people actually are, not just at a desk.",
   },
   {
     code: "L03",
@@ -65,7 +65,7 @@ const LAYERS: Layer[] = [
 
 const SECURITY = {
   name: "Cybersecurity",
-  note: "Controlled access, auditable trails, backup and disaster recovery — applied at every tier, not bolted onto one.",
+  note: "Controlled access, auditable trails, backup and disaster recovery, applied at every tier rather than bolted onto one.",
 };
 
 export default function TechnologyContent() {
@@ -75,7 +75,7 @@ export default function TechnologyContent() {
         index="05"
         eyebrow="Technology & Innovation"
         title="Built for today. Ready for what's next."
-        lead="The engineering foundations under every eArrow platform — chosen so the systems you adopt now still fit the way you'll work in five years."
+        lead="The engineering foundations under every eArrow platform, chosen so the systems you adopt now still fit how you'll work in five years."
       />
 
       {/* ── The stack ──────────────────────────────────────────────────── */}
@@ -238,7 +238,7 @@ export default function TechnologyContent() {
 
       <PageCta
         title="Bring the next decade forward."
-        body="Talk to our architects about where AI, automation and cloud fit your operation — and where they don't yet."
+        body="Talk to our architects about where AI, automation and cloud actually fit your operation, and where they don't yet."
         primary={{ label: "Request a Consultation", href: "/contact" }}
         secondary={{ label: "Explore Solutions", href: "/solutions" }}
       />
