@@ -141,7 +141,7 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
               instead, which is the one thing the heading can add.
             */}
             <h2 className="mt-5 max-w-xl font-heading text-[1.72rem] font-bold leading-[1.08] tracking-[-0.035em] text-white sm:text-[2.064rem] lg:text-[2.365rem]">
-              Three stages of the same journey.
+              Three stages of the same journey
             </h2>
           </div>
 

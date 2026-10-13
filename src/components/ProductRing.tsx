@@ -75,7 +75,13 @@ export default function ProductRing({
 
   return (
     <div className="relative">
-      <div className="ring-stage relative h-[330px] w-full sm:h-[370px]">
+      <div className="ring-stage relative h-[330px] w-full sm:h-[370px] lg:h-[480px]">
+        {/* orbit guides and a warm floor, flat and behind the 3D ring */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <span className="absolute left-1/2 top-[56%] h-[34%] w-[104%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-border-strong" />
+          <span className="absolute left-1/2 top-[56%] h-[24%] w-[76%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-border" />
+          <span className="absolute left-1/2 top-[60%] h-[22%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-[50%]" style={{ background: "radial-gradient(closest-side, rgba(232,59,0,0.18), transparent)" }} />
+        </div>
         {/*
           The entrance and the tilt are on two different elements on purpose.
           They were one, and framer's `scale` wrote `transform` inline over the
@@ -162,7 +168,7 @@ export default function ProductRing({
                           </span>
                         )}
 
-                        <span className="relative text-center font-mono text-[8.5px] uppercase leading-tight tracking-[0.1em] text-ink-muted transition-colors duration-300 group-hover:text-ink">
+                        <span className="relative px-1 text-center text-[10.5px] font-semibold leading-tight text-ink transition-colors duration-300 group-hover:text-orange lg:text-[11.5px]">
                           {item.label}
                         </span>
                       </a>

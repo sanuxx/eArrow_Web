@@ -7,7 +7,7 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { withBasePath } from "@/lib/basePath";
 
 /*
- * Brief §05 — "One ecosystem. Multiple possibilities."
+ * Brief §05 — "One ecosystem, multiple possibilities"
  *
  *   "Instead of showing every product as a traditional list, create an
  *    interactive product ecosystem. The center could use the new eArrow
@@ -198,394 +198,239 @@ function MobileCarousel() {
   );
 }
 
-/* ── The dial (tablet and up) ────────────────────────────────────────────
+/* ── The accordion (tablet and up) ───────────────────────────────────────
  *
- * A black disc with an orange aurora drifting behind a glowing ring. The
- * products are numbered round the ring; a bright arc sits over the live one
- * and fills as its countdown, with the seconds left beside it. When it is
- * full the arc swings on to the next number. The live product's name sits in
- * the dark centre. Click a number to jump; hover to hold.
+ * Seven tall panels in a row, each carrying its product's real screenshot.
+ * The open one widens: its screenshot sits in a browser frame and the
+ * product's details rise in beneath it. The others narrow to slim strips —
+ * screenshot dimmed, name running up the side. Hover or click to open a
+ * panel; left alone, it moves on by itself, a progress line timing it.
  *
- * Geometry is one 100×100 SVG. The arc lives in a group GSAP rotates (always
- * forwards, so 07 → 01 carries on clockwise rather than unwinding); the
- * countdown is a dash offset; everything else is opacity and transforms.
+ * Width is animated with CSS flex-grow on one property; the content inside
+ * each panel fades/slides with GSAP. Reduced motion: no auto-advance.
  */
-
-const SLOT = 360 / COUNT;
-const R_TRACK = 30; // the ring band the numbers sit on
-const R_ARC = 36.5; // the live arc, just outside it
-const polar = (deg: number, r: number) => {
-  const a = ((deg - 90) * Math.PI) / 180;
-  return { x: Math.round((50 + Math.cos(a) * r) * 1e3) / 1e3, y: Math.round((50 + Math.sin(a) * r) * 1e3) / 1e3 };
-};
-const slotPath = (r: number) => {
-  const a = polar(0, r);
-  const b = polar(SLOT, r);
-  return `M ${a.x} ${a.y} A ${r} ${r} 0 0 1 ${b.x} ${b.y}`;
-};
 
 export default function ProductEcosystem() {
   const [active, setActive] = useState(0);
   const [engaged, setEngaged] = useState(false);
-
   const rootRef = useRef<HTMLDivElement>(null);
-  const dialRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<(SVGGElement | null)[]>([]);
-  const turned = useRef(0); // accumulated arc rotation, degrees
-  const lastAnimated = useRef<number | null>(null);
+  const first = useRef(true);
 
-  const product = PRODUCTS[active];
-
-  /* ── Assembly ── */
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || prefersReducedMotion()) return;
-    let io: IntersectionObserver | undefined;
-    let failsafe: number | undefined;
-    const ctx = gsap.context(() => {
-      const tl = gsap
-        .timeline({ paused: true, defaults: { ease: "expo.out" } })
-        .from("[data-dial='disc']", { scale: 0.86, opacity: 0, duration: 1.4 })
-        .from("[data-dial='aurora']", { opacity: 0, scale: 0.6, duration: 2 }, 0.2)
-        .fromTo("[data-dial='track']", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, ease: "power3.inOut", onComplete: () => root.querySelector("[data-dial='track']")?.removeAttribute("stroke-dasharray") }, 0.3)
-        .from("[data-dial='num']", { opacity: 0, duration: 0.5, stagger: 0.07, ease: "none" }, 0.7)
-        .from("[data-dial='arc']", { opacity: 0, duration: 0.6 }, 1.0)
-        .from("[data-dial='centre'] > *", { y: 16, opacity: 0, duration: 0.9, stagger: 0.08 }, 0.8)
-        .from("[data-dial='side'] > *", { x: -12, opacity: 0, duration: 0.8, stagger: 0.06 }, 1.0)
-        .from("[data-eco='panel-item']", { opacity: 0, y: 18, duration: 0.6, stagger: 0.06 }, 0.9)
-        .from("[data-eco='screen']", { clipPath: "inset(0% 0% 100% 0%)", duration: 1.1, ease: "power4.inOut" }, 0.9);
-
-      /* the aurora drifts round, the glow breathes */
-      gsap.to("[data-dial='aurora']", { rotation: 360, duration: 26, ease: "none", repeat: -1 });
-      gsap.to("[data-dial='glow']", { opacity: 0.55, scale: 1.04, duration: 3.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
-
-      const play = () => {
-        io?.disconnect();
-        window.clearTimeout(failsafe);
-        tl.play();
-      };
-      io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && play(), { threshold: 0.2 });
-      io.observe(root);
-      failsafe = window.setTimeout(play, 6000);
-    }, root);
-    return () => {
-      io?.disconnect();
-      window.clearTimeout(failsafe);
-      ctx.revert();
-    };
-  }, []);
-
-  /* ── Selection: the arc swings to the slot, the centre and panel swap ── */
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const arc = root.querySelector("[data-dial='arc']");
-    /* forward by the shortest clockwise distance */
-    const from = turned.current;
-    const target = active * SLOT;
-    /* the shortest way round, so 07 → 01 carries on clockwise */
-    let delta = (((target - from) % 360) + 360) % 360;
-    if (delta > 180) delta -= 360;
-    const next = from + delta;
-    turned.current = next;
-
-    if (lastAnimated.current === active) return;
-    const first = lastAnimated.current === null;
-    lastAnimated.current = active;
-    if (prefersReducedMotion() || first) {
-      gsap.set(arc, { rotation: next, svgOrigin: "50 50" });
-      return;
-    }
-    const ctx = gsap.context(() => {
-      gsap.to(arc, { rotation: next, svgOrigin: "50 50", duration: 0.9, ease: "expo.inOut" });
-      gsap.fromTo("[data-dial='centre'] > *", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, ease: "expo.out", delay: 0.2 });
-      gsap.fromTo("[data-eco='panel-item']", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: "power3.out" });
-      gsap.fromTo("[data-eco='screen']", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "power4.inOut" });
-      gsap.fromTo("[data-eco='screen'] img", { scale: 1.12 }, { scale: 1, duration: 1.4, ease: "power3.out" });
-    }, root);
-    return () => ctx.revert();
-  }, [active]);
-
-  /* ── Countdown: the arc fills, the seconds tick down, then the next ── */
+  /* auto-advance, timed by the progress line in the open panel */
   useEffect(() => {
-    const root = rootRef.current;
-    const fill = root?.querySelector<SVGPathElement>("[data-dial='fill']");
-    const secs = root?.querySelector<SVGTextElement>("[data-dial='secs']");
-    if (!fill || !secs) return;
-    const show = (left: number) => (secs.textContent = `0:0${Math.max(0, Math.ceil(left))}`);
-    if (prefersReducedMotion() || engaged) {
-      gsap.set(fill, { strokeDashoffset: engaged ? 0 : 1 });
-      show(DWELL);
-      return;
-    }
-    const o = { p: 0 };
-    const t = gsap.to(o, {
-      p: 1,
-      duration: DWELL,
-      ease: "none",
-      onUpdate: () => {
-        fill.style.strokeDashoffset = String(1 - o.p);
-        show(DWELL * (1 - o.p));
-      },
-      onComplete: () => setActive((a) => (a + 1) % COUNT),
-    });
+    if (engaged || prefersReducedMotion()) return;
+    const bar = rootRef.current?.querySelector<HTMLElement>(`[data-acc-bar="${active}"]`);
+    const t = gsap.fromTo(
+      bar ?? {},
+      { scaleX: 0 },
+      { scaleX: 1, duration: DWELL, ease: "none", onComplete: () => setActive((a) => (a + 1) % COUNT) },
+    );
     return () => {
       t.kill();
     };
   }, [active, engaged]);
 
-  /* ── The disc tilts toward the pointer ── */
+  /* the open panel's content arrives in turn */
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || prefersReducedMotion()) return;
+    const panel = root.querySelector(`[data-acc="${active}"]`);
+    if (!panel) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        panel.querySelector("[data-acc-shot]"),
+        { y: 30, opacity: 0, scale: 0.97 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out", delay: first.current ? 0 : 0.25 },
+      );
+      gsap.fromTo(
+        panel.querySelectorAll("[data-acc-in]"),
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, ease: "power3.out", delay: first.current ? 0.1 : 0.35 },
+      );
+    }, root);
+    first.current = false;
+    return () => ctx.revert();
+  }, [active]);
+
+  /* entrance: the panels rise in turn */
   useEffect(() => {
-    const dial = dialRef.current;
-    if (!dial || prefersReducedMotion()) return;
-    gsap.set(dial, { transformPerspective: 1400 });
-    const rx = gsap.quickTo(dial, "rotationX", { duration: 1, ease: "power3.out" });
-    const ry = gsap.quickTo(dial, "rotationY", { duration: 1, ease: "power3.out" });
-    const move = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      const r = dial.getBoundingClientRect();
-      ry(((e.clientX - r.left) / r.width - 0.5) * 10);
-      rx(-((e.clientY - r.top) / r.height - 0.5) * 10);
-    };
-    const leave = () => {
-      rx(0);
-      ry(0);
-    };
-    dial.addEventListener("pointermove", move);
-    dial.addEventListener("pointerleave", leave);
-    return () => {
-      dial.removeEventListener("pointermove", move);
-      dial.removeEventListener("pointerleave", leave);
-    };
+    const root = rootRef.current;
+    if (!root || prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        "[data-acc]",
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, stagger: 0.07, ease: "power4.out", scrollTrigger: { trigger: root, start: "top 80%", once: true } },
+      );
+      /* liquid motion: each blob rides two sines at different periods (a
+         Lissajous loop), so the paths never visibly repeat; the colour swirl
+         underneath flows upward, and each panel is phase-shifted from its neighbours */
+      gsap.utils.toArray<HTMLElement>("[data-blob]").forEach((bl, k) => {
+        const panel = Math.floor(k / 4);
+        const ax = gsap.utils.random(40, 90);
+        const ay = gsap.utils.random(60, 140);
+        gsap.fromTo(bl, { x: -ax }, { x: ax, duration: gsap.utils.random(3.2, 5.2), ease: "sine.inOut", yoyo: true, repeat: -1, delay: -panel * 0.9 - k * 0.37 });
+        gsap.fromTo(bl, { y: -ay }, { y: ay, duration: gsap.utils.random(4.4, 7.4), ease: "sine.inOut", yoyo: true, repeat: -1, delay: -panel * 1.3 - k * 0.53 });
+        gsap.to(bl, { scale: gsap.utils.random(1.2, 1.6), duration: gsap.utils.random(2.6, 4.2), ease: "sine.inOut", yoyo: true, repeat: -1 });
+      });
+      gsap.utils.toArray<HTMLElement>("[data-swirl]").forEach((sw, k) => {
+        /* one period of the bands is a third of the layer, so this loops seamlessly */
+        gsap.fromTo(sw, { yPercent: 0 }, { yPercent: -33.3334, duration: 9 + (k % 3) * 1.4, ease: "none", repeat: -1, delay: -k * 2.1 });
+      });
+    }, root);
+    return () => ctx.revert();
   }, []);
 
-  const onKeyDown = useCallback((event: React.KeyboardEvent) => {
-    const delta = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
-    if (!delta) return;
-    event.preventDefault();
-    setActive((current) => {
-      const next = (current + delta + COUNT) % COUNT;
-      tabRefs.current[next]?.focus();
-      return next;
-    });
+  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    setActive((a) => (a + d + COUNT) % COUNT);
   }, []);
-
-  const secsPos = polar(SLOT + 4, R_ARC + 6.5);
 
   return (
     <section id="products" className="tech-grid relative overflow-hidden bg-canvas-alt py-10 lg:py-16">
-      <div ref={rootRef} className="relative mx-auto max-w-7xl px-6 lg:px-12">
-        <SectionLabel index="02">Product Ecosystem</SectionLabel>
-        <SectionHeading>One ecosystem. Multiple possibilities.</SectionHeading>
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <SectionLabel>Product Ecosystem</SectionLabel>
+            <SectionHeading>One ecosystem. Multiple possibilities.</SectionHeading>
+          </div>
+          <p className="hidden max-w-xs text-[15px] leading-relaxed text-ink-muted md:block lg:text-right">
+            Seven platforms on one shared core. Hover a panel to explore it.
+          </p>
+        </div>
 
         <MobileCarousel />
 
-        <div className="mt-16 hidden grid-cols-1 items-center gap-14 md:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          {/* ── The dial ── */}
-          <div
-            ref={dialRef}
-            onPointerEnter={() => setEngaged(true)}
-            onPointerLeave={() => setEngaged(false)}
-            className="relative mx-auto aspect-square w-full max-w-[560px]"
-          >
-            <div
-              data-dial="disc"
-              className="absolute inset-0 overflow-hidden rounded-full bg-[#050506] shadow-[0_50px_100px_-40px_rgba(0,0,0,0.65),0_0_0_1px_rgba(0,0,0,0.06)]"
-            >
-              {/* aurora: soft gradients, rotated as one layer — no blur filter */}
-              <div data-dial="aurora" className="absolute inset-[6%]">
-                <span className="absolute right-[2%] top-[22%] h-[44%] w-[46%] rounded-full" style={{ background: "radial-gradient(ellipse at center, rgba(255,122,26,0.75), rgba(255,122,26,0) 68%)" }} />
-                <span className="absolute bottom-[14%] left-[10%] h-[34%] w-[34%] rounded-full" style={{ background: "radial-gradient(ellipse at center, rgba(255,177,59,0.55), rgba(255,177,59,0) 68%)" }} />
-                <span className="absolute left-[18%] top-[30%] h-[30%] w-[30%] rounded-full" style={{ background: "radial-gradient(ellipse at center, rgba(232,59,0,0.5), rgba(232,59,0,0) 70%)" }} />
-              </div>
-              {/* the glow hugging the ring */}
-              <span
-                data-dial="glow"
-                className="absolute inset-[14%] rounded-full opacity-80"
-                style={{ background: "radial-gradient(circle, transparent 52%, rgba(255,150,70,0.28) 62%, transparent 74%)" }}
-              />
-            </div>
-
-            <svg
-              viewBox="0 0 100 100"
-              className="absolute inset-0 h-full w-full overflow-visible"
-              role="tablist"
-              aria-label="Product ecosystem"
-              onKeyDown={onKeyDown}
-            >
-              <defs>
-                <linearGradient id="dial-arc" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="100%" stopColor="#ffb98a" />
-                </linearGradient>
-              </defs>
-
-              {/* the ring band */}
-              <circle
-                data-dial="track"
-                cx="50"
-                cy="50"
-                r={R_TRACK}
-                fill="none"
-                stroke="rgba(255,255,255,0.13)"
-                strokeWidth="6"
-                pathLength={1}
-                strokeDasharray="1"
-                transform="rotate(-90 50 50)"
-              />
-              {/* the dark centre */}
-              <circle cx="50" cy="50" r={R_TRACK - 3.4} fill="#020203" />
-
-              {/* the live arc: a dim slot, the fill as countdown, and the seconds */}
-              <g data-dial="arc">
-                <path d={slotPath(R_ARC)} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="5" />
-                <path
-                  data-dial="fill"
-                  d={slotPath(R_ARC)}
-                  fill="none"
-                  stroke="url(#dial-arc)"
-                  strokeWidth="5"
-                  pathLength={1}
-                  strokeDasharray="1"
-                  strokeDashoffset="1"
-                />
-                <text
-                  data-dial="secs"
-                  x={secsPos.x}
-                  y={secsPos.y}
-                  fill="#fff"
-                  fontSize="2.6"
-                  fontWeight="600"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  transform={`rotate(${SLOT + 4 - 90} ${secsPos.x} ${secsPos.y})`}
-                  style={{ fontFamily: "var(--font-body)" }}
-                >
-                  0:0{Math.ceil(DWELL)}
-                </text>
-                {/* the marker over the live number */}
-                <path d={`M ${polar(SLOT / 2, R_TRACK + 2.6).x - 0.9} ${polar(SLOT / 2, R_TRACK + 2.6).y} l 0.9 1.2 l 0.9 -1.2 z`} fill="#fff" transform={`rotate(${SLOT / 2} ${polar(SLOT / 2, R_TRACK + 2.6).x} ${polar(SLOT / 2, R_TRACK + 2.6).y})`} />
-              </g>
-
-              {/* the numbers, on the band */}
-              {PRODUCTS.map((p, i) => {
-                const a = (i + 0.5) * SLOT;
-                const pos = polar(a, R_TRACK);
-                const live = i === active;
-                return (
-                  <g
-                    key={p.key}
-                    ref={(el) => {
-                      tabRefs.current[i] = el;
+        <div
+          ref={rootRef}
+          role="tablist"
+          aria-label="Product ecosystem"
+          onKeyDown={onKeyDown}
+          onPointerEnter={() => setEngaged(true)}
+          onPointerLeave={() => setEngaged(false)}
+          className="mt-12 hidden h-[560px] gap-3 md:flex"
+        >
+          {PRODUCTS.map((p, i) => {
+            const on = i === active;
+            return (
+              <div
+                key={p.key}
+                data-acc={i}
+                role="tab"
+                tabIndex={on ? 0 : -1}
+                aria-selected={on}
+                aria-label={`Arrow ${p.label}`}
+                onPointerEnter={() => setActive(i)}
+                onClick={() => setActive(i)}
+                onFocus={() => setActive(i)}
+                className={`group relative min-w-0 cursor-pointer overflow-hidden rounded-[26px] outline-none transition-[flex-grow,box-shadow] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  on
+                    ? "bg-surface shadow-[0_34px_70px_-34px_rgba(var(--orange-ch),0.55)] ring-1 ring-border"
+                    : "bg-[#e83b00] shadow-[0_18px_36px_-24px_rgba(var(--orange-ch),0.6)] hover:-translate-y-1 hover:shadow-[0_28px_50px_-22px_rgba(var(--orange-ch),0.75)]"
+                }`}
+                style={{ flexGrow: on ? 6.5 : 1, flexBasis: 0 }}
+              >
+                {/* ── closed: frosted glass over drifting gradient light, the name up the side ──
+                    The blobs are pre-softened radial gradients moved by transform (no
+                    blur filters, no backdrop-filter), so seven of them stay cheap. */}
+                <div className={`absolute inset-0 overflow-hidden rounded-[26px] transition-opacity duration-500 ${on ? "opacity-0" : "opacity-100"}`}>
+                  <span className="absolute inset-0" style={{ background: "linear-gradient(160deg, #ff8a3d 0%, #e83b00 55%, #b52a00 100%)" }} />
+                  {/* bands of colour flowing up the slab in a seamless loop */}
+                  <span
+                    data-swirl
+                    className="absolute inset-x-0 top-0 h-[300%] will-change-transform"
+                    style={{
+                      background: "linear-gradient(180deg, #ff6a1a 0%, #ffb13b 22%, #e83b00 45%, #ffcf8a 62%, #c22e00 82%, #ff6a1a 100%)",
+                      backgroundSize: "100% 33.3334%",
                     }}
-                    data-dial="num"
-                    role="tab"
-                    id={`eco-tab-${p.key}`}
-                    aria-selected={live}
-                    aria-controls="eco-panel"
-                    aria-label={`Arrow ${p.label}`}
-                    tabIndex={live ? 0 : -1}
-                    onClick={() => setActive(i)}
-                    className="cursor-pointer outline-none"
-                  >
-                    <circle cx={pos.x} cy={pos.y} r="4.2" fill="transparent" />
-                    <text
-                      x={pos.x}
-                      y={pos.y}
-                      fontSize="3"
-                      fontWeight={live ? 600 : 400}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill={live ? "#ffffff" : "rgba(255,255,255,0.3)"}
-                      transform={`rotate(${a > 90 && a < 270 ? a - 180 : a} ${pos.x} ${pos.y})`}
-                      className="transition-[fill] duration-500 hover:fill-white"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      {num(i)}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+                  />
+                  <span className="absolute inset-0" style={{ background: "linear-gradient(160deg, rgba(255,138,61,0.55), rgba(232,59,0,0.35) 55%, rgba(150,30,0,0.55))" }} />
+                  {/* liquid light: soft blobs on looping paths, sized off the panel's height */}
+                  {[
+                    { c: "rgba(255,230,180,0.95)", x: "10%", y: "8%" },
+                    { c: "rgba(255,80,10,0.95)", x: "60%", y: "30%" },
+                    { c: "rgba(255,180,70,0.9)", x: "20%", y: "58%" },
+                    { c: "rgba(200,40,0,0.85)", x: "70%", y: "80%" },
+                  ].map((bl, k) => (
+                    <span
+                      key={k}
+                      data-blob
+                      className="absolute aspect-square h-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full will-change-transform"
+                      style={{ left: bl.x, top: bl.y, background: `radial-gradient(circle, ${bl.c} 0%, transparent 62%)` }}
+                    />
+                  ))}
+                  {/* the glass: frost, a lit top edge and a soft inner rim */}
+                  <span className="absolute inset-0 bg-white/20" />
+                  <span className="absolute inset-0 rounded-[26px] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_0_0_1px_rgba(255,255,255,0.35),inset_0_-30px_60px_-30px_rgba(120,30,0,0.45)]" />
+                  <span className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
+                  <span className="cine-grain absolute inset-0 opacity-[0.08] mix-blend-overlay" />
+                  <span className="absolute left-1/2 top-5 -translate-x-1/2 text-[12px] font-semibold text-white/90">{num(i)}</span>
+                  <span className="absolute bottom-6 left-1/2 origin-bottom-left -rotate-90 translate-x-2 whitespace-nowrap font-spartan text-[1.15rem] font-semibold text-white drop-shadow-[0_2px_8px_rgba(120,30,0,0.45)]">
+                    {p.label}
+                  </span>
+                </div>
 
-            {/* the live product, in the centre */}
-            <div data-dial="centre" className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-[12px] font-medium tracking-[0.04em] text-white/45">Arrow</span>
-              <span className="mt-1 max-w-[40%] font-heading text-[1.35rem] font-semibold leading-[1.15] tracking-[-0.02em] text-white lg:text-[1.6rem]">
-                {product.label}
-              </span>
-              <span className="mt-2 text-[12px] text-[#ffb070]">{product.domain}</span>
-            </div>
+                {/* ── open: the product ── */}
+                <div className={`absolute inset-0 flex flex-col p-6 transition-opacity duration-500 lg:p-7 ${on ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+                  <div data-acc-shot className="overflow-hidden rounded-[16px] border border-border bg-surface-sunken shadow-[0_24px_50px_-30px_rgba(var(--orange-ch),0.6)]">
+                    <div className="flex items-center gap-1.5 border-b border-border px-3 py-2">
+                      <span className="h-2 w-2 rounded-full bg-orange" />
+                      <span className="h-2 w-2 rounded-full bg-amber/70" />
+                      <span className="h-2 w-2 rounded-full bg-border-strong" />
+                      <span className="ml-2 text-[11px] font-medium text-ink-soft">Arrow {p.label}</span>
+                    </div>
+                    <div className="relative aspect-[2.2] overflow-hidden bg-white">
+                      {on && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={withBasePath(`/products/${p.key}/1-sm.webp`)} alt={`Arrow ${p.label} screen`} className="h-full w-full object-cover object-left-top" />
+                      )}
+                    </div>
+                  </div>
 
-            {/* the side note */}
-            <div data-dial="side" className="pointer-events-none absolute left-[9%] top-1/2 -translate-y-1/2 text-[13px] font-medium leading-[1.35] text-white/85">
-              <p>{String(COUNT).padStart(2, "0")}</p>
-              <p>Products</p>
-              <p>One core</p>
-            </div>
-          </div>
-
-          {/* ── The surrounding interface, which changes with the selection ── */}
-          <div
-            ref={panelRef}
-            id="eco-panel"
-            role="tabpanel"
-            aria-labelledby={`eco-tab-${product.key}`}
-            onPointerEnter={() => setEngaged(true)}
-            onPointerLeave={() => setEngaged(false)}
-            className="surface-card relative overflow-hidden rounded-panel px-8 py-9 lg:px-10 lg:py-11"
-          >
-            <div className="mb-8 overflow-hidden rounded-xl border border-border bg-surface-sunken shadow-[0_24px_50px_-30px_rgba(var(--orange-ch),0.6)]">
-              <div className="flex items-center gap-1.5 border-b border-border px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-orange" />
-                <span className="h-2 w-2 rounded-full bg-amber/70" />
-                <span className="h-2 w-2 rounded-full bg-border-strong" />
-                <span className="ml-2 font-mono text-[9px] tracking-[0.14em] text-ink-soft">arrow / {product.key}</span>
+                  <div className="mt-5 flex min-h-0 flex-1 flex-col">
+                    <div className="flex items-baseline justify-between gap-4">
+                      <div className="min-w-0">
+                        <p data-acc-in className="text-[13px] font-semibold text-orange">{p.domain}</p>
+                        <h3 data-acc-in className="mt-1 truncate font-heading text-[1.6rem] font-bold leading-tight tracking-[-0.03em] text-ink">
+                          Arrow {p.label}
+                        </h3>
+                      </div>
+                      <span data-acc-in className="shrink-0 text-[13px] font-semibold text-ink-soft">
+                        {num(i)} / {num(COUNT - 1)}
+                      </span>
+                    </div>
+                    <p data-acc-in className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink-muted">{p.blurb}</p>
+                    <div data-acc-in className="mt-4 flex flex-wrap gap-2">
+                      {p.modules.map((m) => (
+                        <span key={m} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-sunken px-3 py-1.5 text-xs font-medium text-ink">
+                          <span className="h-1 w-1 rounded-full bg-orange" />
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                    <div data-acc-in className="mt-auto flex items-center justify-between gap-4 pt-4">
+                      <a
+                        href={`/products#${p.key}`}
+                        className="group/cta inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(232,59,0,0.7)] transition-transform duration-300 hover:-translate-y-0.5"
+                      >
+                        Discover Arrow {p.label}
+                        <ArrowGlyph className="h-3 w-3 transition-transform duration-300 group-hover/cta:translate-x-1" />
+                      </a>
+                      <span className="hidden text-[12.5px] text-ink-soft xl:block">
+                        Up next · <span className="font-semibold text-ink">{PRODUCTS[(i + 1) % COUNT].label}</span>
+                      </span>
+                    </div>
+                  </div>
+                  {/* the timer */}
+                  <span aria-hidden className="absolute inset-x-6 bottom-0 h-[3px] overflow-hidden rounded-full bg-border lg:inset-x-7">
+                    <span data-acc-bar={i} className="block h-full origin-left bg-orange" style={{ transform: "scaleX(0)" }} />
+                  </span>
+                </div>
               </div>
-              <div data-eco="screen" className="relative aspect-[1.94] overflow-hidden bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  key={product.key}
-                  src={withBasePath(`/products/${product.key}/1-sm.webp`)}
-                  alt={`Arrow ${product.label} screen`}
-                  className="h-full w-full object-cover object-left-top"
-                />
-              </div>
-            </div>
-            <p data-eco="panel-item" className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
-              {product.domain}
-            </p>
-            <h3 data-eco="panel-item" className="mt-3 font-heading text-[1.505rem] font-bold leading-tight tracking-[-0.03em] text-ink sm:text-[1.72rem]">
-              {product.label}
-            </h3>
-            <p data-eco="panel-item" className="mt-4 text-base leading-[1.75] text-ink-muted">
-              {product.blurb}
-            </p>
-            <p data-eco="panel-item" className="mt-8 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-soft">
-              Modules
-            </p>
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {product.modules.map((m) => (
-                <li
-                  key={m}
-                  data-eco="panel-item"
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-sunken px-3.5 py-2 text-xs font-medium text-ink"
-                >
-                  <span className="h-1 w-1 rounded-full bg-gradient-to-br from-orange to-amber" />
-                  {m}
-                </li>
-              ))}
-            </ul>
-            <a
-              data-eco="panel-item"
-              href="/contact"
-              className="group/cta mt-9 inline-flex items-center gap-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-orange"
-            >
-              Discover {product.label}
-              <ArrowGlyph className="h-3 w-3 transition-transform duration-300 group-hover/cta:translate-x-1.5" />
-            </a>
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>

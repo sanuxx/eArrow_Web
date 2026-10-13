@@ -1098,10 +1098,10 @@ a:focus-visible, button:focus-visible {
   }
   25%,
   75% {
-    filter: opacity(0.82) blur(0.5px);
+    filter: opacity(0.9) blur(0.2px);
   }
   50% {
-    filter: opacity(0.58) blur(1.2px);
+    filter: opacity(0.72) blur(0.6px);
   }
 }
 
@@ -2183,3 +2183,22 @@ a:focus-visible, button:focus-visible {
 
 /* Technology hero letterbox: closed before the open plays, gone for reduced motion */
 @media (prefers-reduced-motion: reduce) { .tech-hero [data-bar] { display: none; } }
+
+/* Products hero ring: larger on wide screens */
+@media (min-width: 1024px) {
+  .ring-stage {
+    --ring-r: clamp(180px, 17vw, 240px);
+    --ring-card: 112px;
+    --globe: 190px;
+  }
+}
+
+/* Industries devices: the frame face is real (devices.css); its flat base and
+   stand are replaced by 3D parts, so hide the drawn ones */
+.device-3d .device-power { display: none; }
+.device-3d .device-frame { position: relative; }
+
+/* Industries landing (app/industries/IndustriesLanding.tsx) */
+@media (prefers-reduced-motion: no-preference) {
+  .ind-landing .lnd-fade { opacity: 0; }
+}

@@ -174,7 +174,7 @@ export default function RewireScene() {
         </p>
 
         <h2 className="mt-5 max-w-3xl font-heading text-[1.8rem] font-extrabold leading-[1.06] tracking-[-0.038em] text-white sm:text-[2.4rem] lg:text-[2.9rem]">
-          From manual HR to digital workforce management.
+          From manual HR to digital workforce management
         </h2>
 
         {/* The column headers do the naming once, so the rows below carry no

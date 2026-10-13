@@ -3,8 +3,10 @@
 import { useEffect, useRef } from "react";
 import { PageCta } from "@/components/page-kit";
 import { INDUSTRY_ICONS, type IndustryIconKey } from "@/components/industry-icons";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { withBasePath } from "@/lib/basePath";
+import "devices.css/dist/devices.min.css";
+import IndustriesLanding from "./IndustriesLanding";
 
 /*
  * Industries — a flight down a tunnel of frames (see Tunnel below). Each
@@ -103,11 +105,21 @@ const shot = (s: string) => withBasePath(`/products/${s}.webp`);
  * It is real CSS 3D — one perspective, one `preserve-3d` world — so every
  * plane foreshortens correctly without any per-frame maths for geometry. Per
  * frame GSAP writes exactly one transform (the world's translateZ, i.e. the
- * camera) plus an opacity per plane for fog and culling. The frames are NOT
- * 3D layers — thirty full-screen bordered planes were most of the cost — they
- * are stroked onto one canvas each frame from the same projection maths
- * (scale = P / (P − z)). The converging corner lines are a static SVG: with
- * the camera only moving along z they never change on screen.
+ * camera) plus an opacity per plane for fog and culling. The corridor itself
+ * is aurora: wide, soft ribbons of the landing's orange light hanging on the
+ * walls and ceiling, drawn on one canvas from the same projection maths
+ * (scale = P / (P − z)). They drift toward you on their own and slowly ripple
+ * while the section is on screen. Being soft, the canvas renders at a quarter
+ * resolution and is scaled up, which costs little and blurs for free.
+ *
+ * Shot like a film: widescreen bars close in when the flight starts and the
+ * sector name runs as a subtitle in the lower bar; an anamorphic flare lies
+ * across the vanishing point and flashes, with a light leak sweeping the
+ * frame, on every cut to a new sector; a vignette and plain grain finish it.
+ *
+ * Budget: the aurora draws at 30fps on a quarter-size canvas and only while
+ * the section is on screen; per-plane opacity is written only when it
+ * changes; grain is a plain layer (no blend mode re-compositing each frame).
  *
  * Wall orientations, so each screenshot faces the camera and reads upright:
  *   left   rotateY(90deg)   from its near edge, extending away
@@ -118,7 +130,7 @@ const shot = (s: string) => withBasePath(`/products/${s}.webp`);
 
 const P = 1000; // perspective, px
 const SPACING = 2200; // depth between sectors
-const RING_GAP = 650; // depth between frames
+const BAND_GAP = 820; // depth between aurora ribbons
 const PRODUCT_SHOT: Record<string, string> = {
   "HR & Payroll": "workforce",
   Workflow: "workflow",
@@ -147,136 +159,143 @@ const systemsFor = (ind: Industry) => {
 };
 
 const STATIONS = INDUSTRIES.map((ind, i) => ({ ind, z: -(i + 1) * SPACING }));
-const DEPTH = (INDUSTRIES.length + 1) * SPACING + 1600;
 
-/* A device on the wall, built in 3D.
+/* Real device faces from devices.css (MIT, pure CSS) — the bezel, notch and
+   screen — on true 3D bodies built here: an aluminium back shell with
+   thickness and a side edge, and for the laptop a keyboard deck folded out
+   of the wall, for the monitor a stand arm with depth and a foot lying flat.
 
-   Everything here sits inside a preserve-3d chain (figure → door → parts), so
-   nothing in that chain may take opacity, overflow or a filter — any of those
-   flattens it. Fog is applied per leaf through the --fog variable instead
-   (`.fogp`). Local +z points out of the wall, toward the tunnel's centre.
-
-     body    bezel and screen, on the door plane
-     shell   the back, 16px behind, and its side at the free end
-     deck    laptop keyboard deck / monitor foot, folded out of the wall
-     phone   (HR) the mobile app, standing 70px proud of the screen */
-const DW = 900; // device depth along the wall
+   Everything is a separate leaf inside one preserve-3d wrapper, and each
+   leaf fogs through --fog (`.fogp`) — opacity on any ancestor would flatten
+   the whole device back into a picture. */
+const DW = 900; // device panel width along the wall
 const DH = 520;
 
+const DEVICE = {
+  laptop: { cls: "device-macbook-pro device-silver", w: 740, h: 434, faceW: 618, faceH: 418 },
+  monitor: { cls: "device-pro-display-xdr", w: 640, h: 475, faceW: 640, faceH: 368 },
+} as const;
+
+const P3D: React.CSSProperties = { transformStyle: "preserve-3d" };
+const ALU = "linear-gradient(180deg,#f2f3f5 0%,#d9dce0 45%,#b9bdc3 100%)";
+
 function Device({ kind, src, phone, wall }: { kind: "laptop" | "monitor"; src: string; phone?: boolean; wall: Wall }) {
+  const d = DEVICE[kind];
   const lap = kind === "laptop";
-  const bodyH = lap ? DH - 14 : DH - 96;
-  const bodyW = lap ? DW * 0.88 : DW * 0.9;
-  const left = (DW - bodyW) / 2;
-  const free = wall === "left" ? left + bodyW : left; // the end away from the hinge
-  const alu = "linear-gradient(180deg,#eef0f3 0%,#d9dce1 45%,#c3c7ce 100%)";
+  const k = Math.min((DW * 0.94) / d.w, (DH * 0.98) / d.h);
+  const fx = (d.w - d.faceW) / 2; // face's left offset inside the device box
+  const T = lap ? 12 : 22; // shell thickness, px (pre-scale)
+  const free = wall === "left" ? "right" : "left"; // the edge away from the hinge
+
   return (
     <>
-      {/* ── shell: the aluminium back and its side edge ── */}
-      <div className="fogp absolute rounded-[24px]" style={{ left, top: 0, width: bodyW, height: bodyH, transform: "translateZ(-14px)", background: alu }} />
+      {/* contact shadow on the wall */}
       <div
         className="fogp absolute"
-        style={{
-          left: wall === "left" ? free : free - 14,
-          top: 12,
-          width: 14,
-          height: bodyH - 24,
-          transformOrigin: wall === "left" ? "0 50%" : "100% 50%",
-          transform: wall === "left" ? "rotateY(90deg)" : "rotateY(-90deg)",
-          background: "linear-gradient(90deg,#f5f6f8,#b9bdc4)",
-        }}
+        style={{ left: DW * 0.06, right: DW * 0.06, bottom: -14, height: 80, background: "radial-gradient(ellipse at 50% 50%, rgba(30,20,10,0.32), transparent 70%)", transform: "translateZ(-2px)" }}
       />
-
-      {/* ── display: aluminium rim → black glass bezel → screen ── */}
-      <div className="fogp absolute rounded-[24px] p-[3px]" style={{ left, top: 0, width: bodyW, height: bodyH, background: "linear-gradient(135deg,#f7f8fa,#b8bcc3 60%,#e4e6ea)" }}>
-        <div className="relative h-full overflow-hidden rounded-[21px] bg-[#0a0a0b]" style={{ padding: lap ? "16px 16px 30px" : "14px" }}>
-          {/* camera */}
-          {lap ? (
-            <span className="absolute left-1/2 top-0 flex h-[16px] w-[86px] -translate-x-1/2 items-center justify-center rounded-b-[9px] bg-black">
-              <span className="h-[6px] w-[6px] rounded-full bg-[#1b2633] ring-1 ring-[#2c3a4c]" />
-            </span>
-          ) : (
-            <span className="absolute left-1/2 top-[4px] h-[6px] w-[6px] -translate-x-1/2 rounded-full bg-[#1b2633]" />
-          )}
-          <div className="relative h-full overflow-hidden rounded-[6px] bg-white">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={src} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover object-left-top" />
-            {/* glass: a soft diagonal glare and a faint inner edge */}
-            <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.06)_30%,rgba(255,255,255,0)_46%)]" />
-            <span className="pointer-events-none absolute inset-0 rounded-[6px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" />
-          </div>
-          {lap && <span className="absolute bottom-[8px] left-1/2 -translate-x-1/2 text-[11px] font-semibold tracking-[0.18em] text-[#4a4a50]">eArrow</span>}
+      <div className="absolute bottom-0 left-1/2" style={{ ...P3D, width: d.w, height: d.h, transform: `translateX(-50%) scale(${k})`, transformOrigin: "50% 100%" }}>
+        {/* ── the shell: back plate + its edges, so the screen has depth ── */}
+        <div className="fogp absolute" style={{ left: fx, top: 0, width: d.faceW, height: d.faceH, borderRadius: lap ? 20 : 6, background: ALU, transform: `translateZ(-${T}px)` }}>
+          {/* the logo on the back, catching light */}
+          <span className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
         </div>
-      </div>
+        {/* top edge */}
+        <div className="fogp absolute" style={{ left: fx + 10, top: 0, width: d.faceW - 20, height: T, background: "linear-gradient(180deg,#ffffff,#c9ccd1)", transformOrigin: "50% 0", transform: "rotateX(90deg)" }} />
+        {/* free side edge */}
+        <div
+          className="fogp absolute"
+          style={{
+            [free]: fx,
+            top: 10,
+            width: T,
+            height: d.faceH - 20,
+            background: "linear-gradient(90deg,#e9ebee,#a6aab1)",
+            transformOrigin: free === "right" ? "100% 50%" : "0 50%",
+            transform: free === "right" ? "rotateY(90deg)" : "rotateY(-90deg)",
+          }}
+        />
 
-      {lap ? (
-        <>
-          {/* hinge */}
-          <div className="fogp absolute rounded-b-[6px]" style={{ left: left + 30, top: bodyH, width: bodyW - 60, height: 10, background: "linear-gradient(180deg,#3a3c41,#16171a)" }} />
-          {/* keyboard deck, folded out of the wall */}
-          <div
-            className="fogp absolute overflow-hidden rounded-b-[26px] rounded-t-[6px]"
-            style={{ left: left - 22, top: bodyH + 10, width: bodyW + 44, height: 330, transformOrigin: "50% 0", transform: "rotateX(82deg)", background: alu }}
-          >
-            {/* speaker grilles */}
-            {[0, 1].map((k) => (
-              <span
-                key={k}
-                className="absolute top-[7%] h-[48%] w-[7%]"
-                style={{ [k ? "right" : "left"]: "3%", backgroundImage: "radial-gradient(#8e939b 1.1px, transparent 1.4px)", backgroundSize: "7px 7px" }}
+        {/* ── the real face ── */}
+        <div className={`fogp device ${d.cls} device-3d absolute left-0 top-0`}>
+          <div className="device-frame">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="device-screen object-cover object-left-top" src={src} alt="" loading="lazy" draggable={false} />
+            {/* glass: a glare that reads as a curved, lit surface */}
+            <span className="pointer-events-none absolute inset-[9px] rounded-[10px] bg-[linear-gradient(115deg,rgba(255,255,255,0.32)_0%,rgba(255,255,255,0.06)_28%,transparent_45%,rgba(0,0,0,0.08)_100%)]" />
+          </div>
+          <div className="device-stripe" />
+          <div className="device-header" />
+          <div className="device-sensors" />
+          <div className="device-btns" />
+        </div>
+
+        {lap ? (
+          <>
+            {/* hinge */}
+            <div className="fogp absolute" style={{ left: fx + 30, top: d.faceH - 4, width: d.faceW - 60, height: 14, borderRadius: 7, background: "linear-gradient(180deg,#4a4c51,#1b1c1f)", transform: "translateZ(-6px)" }} />
+            {/* keyboard deck, folded out of the wall toward the viewer */}
+            <div
+              className="fogp absolute overflow-hidden"
+              style={{ left: fx - 40, top: d.faceH + 4, width: d.faceW + 80, height: 420, borderRadius: "8px 8px 28px 28px", background: ALU, transformOrigin: "50% 0", transform: "rotateX(80deg)", boxShadow: "inset 0 2px 0 rgba(255,255,255,0.8)" }}
+            >
+              {[0, 1].map((s) => (
+                <span key={s} className="absolute top-[6%] h-[50%] w-[7%]" style={{ [s ? "right" : "left"]: "3%", backgroundImage: "radial-gradient(#8e939b 1.3px, transparent 1.6px)", backgroundSize: "8px 8px" }} />
+              ))}
+              {/* the keys: one painted grid rather than sixty-odd elements per laptop */}
+              <div className="absolute left-[13%] right-[13%] top-[6%] h-[50%] rounded-[12px] bg-[#1c1d20] p-[7px] shadow-[inset_0_3px_8px_rgba(0,0,0,0.6)]">
+                <div
+                  className="h-full w-full"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, #1c1d20 0 6px, transparent 6px), linear-gradient(180deg, #1c1d20 0 6px, transparent 6px), linear-gradient(180deg, #2d2e33, #17181b)",
+                    backgroundSize: "calc(100% / 14) 20%",
+                    backgroundPosition: "-6px -6px",
+                  }}
+                />
+              </div>
+              <div className="absolute bottom-[7%] left-1/2 h-[30%] w-[34%] -translate-x-1/2 rounded-[14px] bg-gradient-to-b from-[#e6e8eb] to-[#cdd1d6] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.8)]" />
+            </div>
+            {/* the deck's front lip (its thickness), standing up at the far end */}
+            <div
+              className="fogp absolute"
+              style={{ left: fx - 30, top: d.faceH + 4, width: d.faceW + 60, height: 14, borderRadius: "0 0 10px 10px", background: "linear-gradient(180deg,#b9bdc3,#868a92)", transformOrigin: "50% 0", transform: "rotateX(80deg) translateY(420px) rotateX(-90deg)" }}
+            />
+          </>
+        ) : (
+          <>
+            {/* stand arm: a front face and two side faces, so it is a solid */}
+            <div className="fogp absolute" style={{ left: d.w / 2 - 60, top: d.faceH - 6, width: 120, height: 118, background: "linear-gradient(90deg,#aeb2b9,#f1f2f4 45%,#c9ccd2 70%,#9b9fa6)", transform: "translateZ(-40px)" }} />
+            {[0, 1].map((s) => (
+              <div
+                key={s}
+                className="fogp absolute"
+                style={{ left: s ? d.w / 2 + 60 : d.w / 2 - 60, top: d.faceH - 6, width: 34, height: 118, background: "linear-gradient(90deg,#d5d8dc,#9a9ea5)", transformOrigin: "0 50%", transform: `translateZ(-40px) rotateY(${s ? -90 : -90}deg)` }}
               />
             ))}
-            {/* keyboard well with key rows */}
-            <div className="absolute left-[12%] right-[12%] top-[7%] h-[50%] rounded-[10px] bg-[#1c1d20] p-[6px] shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]">
-              <div className="flex h-full flex-col gap-[5px]">
-                {[14, 14, 13, 12, 9].map((n, r) => (
-                  <div key={r} className="flex flex-1 gap-[5px]">
-                    {Array.from({ length: n }).map((_, c) => (
-                      <span
-                        key={c}
-                        className="flex-1 rounded-[4px] bg-gradient-to-b from-[#2b2c30] to-[#18191c] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                        style={r === 4 && c === 4 ? { flexGrow: 6 } : undefined}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* trackpad */}
-            <div className="absolute bottom-[7%] left-1/2 h-[30%] w-[34%] -translate-x-1/2 rounded-[12px] bg-gradient-to-b from-[#e2e5e9] to-[#cfd3d9] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.7)]" />
-            {/* front lip */}
-            <span className="absolute inset-x-0 bottom-0 h-[5px] bg-gradient-to-b from-[#b4b8bf] to-[#8d9199]" />
-          </div>
-          {/* contact shadow on the wall beneath */}
-          <div className="fogp absolute" style={{ left: left - 10, top: bodyH + 14, width: bodyW + 20, height: 60, background: "radial-gradient(ellipse at 50% 0%, rgba(40,30,20,0.22), transparent 70%)" }} />
-        </>
-      ) : (
-        <>
-          {/* stand: an aluminium arm, then a foot that sits out from the wall */}
-          <div className="fogp absolute" style={{ left: DW / 2 - 70, top: bodyH, width: 140, height: 96, background: "linear-gradient(90deg,#b7bbc2,#eef0f3 45%,#c9ccd2 70%,#a9adb4)", clipPath: "polygon(8% 0,92% 0,100% 100%,0 100%)" }} />
-          <div
-            className="fogp absolute rounded-[14px]"
-            style={{ left: DW / 2 - 170, top: bodyH + 96, width: 340, height: 210, transformOrigin: "50% 0", transform: "rotateX(84deg)", background: "linear-gradient(180deg,#f1f2f5,#c3c7ce)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)" }}
-          />
-          <div className="fogp absolute" style={{ left: DW / 2 - 200, top: bodyH + 88, width: 400, height: 50, background: "radial-gradient(ellipse at 50% 20%, rgba(40,30,20,0.25), transparent 70%)" }} />
-        </>
-      )}
+            {/* the foot, lying flat out from the wall */}
+            <div
+              className="fogp absolute"
+              style={{ left: d.w / 2 - 150, top: d.faceH + 112, width: 300, height: 220, borderRadius: 18, background: "linear-gradient(180deg,#f3f4f6,#c3c7cd)", transformOrigin: "50% 0", transform: "translateZ(-40px) rotateX(84deg)", boxShadow: "inset 0 2px 0 rgba(255,255,255,0.9)" }}
+            />
+          </>
+        )}
+      </div>
 
       {phone && (
-        /* the phone, standing proud of the screen: titanium frame, buttons, island */
-        <div className="fogp absolute" style={{ height: DH * 0.8, top: DH * 0.1, left: wall === "left" ? DW * 0.05 : DW * 0.7, aspectRatio: "9 / 19.5", transform: "translateZ(80px)" }}>
-          <span className="absolute -left-[3px] top-[18%] h-[7%] w-[3px] rounded-l bg-[#9a9ea6]" />
-          <span className="absolute -left-[3px] top-[28%] h-[11%] w-[3px] rounded-l bg-[#9a9ea6]" />
-          <span className="absolute -right-[3px] top-[24%] h-[14%] w-[3px] rounded-r bg-[#9a9ea6]" />
-          <div className="h-full w-full rounded-[34px] p-[3px]" style={{ background: "linear-gradient(135deg,#e9eaed,#8f939b 50%,#d5d7db)" }}>
-            <div className="relative h-full w-full overflow-hidden rounded-[31px] bg-black p-[6px]">
-              <div className="relative h-full overflow-hidden rounded-[26px] bg-[#f3f6fd]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={withBasePath("/products/mobile/hr-app.webp")} alt="" loading="lazy" draggable={false} className="w-full" />
-                <span className="absolute left-1/2 top-[8px] h-[16px] w-[52px] -translate-x-1/2 rounded-full bg-black" />
-                <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.25),rgba(255,255,255,0)_40%)]" />
-              </div>
+        <div className="absolute" style={{ ...P3D, width: 428, height: 868, top: DH * 0.08, left: wall === "left" ? DW * 0.02 : DW * 0.74, transform: `translateZ(90px) scale(${(DH * 0.84) / 868})`, transformOrigin: "0 0" }}>
+          {/* the phone's thickness */}
+          <div className="fogp absolute inset-0 rounded-[68px] bg-gradient-to-b from-[#3a3540] to-[#16131a]" style={{ transform: "translateZ(-18px)" }} />
+          <div className="fogp device device-iphone-14-pro device-black absolute left-0 top-0">
+            <div className="device-frame">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="device-screen object-cover object-top" src={withBasePath("/products/mobile/hr-app.webp")} alt="" loading="lazy" draggable={false} />
             </div>
+            <div className="device-stripe" />
+            <div className="device-header" />
+            <div className="device-sensors" />
+            <div className="device-btns" />
+            <div className="device-power" />
           </div>
         </div>
       )}
@@ -330,17 +349,17 @@ function MobileDeck() {
   }, []);
 
   return (
-    <section ref={ref} className="ind-tunnel bg-canvas px-4 pb-16 pt-28">
+    <section ref={ref} className="ind-tunnel bg-[#060507] px-4 pb-16 pt-16">
       <div className="text-center">
-        <h1 className="font-spartan text-[2.5rem] font-semibold leading-[1.02] tracking-[-0.035em] text-ink">
+        <h2 className="font-spartan text-[2.2rem] font-semibold leading-[1.02] tracking-[-0.035em] text-white">
           <span className="block overflow-hidden pb-[0.06em]">
             <span data-m-h className="ind-fade block">Built for</span>
           </span>
           <span className="block overflow-hidden pb-[0.08em]">
             <span data-m-h className="ind-fade block">every industry.</span>
           </span>
-        </h1>
-        <p data-m-copy className="ind-fade mx-auto mt-4 max-w-xs text-[15px] leading-relaxed text-ink-muted">
+        </h2>
+        <p data-m-copy className="ind-fade mx-auto mt-4 max-w-xs text-[15px] leading-relaxed text-white/65">
           The same connected ecosystem, configured for the way each sector <span className="text-orange">actually works</span>.
         </p>
       </div>
@@ -429,6 +448,7 @@ function Tunnel() {
           ? (v: number) => el.style.setProperty("--fog", String(v))
           : gsap.quickSetter(el, "opacity"),
       shown: true,
+      last: -1,
     }));
     /* the doors: each device swings out of the wall as it approaches */
     const doors = (q("[data-door]") as HTMLElement[]).map((el) => ({
@@ -439,38 +459,118 @@ function Tunnel() {
     }));
     const canvas = q("[data-rings]")[0] as HTMLCanvasElement;
     const c2d = canvas.getContext("2d")!;
+    const RES = 0.25; // soft light: draw small, let the browser scale it up
     let cw = 0;
     let ch = 0;
-    let RX = 0;
-    let RY = 0;
+    let R = 0; // the corridor radius at the lens plane, in canvas px
     const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cw = canvas.clientWidth;
-      ch = canvas.clientHeight;
-      canvas.width = cw * dpr;
-      canvas.height = ch * dpr;
-      c2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-      RX = Math.min(cw * 0.42, 760);
-      RY = ch * 0.42;
+      cw = Math.max(1, Math.round(canvas.clientWidth * RES));
+      ch = Math.max(1, Math.round(canvas.clientHeight * RES));
+      canvas.width = cw;
+      canvas.height = ch;
+      R = Math.min(Math.hypot(cw, ch) * 0.34, 210);
     };
     size();
-    const drawRings = (s: number) => {
+
+    /* the ribbons: one per depth slot, each hung at its own place round the
+       corridor (kept off the middle, where the sector copy sits) */
+    const NEAR = P * 0.8;
+    const FAR = -6200;
+    const SPAN = Math.ceil((NEAR - FAR) / BAND_GAP) * BAND_GAP;
+    const TONES = ["255,106,26", "255,140,50", "232,59,0", "255,170,60", "255,84,23"];
+    const bands = Array.from({ length: SPAN / BAND_GAP }, (_, i) => ({
+      z: FAR + i * BAND_GAP,
+      th: i * 2.39996 + Math.random() * 0.5, // golden-angle spread round the walls
+      off: 1.1 + Math.random() * 0.35,
+      len: 1.3 + Math.random() * 0.6,
+      thick: 0.42 + Math.random() * 0.22,
+      tone: TONES[i % TONES.length],
+      ph: Math.random() * Math.PI * 2,
+      sp: 0.25 + Math.random() * 0.3,
+    }));
+
+    let cur = 0; // camera depth from the scroll
+    let drift = 0; // the aurora's own slow travel
+    let time = 0;
+    const fade = (e: number) => Math.pow(Math.min(1, (e - FAR) / 3600), 2) * (e > 150 ? Math.max(0, 1 - (e - 150) / 550) : 1);
+
+    const drawAurora = () => {
+      c2d.globalCompositeOperation = "source-over";
       c2d.clearRect(0, 0, cw, ch);
-      const dark = document.documentElement.dataset.theme === "dark";
-      c2d.lineWidth = 1;
-      for (let z = 0; z > -DEPTH; z -= RING_GAP) {
-        const eff = z + s;
-        if (eff > P * 0.9 || eff < -5400) continue;
-        const k = P / (P - eff);
-        const a = Math.min(1, (eff + 5400) / 1800) * (eff > 200 ? Math.max(0, 1 - (eff - 200) / 500) : 1);
-        c2d.strokeStyle = `rgba(${dark ? "90,86,84" : "214,206,199"},${a.toFixed(3)})`;
-        c2d.strokeRect(cw / 2 - RX * k + 0.5, ch / 2 - RY * k + 0.5, 2 * RX * k, 2 * RY * k);
+      c2d.globalCompositeOperation = "lighter";
+      const cx = cw / 2;
+      const cy = ch / 2;
+      for (const b of bands) {
+        let e = b.z + cur + drift;
+        e = ((((e - FAR) % SPAN) + SPAN) % SPAN) + FAR;
+        const a = fade(e);
+        if (a < 0.01) continue;
+        const k = P / (P - e);
+        /* a slow ripple: the ribbon sways round the wall, swells and twists */
+        const w = Math.sin(time * b.sp + b.ph);
+        const th = b.th + w * 0.18;
+        const r = R * k;
+        const x = cx + Math.cos(th) * r * b.off;
+        const y = cy + Math.sin(th) * r * b.off * 0.82;
+        /* keep the middle clear for the copy */
+        const d = Math.hypot(x - cx, (y - cy) / 0.82) / (Math.min(cw, ch) * 0.5);
+        const clear = Math.min(1, Math.max(0, (d - 0.35) / 0.45));
+        if (clear < 0.01) continue;
+        const L = r * b.len * (1 + 0.12 * Math.sin(time * b.sp * 1.7 + b.ph));
+        const T = r * b.thick * (1 + 0.25 * w);
+        c2d.save();
+        c2d.translate(x, y);
+        c2d.rotate(th + Math.PI / 2 + w * 0.22); // lie along the wall
+        c2d.scale(1, T / L);
+        const g = c2d.createRadialGradient(0, 0, 0, 0, 0, L);
+        g.addColorStop(0, `rgba(${b.tone},${(0.78 * a * clear).toFixed(3)})`);
+        g.addColorStop(0.4, `rgba(${b.tone},${(0.36 * a * clear).toFixed(3)})`);
+        g.addColorStop(1, `rgba(${b.tone},0)`);
+        c2d.fillStyle = g;
+        c2d.beginPath();
+        c2d.arc(0, 0, L, 0, Math.PI * 2);
+        c2d.fill();
+        c2d.restore();
       }
+    };
+
+    /* the aurora keeps moving while the section is on screen */
+    let raf = 0;
+    let prev = 0;
+    let since = 1;
+    const tick = (now: number) => {
+      const dt = prev ? Math.min(0.05, (now - prev) / 1000) : 0.016;
+      prev = now;
+      time += dt;
+      drift += dt * 120;
+      since += dt;
+      /* soft light needs no more than 30fps */
+      if (since >= 1 / 31) {
+        since = 0;
+        drawAurora();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    const run = (on: boolean) => {
+      cancelAnimationFrame(raf);
+      prev = 0;
+      if (on) raf = requestAnimationFrame(tick);
     };
     const hud = q("[data-hud]")[0] as HTMLElement;
     const hudName = q("[data-hud-name]")[0] as HTMLElement;
     const hudBar = q("[data-hud-bar]")[0] as HTMLElement;
     let station = -1;
+    const flash = q("[data-flash]")[0] as HTMLElement;
+    const leak = q("[data-leak]")[0] as HTMLElement;
+    /* a cut to a new sector: the flare flashes and a light leak sweeps the frame */
+    const cut = () => {
+      gsap.fromTo(flash, { opacity: 0, scaleX: 0.6 }, { opacity: 1, scaleX: 1.15, duration: 0.35, ease: "power2.out", yoyo: true, repeat: 1, repeatDelay: 0.15, overwrite: true });
+      gsap.fromTo(
+        leak,
+        { xPercent: 0 },
+        { xPercent: 330, duration: 1.6, ease: "power1.inOut", overwrite: true, keyframes: { opacity: [0, 1, 1, 0] } },
+      );
+    };
 
     const fog = (kind: string, eff: number) => {
       if (eff > P * 0.6) return 0; // at or behind the lens
@@ -490,11 +590,13 @@ function Tunnel() {
 
     const render = (s: number) => {
       gsap.set(world, { z: s });
-      drawRings(s);
+      cur = s;
       /* devices stay out of the title shot until the flight has begun */
       const gate = Math.min(1, Math.max(0, (s - 120) / 520));
       planes.forEach((p) => {
-        const o = fog(p.kind, p.z + s) * (p.kind === "shot" ? gate : 1);
+        const o = Math.round(fog(p.kind, p.z + s) * (p.kind === "shot" ? gate : 1) * 200) / 200;
+        if (o === p.last) return;
+        p.last = o;
         p.set(o);
         const vis = o > 0.002;
         if (vis !== p.shown) {
@@ -518,6 +620,7 @@ function Tunnel() {
         gsap.to(hud, { autoAlpha: idx >= 0 ? 1 : 0, duration: 0.4 });
         if (idx >= 0) {
           hudName.textContent = STATIONS[idx].ind.name;
+          cut();
         }
       }
     };
@@ -534,6 +637,17 @@ function Tunnel() {
         .fromTo("[data-t-copy]", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1, stagger: 0.1 }, 0.6);
 
       render(0);
+      /* widescreen bars close in while the stage is pinned */
+      gsap.set("[data-bar]", { scaleY: 0 });
+      ScrollTrigger.create({
+        trigger: track,
+        start: "top top",
+        end: "bottom bottom",
+        onToggle: (self) => gsap.to("[data-bar]", { scaleY: self.isActive ? 1 : 0, duration: 0.9, ease: "power3.inOut", overwrite: true }),
+      });
+      /* the resting flare breathes */
+      gsap.to("[data-flare]", { scaleX: 1.12, opacity: 0.75, duration: 3.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      ScrollTrigger.create({ trigger: track, start: "top bottom", end: "bottom top", onToggle: (self) => run(self.isActive) });
       gsap.to(cameraZ, {
         s: end,
         ease: "none",
@@ -549,7 +663,10 @@ function Tunnel() {
         render(cameraZ.s);
       };
       window.addEventListener("resize", onResize);
-      return () => window.removeEventListener("resize", onResize);
+      return () => {
+        window.removeEventListener("resize", onResize);
+        run(false);
+      };
     }, track);
 
     return () => ctx.revert();
@@ -576,21 +693,27 @@ function Tunnel() {
   };
 
   return (
-    <section ref={trackRef} className="ind-tunnel relative bg-canvas" style={{ height: `${INDUSTRIES.length * 95 + 140}svh` }}>
+    <section ref={trackRef} className="ind-tunnel relative bg-[#060507] text-white" style={{ height: `${INDUSTRIES.length * 95 + 140}svh` }}>
+      {/* a dark lead-in at the very top of the track: the aurora rises out of the
+          landing's dark instead of starting at a hard edge. It sits in the
+          track, not the sticky stage, so it scrolls away as the stage pins */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-2 z-20 h-[60svh] bg-gradient-to-b from-[#060507] via-[#060507]/70 to-transparent" />
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        {/* static converging lines — they never move on screen */}
-        <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-          {[
-            [0, 0], [100, 0], [0, 100], [100, 100],
-            [30, 0], [70, 0], [30, 100], [70, 100],
-            [0, 28], [0, 72], [100, 28], [100, 72],
-          ].map(([x, y], i) => (
-            <line key={i} x1={x} y1={y} x2={50} y2={50} stroke="var(--color-border-strong)" strokeWidth={i < 4 ? 1.2 : 0.8} vectorEffect="non-scaling-stroke" />
-          ))}
-        </svg>
-
-        {/* the frames, stroked per frame */}
+        {/* the landing's orange light, glowing from the end of the tunnel */}
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 34% 30% at 50% 50%, rgba(255,106,26,0.32), rgba(232,59,0,0.12) 45%, transparent 75%), radial-gradient(ellipse 80% 70% at 50% 120%, rgba(232,59,0,0.22), transparent 70%)" }} />
+        {/* the aurora, drawn per frame */}
         <canvas data-rings aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
+
+        {/* anamorphic flare across the vanishing point: a resting streak, and a brighter one for cuts.
+            The lines part in the middle, so they read as passing behind the sector copy */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2">
+          <div data-flare className="relative mx-auto h-[90px] w-[88vw] opacity-50" style={{ background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,140,50,0.35), transparent 70%)" }}>
+            <div className="absolute inset-x-[6%] top-1/2 h-px -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(255,177,59,0.55) 30%, rgba(255,230,200,0.8) 36%, transparent 43%, transparent 57%, rgba(255,230,200,0.8) 64%, rgba(255,177,59,0.55) 70%, transparent)" }} />
+          </div>
+          <div data-flash className="absolute inset-x-0 top-1/2 h-[140px] -translate-y-1/2 opacity-0" style={{ background: "radial-gradient(ellipse 48% 18% at 50% 50%, rgba(255,200,140,0.7), rgba(255,106,26,0.25) 45%, transparent 75%)" }}>
+            <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(255,210,160,0.9) 26%, #fff5ea 36%, transparent 43%, transparent 57%, #fff5ea 64%, rgba(255,210,160,0.9) 74%, transparent)" }} />
+          </div>
+        </div>
 
         {/* the camera */}
         <div data-cam className="absolute inset-0" style={{ perspective: `${P}px`, transformStyle: "preserve-3d" }}>
@@ -624,27 +747,16 @@ function Tunnel() {
 
             {/* the title, in the mouth of the tunnel */}
             <div data-z={0} data-kind="title" className="absolute w-[min(900px,88vw)] text-center" style={{ transform: "translate3d(-50%, -50%, 0)" }}>
-              <h1 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-ink sm:text-[4rem] lg:text-[5.2rem]">
+              <p data-t-copy className="ind-fade text-[12px] font-semibold uppercase tracking-[0.2em] text-orange">Eight sectors · one ecosystem</p>
+              <h2 className="font-spartan mt-4 text-[2.2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[3rem]">
                 <span className="block overflow-hidden pb-[0.06em]">
-                  <span data-t className="ind-fade block">Built for</span>
+                  <span data-t className="ind-fade block">Fly through every sector</span>
                 </span>
-                <span className="block overflow-hidden pb-[0.08em]">
-                  <span data-t className="ind-fade block">every industry.</span>
-                </span>
-              </h1>
-              <p data-t-copy className="ind-fade mx-auto mt-5 max-w-md text-[15px] leading-relaxed text-ink-muted sm:text-[17px]">
-                The same connected ecosystem, configured for the way each sector{" "}
-                <span className="text-orange">actually works</span>.
+              </h2>
+              <p data-t-copy className="ind-fade mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
+                Keep scrolling
+                <span aria-hidden className="ind-bob text-orange">↓</span>
               </p>
-              <div data-t-copy className="ind-fade mt-7 flex items-center justify-center gap-5">
-                <a href="/contact" className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-canvas transition-transform duration-300 hover:-translate-y-0.5">
-                  Talk to an expert
-                </a>
-                <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
-                  Scroll to explore
-                  <span aria-hidden className="ind-bob">↓</span>
-                </span>
-              </div>
             </div>
 
             {/* the sectors */}
@@ -655,22 +767,21 @@ function Tunnel() {
                   id={`ind-${i}`}
                   data-z={z}
                   data-kind="text"
-                  className="absolute w-[min(760px,88vw)] rounded-[40px] px-6 py-10 text-center"
+                  className="absolute w-[min(720px,80vw)] px-6 py-10 text-center"
                   style={{
                     transform: `translate3d(-50%, -50%, ${z}px)`,
                     visibility: "hidden",
                     opacity: 0,
-                    background: "radial-gradient(ellipse at center, var(--color-canvas) 55%, transparent 72%)",
                   }}
                 >
-                  <h2 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.03em] text-ink sm:text-[4rem] lg:text-[4.8rem]">
+                  <h2 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.03em] text-white sm:text-[4rem] lg:text-[4.8rem]">
                     {ind.name}
                   </h2>
-                  <p className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-ink-muted sm:text-[17px]">{ind.line}</p>
+                  <p className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-white/65 sm:text-[17px]">{ind.line}</p>
                   <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.2em] text-orange">Related systems</p>
                   <div className="mt-3 flex flex-wrap justify-center gap-2">
                     {systemsFor(ind).map((p) => (
-                      <span key={p} className="rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-canvas">
+                      <span key={p} className="rounded-full bg-white/[0.08] px-4 py-2 text-[13px] font-semibold text-white ring-1 ring-white/15">
                         {PRODUCT_FULL[p]}
                       </span>
                     ))}
@@ -681,13 +792,26 @@ function Tunnel() {
           </div>
         </div>
 
-        {/* HUD: where you are */}
-        <div data-hud className="pointer-events-none absolute inset-x-0 bottom-6 z-10 mx-auto w-[min(520px,88vw)] opacity-0">
-          <p data-hud-name className="text-center text-[12px] font-semibold text-ink-muted" />
-          <div className="mt-2 h-[2px] overflow-hidden rounded-full bg-black/10">
-            <span data-hud-bar className="block h-full origin-left scale-x-0 bg-gradient-to-r from-[#e83b00] to-[#ffb13b]" />
+        {/* film finish: a vignette, and a warm light leak that sweeps the frame on each cut */}
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0,0,0,0.65) 100%)" }} />
+        <div
+          aria-hidden
+          data-leak
+          className="pointer-events-none absolute -left-[50vw] top-0 h-full w-[45vw] opacity-0 will-change-transform"
+          style={{ background: "radial-gradient(ellipse 50% 60% at 50% 50%, rgba(255,150,60,0.22), rgba(232,59,0,0.08) 50%, transparent 75%)" }}
+        />
+
+        {/* widescreen bars; the lower one carries the sector as a subtitle */}
+        <div aria-hidden data-bar className="pointer-events-none absolute inset-x-0 top-0 z-30 h-[calc(76px+7vh)] origin-top bg-black" />
+        <div data-bar className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-[11vh] origin-bottom items-center justify-center bg-black">
+          <div data-hud className="w-[min(520px,88vw)] opacity-0">
+            <p data-hud-name className="text-center text-[12px] font-medium uppercase tracking-[0.32em] text-white/70" />
+            <div className="mt-2.5 h-px overflow-hidden bg-white/10">
+              <span data-hud-bar className="block h-full origin-left scale-x-0 bg-gradient-to-r from-[#e83b00] to-[#ffb13b]" />
+            </div>
           </div>
         </div>
+        <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 z-30 opacity-[0.035]" />
       </div>
     </section>
   );
@@ -698,9 +822,9 @@ function StaticList() {
   return (
     <section className="bg-canvas px-6 pb-20 pt-32">
       <div className="mx-auto max-w-4xl text-center">
-        <h1 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-ink sm:text-[4rem]">
-          Built for every industry.
-        </h1>
+        <h2 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-ink sm:text-[4rem]">
+          Built for every industry
+        </h2>
         <p className="mx-auto mt-5 max-w-md text-ink-muted">
           The same connected ecosystem, configured for the way each sector actually works.
         </p>
@@ -727,6 +851,7 @@ function StaticList() {
 export default function IndustriesContent() {
   return (
     <>
+      <IndustriesLanding />
       <div className="hidden md:block motion-reduce:hidden">
         <Tunnel />
       </div>
@@ -737,7 +862,7 @@ export default function IndustriesContent() {
         <StaticList />
       </div>
       <PageCta
-        title="Discover how we help businesses grow."
+        title="Discover how we help businesses grow"
         body="Every sector runs differently. Tell us about yours and we'll show you what changes first."
         primary={{ label: "Talk to an Expert", href: "/contact" }}
         secondary={{ label: "See Customer Stories", href: "/customer-success" }}

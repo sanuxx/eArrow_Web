@@ -430,7 +430,7 @@ export default function CinematicHero() {
           </div>
 
           {/* ── Headline, copy, actions ── */}
-          <div data-px="6" className="absolute inset-x-0 top-0 motion-reduce:relative">
+          <div data-px="6" className="absolute inset-x-0 top-0 z-20 motion-reduce:relative">
             <div className="mx-auto flex max-w-5xl flex-col items-center px-6 pt-[clamp(108px,15vh,160px)] text-center motion-reduce:pb-32">
               <h1
                 data-title
@@ -454,7 +454,7 @@ export default function CinematicHero() {
                   prefetch={false}
                   data-magnetic
                   href="/contact"
-                  className="inline-flex items-center rounded-full bg-[#2a0d03]/35 px-7 py-3.5 font-mono text-[12px] font-medium uppercase tracking-[0.16em] text-white ring-1 ring-white/30 backdrop-blur-md transition-colors hover:bg-[#2a0d03]/55"
+                  className="inline-flex items-center rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-7 py-3.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_28px_-8px_rgba(232,59,0,0.75),inset_0_1px_0_rgba(255,255,255,0.4)] ring-1 ring-white/25 transition-[box-shadow,filter] duration-300 hover:shadow-[0_14px_36px_-8px_rgba(232,59,0,0.9),inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-110"
                 >
                   See Features
                 </Link>
@@ -478,7 +478,7 @@ export default function CinematicHero() {
           {/* ── The arc of product screens ── */}
           <div data-px="16" className="pointer-events-none absolute inset-0 motion-reduce:hidden">
             <div data-wall className="cine-wall absolute inset-0" style={{ perspective: "1500px" }}>
-              <div data-wall-lift className="cine-wall-lift absolute left-1/2 top-[71%] h-0 w-0" style={{ transformStyle: "preserve-3d" }}>
+              <div data-wall-lift className="cine-wall-lift absolute left-1/2 top-[71%] h-0 w-0 [@media(min-aspect-ratio:16/9)]:top-[77%] [@media(min-aspect-ratio:2/1)]:top-[80%]" style={{ transformStyle: "preserve-3d" }}>
                 <div style={{ transform: "rotateX(-7deg)", transformStyle: "preserve-3d" }}>
                   <div data-ring-spin style={{ transformStyle: "preserve-3d" }}>
                     <div data-ring className="relative" style={{ transformStyle: "preserve-3d" }}>

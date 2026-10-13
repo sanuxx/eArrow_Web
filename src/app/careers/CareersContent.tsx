@@ -43,7 +43,7 @@ export default function CareersContent() {
       <PageHero
         index="08"
         eyebrow="Careers"
-        title="Build technology organisations actually run on."
+        title="Build technology organisations actually run on"
         lead="We're looking for people who want their work in production, in front of real users, solving problems that genuinely cost businesses time and money."
       />
 
@@ -51,7 +51,7 @@ export default function CareersContent() {
         tone="sunken"
         index="09"
         label="Working here"
-        title="What you can expect."
+        title="What you can expect"
       >
         <NumberedBlocks items={WHY} />
       </PageSection>
@@ -75,7 +75,7 @@ export default function CareersContent() {
         </div>
       </PageSection>
 
-      <PageSection index="11" label="Open positions" title="Roles we're hiring for.">
+      <PageSection index="11" label="Open positions" title="Roles we're hiring for">
         {/* No vacancies are invented — the sheet asks for a positions list, and
             the honest version of that until the client supplies one is an open
             application route. */}
@@ -98,7 +98,7 @@ export default function CareersContent() {
       </PageSection>
 
       <PageCta
-        title="Talented people build better systems."
+        title="Talented people build better systems"
         body="Tell us what you're good at and where you want to take it next."
         primary={{ label: "Get in touch", href: "/contact" }}
         secondary={{ label: "About eArrow", href: "/about" }}

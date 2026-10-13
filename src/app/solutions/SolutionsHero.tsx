@@ -12,7 +12,7 @@ import { withBasePath } from "@/lib/basePath";
  * cards lifted from the app's own features (leave balances, check-in).
  *
  * Motion (GSAP; reduced motion gets the settled frame):
- *   entrance — badge, then the headline line by line, copy, actions; the
+ *   entrance — the headline line by line, copy, actions; the
  *              phone lifts and untilts into place; the cards glide in
  *   ambient  — the cards float on out-of-step sines
  *   pointer  — the phone tilts toward the cursor
@@ -63,7 +63,6 @@ export default function SolutionsHero({
       /* ── Entrance ── */
       const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
       intro
-        .fromTo("[data-badge]", { opacity: 0, y: 16, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 1 }, 0.1)
         .fromTo("[data-word]", { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.06 }, 0.2)
         .fromTo("[data-copy]", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 1, stagger: 0.1 }, 0.75)
         .fromTo(
@@ -123,7 +122,7 @@ export default function SolutionsHero({
   }, []);
 
   return (
-    <section ref={rootRef} className="sol-hero relative isolate min-h-[100svh] overflow-hidden bg-canvas pt-28 lg:pt-32">
+    <section ref={rootRef} className="sol-hero relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-canvas pt-24 lg:pt-28">
       {/* ── The glow: static gradients, painted once ── */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div
@@ -147,20 +146,8 @@ export default function SolutionsHero({
 
       {/* ── Type ── */}
       <div data-type className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 text-center">
-        <div
-          data-badge
-          className="sol-fade inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 py-1 pl-1 pr-4 text-[12px] text-ink-muted shadow-[0_6px_20px_-10px_rgba(232,59,0,0.4)]"
-        >
-          <span className="inline-flex items-center gap-1 rounded-full bg-orange/15 px-2.5 py-0.5 font-semibold text-orange">
-            <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor" aria-hidden>
-              <path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z" />
-            </svg>
-            New
-          </span>
-          Arrow HR mobile app
-        </div>
 
-        <h1 className="font-spartan mt-6 text-[2.05rem] font-medium leading-[1.06] tracking-[-0.03em] text-ink-muted sm:text-[3.4rem] lg:text-[4.1rem]">
+        <h1 className="font-spartan text-[2.05rem] font-medium leading-[1.06] tracking-[-0.03em] text-ink-muted sm:text-[3.4rem] lg:text-[4.1rem]">
           <span className="block overflow-hidden pb-[0.08em]">
             <span data-word className="sol-fade inline-block">
               <span className="bg-gradient-to-r from-[#d13400] via-[#e83b00] to-[#ff9820] bg-clip-text font-semibold text-transparent">
@@ -171,7 +158,7 @@ export default function SolutionsHero({
           </span>
           <span className="block overflow-hidden pb-[0.08em]">
             <span data-word className="sol-fade inline-block">
-              Run, Optimise &amp; <span className="font-bold text-ink">Grow.</span>
+              Run, Optimise &amp; <span className="font-bold text-ink">Grow</span>
             </span>
           </span>
         </h1>
@@ -200,7 +187,7 @@ export default function SolutionsHero({
       </div>
 
       {/* ── The phone and its cards ── */}
-      <div className="relative z-10 mx-auto mt-14 h-[56vh] min-h-[420px] max-w-6xl px-6">
+      <div className="relative z-10 mx-auto mt-10 min-h-[260px] w-full max-w-6xl flex-1 px-6 lg:mt-12">
         {/* left cards */}
         <div data-card-wrap="left" className="absolute left-6 top-[8%] hidden gap-3 md:flex lg:left-10">
           {[

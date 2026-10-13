@@ -36,28 +36,52 @@ const SALES_EMAIL = "sales@earrow.lk";
 export default function ContactContent() {
   const [intent, setIntent] = useState(ROUTES[0].key);
 
-  /*
-   * The site is a static export, so there is no server to POST to. Rather than
-   * ship a form that silently discards what someone types, submitting composes
-   * a pre-filled mail to the sales address — the enquiry actually arrives, and
-   * the chosen route travels with it in the subject line.
-   */
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const body = [
-      `Name: ${data.get("name") ?? ""}`,
-      `Organisation: ${data.get("organisation") ?? ""}`,
-      `Email: ${data.get("email") ?? ""}`,
-      `Phone: ${data.get("phone") ?? ""}`,
-      "",
-      String(data.get("message") ?? ""),
-    ].join("\n");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
-    window.location.href = `mailto:${SALES_EMAIL}?subject=${encodeURIComponent(
-      `${intent} — eArrow enquiry`
-    )}&body=${encodeURIComponent(body)}`;
+  /*
+   * The site is a static export with no server of its own, so submissions go
+   * through FormSubmit (formsubmit.co), a form-to-email relay, straight to the
+   * sales inbox. The very first submission makes FormSubmit send a one-time
+   * activation email to that address; once it is confirmed, every enquiry is
+   * delivered. If the relay is unreachable, the visitor gets a pre-filled mail
+   * to the same address instead, so nothing typed is ever lost.
+   */
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const fields = {
+      Enquiry: intent,
+      Name: String(data.get("name") ?? ""),
+      Organisation: String(data.get("organisation") ?? ""),
+      Email: String(data.get("email") ?? ""),
+      Phone: String(data.get("phone") ?? ""),
+      Message: String(data.get("message") ?? ""),
+    };
+    if (data.get("_honey")) return; // a bot filled the hidden field
+    setStatus("sending");
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${SALES_EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          ...fields,
+          _subject: `${intent} — eArrow website enquiry`,
+          _replyto: fields.Email,
+          _template: "table",
+          _captcha: "false",
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || String(json.success) === "false") throw new Error(json.message || "send failed");
+      setStatus("sent");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
   }
+
+  const mailtoFallback = `mailto:${SALES_EMAIL}?subject=${encodeURIComponent(`${intent} — eArrow enquiry`)}`;
 
   const field =
     "mt-2 w-full rounded-tile border border-border bg-surface px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-orange";
@@ -69,7 +93,7 @@ export default function ContactContent() {
       <PageHero
         index="09"
         eyebrow="Contact"
-        title="Let's talk about what you're trying to fix."
+        title="Let's talk about what you're trying to fix"
         lead="Tell us how you operate today. We'll tell you honestly whether we're the right partner for it."
       />
 
@@ -178,24 +202,41 @@ export default function ContactContent() {
               />
             </label>
 
+            {/* honeypot: hidden from people, irresistible to bots */}
+            <input type="text" name="_honey" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+
             <button
               type="submit"
-              className="group relative mt-7 inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-orange to-amber px-7 py-4 text-sm font-semibold text-white shadow-[var(--shadow-ember)] transition-transform duration-300 hover:scale-[1.02] sm:w-auto"
+              disabled={status === "sending"}
+              className="group relative mt-7 disabled:cursor-wait disabled:opacity-70 inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-orange to-amber px-7 py-4 text-sm font-semibold text-white shadow-[var(--shadow-ember)] transition-transform duration-300 hover:scale-[1.02] sm:w-auto"
             >
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <span className="relative">Send enquiry</span>
+              <span className="relative">{status === "sending" ? "Sending…" : "Send enquiry"}</span>
               <ArrowUpRight className="relative h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
 
-            <p className="relative mt-4 text-xs leading-relaxed text-ink-soft">
-              Opens your mail client with the enquiry pre-filled, addressed to{" "}
-              {SALES_EMAIL}.
+            <p role="status" aria-live="polite" className="relative mt-4 text-sm leading-relaxed">
+              {status === "sent" && (
+                <span className="font-medium text-[#16a34a]">Thank you — your enquiry has been sent to our team. We&apos;ll be in touch shortly.</span>
+              )}
+              {status === "error" && (
+                <span className="text-ink-muted">
+                  We couldn&apos;t send that just now.{" "}
+                  <a href={mailtoFallback} className="font-semibold text-orange underline underline-offset-4">
+                    Email {SALES_EMAIL} instead
+                  </a>
+                  .
+                </span>
+              )}
+              {(status === "idle" || status === "sending") && (
+                <span className="text-xs text-ink-soft">Your enquiry goes straight to {SALES_EMAIL}.</span>
+              )}
             </p>
           </motion.form>
         </div>
       </PageSection>
 
-      <PageSection index="11" label="Direct" title="Reach us directly.">
+      <PageSection index="11" label="Direct" title="Reach us directly">
         <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-3">
           {[
             { k: "Email", v: SALES_EMAIL, href: `mailto:${SALES_EMAIL}` },

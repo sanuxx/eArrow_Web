@@ -112,7 +112,7 @@ export default function WhyEarrow() {
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="05">Why eArrow</SectionLabel>
-        <SectionHeading>Experience that creates impact.</SectionHeading>
+        <SectionHeading>Experience that creates impact</SectionHeading>
 
         <div className="mt-6 grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-14">
           {/* ── Plane 2: the headline figure ─────────────────────────────── */}

@@ -38,9 +38,9 @@ const BORDER_ONLY: React.CSSProperties = {
   mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
 };
 
-const LINE_1 = "Built for today.";
+const LINE_1 = "Built for today";
 const LINE_2A = "Ready for ";
-const LINE_2B = "what's next.";
+const LINE_2B = "what's next";
 
 function Chars({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
   return (

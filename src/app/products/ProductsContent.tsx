@@ -53,7 +53,7 @@ const PRODUCTS: Product[] = [
     id: "WF-01",
     label: "Arrow HR & Payroll",
     short: "HR & Payroll",
-    tagline: "One record. Every payday, on time.",
+    tagline: "One record, every payday, on time",
     domain: "Workforce",
     blurb:
       "One employee record from hiring through payroll, attendance and appraisals. The same person is never re-entered into four systems.",
@@ -86,7 +86,7 @@ const PRODUCTS: Product[] = [
     id: "HE-02",
     label: "Arrow Higher Education Management System",
     short: "Higher Education",
-    tagline: "From first enquiry to graduation day.",
+    tagline: "From first enquiry to graduation day",
     domain: "Higher Education",
     blurb:
       "Admissions, student records, billing and academic workflows on one platform, from enquiry through to graduation.",
@@ -122,7 +122,7 @@ const PRODUCTS: Product[] = [
     id: "TK-03",
     label: "Arrow Ticketing System",
     short: "Ticketing",
-    tagline: "Every request owned until it's resolved.",
+    tagline: "Every request owned until it's resolved",
     domain: "Service Desk",
     blurb:
       "Every request logged, routed to the right team and tracked to resolution, with SLAs that are measured rather than hoped for.",
@@ -158,7 +158,7 @@ const PRODUCTS: Product[] = [
     id: "CR-04",
     label: "Arrow CRM",
     short: "CRM",
-    tagline: "See the whole pipeline, not just the last call.",
+    tagline: "See the whole pipeline, not just the last call",
     domain: "Customer Relationships",
     blurb:
       "Leads, accounts and every conversation with them in one place, so the pipeline is something you can see rather than reconstruct.",
@@ -191,7 +191,7 @@ const PRODUCTS: Product[] = [
     id: "UC-05",
     label: "Arrow Uni Connect",
     short: "Uni Connect",
-    tagline: "Turn every enquiry into an enrolment.",
+    tagline: "Turn every enquiry into an enrolment",
     domain: "Student Recruitment",
     blurb:
       "Every enquiry, from exhibitions, agents, referrals and the website, tracked from first contact to enrolment, with follow-ups that escalate themselves when they slip.",
@@ -225,7 +225,7 @@ const PRODUCTS: Product[] = [
     id: "WM-06",
     label: "Arrow Workflow Management System",
     short: "Workflow",
-    tagline: "Approvals that move on their own.",
+    tagline: "Approvals that move on their own",
     domain: "Process Automation",
     blurb:
       "Approvals and internal processes mapped once and run automatically, with every step visible and every decision on record.",
@@ -261,7 +261,7 @@ const PRODUCTS: Product[] = [
     id: "SS-07",
     label: "Arrow School Management System",
     short: "School",
-    tagline: "The whole school, run from one place.",
+    tagline: "The whole school, run from one place",
     domain: "School Administration",
     blurb:
       "Enrolment, attendance, fees, exams and parent communication for schools, run from one system instead of registers and ledgers.",
@@ -435,8 +435,47 @@ export default function ProductsContent() {
       <PageHero
         index="03"
         eyebrow="Products & Platforms"
-        title="One ecosystem. Multiple possibilities."
-        lead="Seven platforms built on shared foundations. Adopt one, or connect them into a single digital operating layer."
+        title={
+          <>
+            One ecosystem,{" "}
+            <span className="bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] bg-clip-text text-transparent">
+              multiple possibilities
+            </span>
+          </>
+        }
+        lead={
+          <>
+            Seven platforms built on shared foundations. Adopt one, or connect them into a single digital operating layer.
+            {/* spans and links only: this sits inside the hero's <p> */}
+            <span className="mt-8 flex flex-wrap items-center gap-3">
+              <a
+                href="#workforce"
+                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_-8px_rgba(232,59,0,0.7),inset_0_1px_0_rgba(255,255,255,0.4)] transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                Explore the platforms
+                <span aria-hidden className="transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+              </a>
+              <a
+                href="/contact"
+                className="inline-flex items-center rounded-full border border-border-strong bg-surface px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-orange hover:text-orange"
+              >
+                Book a demo
+              </a>
+            </span>
+            <span className="mt-9 flex flex-wrap gap-x-10 gap-y-4">
+              {[
+                ["7", "Platforms"],
+                ["1", "Shared core"],
+                ["Web + mobile", "On every device"],
+              ].map(([n, l]) => (
+                <span key={l} className="block">
+                  <span className="font-spartan block text-[1.7rem] font-semibold leading-none tracking-[-0.02em] text-ink">{n}</span>
+                  <span className="mt-1.5 block text-[12.5px] text-ink-soft">{l}</span>
+                </span>
+              ))}
+            </span>
+          </>
+        }
         /*
           The ecosystem as a ring rather than a grid. Seven platforms plus the
           identity mark orbiting one centre says "these are one system" in a
@@ -590,7 +629,7 @@ export default function ProductsContent() {
       })}
 
       <PageCta
-        title="See it running on your data."
+        title="See it running on your data"
         body="Book a walkthrough and we'll demo the platform against a workflow you actually run today."
         primary={{ label: "Book a Demo", href: "/contact" }}
         secondary={{ label: "Explore Solutions", href: "/solutions" }}

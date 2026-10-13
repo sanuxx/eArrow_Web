@@ -20,7 +20,7 @@ export default function FeaturedProduct() {
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="03">Featured Product</SectionLabel>
         <SectionHeading>
-          Software that works the way your business works.
+          Software that works the way your business works
         </SectionHeading>
 
         <motion.div
@@ -43,7 +43,7 @@ export default function FeaturedProduct() {
               </div>
 
               <h3 className="mt-6 font-heading text-[1.613rem] font-extrabold leading-[1.1] tracking-[-0.035em] text-ink sm:text-[1.935rem]">
-                Simplify workforce management.
+                Simplify workforce management
               </h3>
               <p className="mt-5 max-w-md text-base leading-[1.75] text-ink-muted">
                 Manage employees, payroll, attendance and reporting from one

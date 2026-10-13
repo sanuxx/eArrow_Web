@@ -74,7 +74,7 @@ export default function TechnologyContent() {
       <StackSection layers={LAYERS} security={SECURITY} />
 
       <PageCta
-        title="Bring the next decade forward."
+        title="Bring the next decade forward"
         body="Talk to our architects about where AI, automation and cloud actually fit your operation, and where they don't yet."
         primary={{ label: "Request a Consultation", href: "/contact" }}
         secondary={{ label: "Explore Solutions", href: "/solutions" }}

@@ -71,7 +71,7 @@ export default function Insights() {
     <section id="insights" className="relative bg-canvas py-10 lg:py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="07">Insights</SectionLabel>
-        <SectionHeading>Ideas shaping tomorrow&rsquo;s business.</SectionHeading>
+        <SectionHeading>Ideas shaping tomorrow&rsquo;s business</SectionHeading>
 
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
           {ARTICLES.map((a, i) => (

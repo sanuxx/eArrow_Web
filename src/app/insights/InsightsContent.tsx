@@ -30,7 +30,7 @@ export default function InsightsContent() {
       <PageHero
         index="07"
         eyebrow="Insights"
-        title="Perspectives from the people building the systems."
+        title="Perspectives from the people building the systems"
         lead="Practical writing on technology, operations and transformation, written by the team doing the implementations."
       />
 
@@ -38,7 +38,7 @@ export default function InsightsContent() {
         tone="sunken"
         index="08"
         label="Categories"
-        title="What we write about."
+        title="What we write about"
       >
         <div className="mt-7 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {CATEGORIES.map((category, i) => (
@@ -83,7 +83,7 @@ export default function InsightsContent() {
       </PageSection>
 
       <PageCta
-        title="Get the thinking before everyone else."
+        title="Get the thinking before everyone else"
         body="We publish what we learn from real implementations. No newsletter filler."
         primary={{ label: "Talk to an Expert", href: "/contact" }}
       />

@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { PageCta } from "@/components/page-kit";
 import CustomerSuccessHero from "./CustomerSuccessHero";
-import RewireScene from "./RewireScene";
+import StoryPath from "./StoryPath";
+import CaseStudy from "./CaseStudy";
 
 /*
  * From the brief's "Customer Success" sheet.
@@ -56,69 +56,12 @@ export default function CustomerSuccessContent() {
     <>
       <CustomerSuccessHero />
 
-      {/* ── The four questions ─────────────────────────────────────────────
-          Set on a rail: a hairline runs the width with a node above each
-          column, so four separate cards read as one method with four beats.
-          On the stacked column the rail turns vertical and does the same job
-          down the left edge. */}
-      <section className="relative overflow-hidden bg-canvas-alt py-14 lg:py-20">
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-orange">
-            How we tell it
-          </p>
-          <h2 className="mt-5 max-w-2xl font-heading text-[1.8rem] font-extrabold leading-[1.06] tracking-[-0.038em] text-ink sm:text-[2.3rem] lg:text-[2.6rem]">
-            Every story answers the same four questions.
-          </h2>
+      <StoryPath stages={STAGES} />
 
-          <div className="relative mt-14">
-            {/* The rail. Horizontal above the columns on desktop, down the
-                left edge when they stack — one element, two orientations,
-                because it is decoration and can be redrawn by breakpoint. */}
-            <span
-              aria-hidden
-              className="absolute left-0 top-0 h-full w-px bg-border lg:h-px lg:w-full"
-            />
-
-            <div className="grid grid-cols-1 gap-y-10 lg:grid-cols-4 lg:gap-x-10">
-              {STAGES.map((stage, i) => (
-                <motion.div
-                  key={stage.label}
-                  initial={{ opacity: 0, y: 22 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-70px" }}
-                  transition={{
-                    duration: 0.55,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: i * 0.09,
-                  }}
-                  className="relative pl-7 lg:pl-0 lg:pt-8"
-                >
-                  {/* The node where this beat meets the rail. */}
-                  <span
-                    aria-hidden
-                    className="absolute left-0 top-1.5 h-2 w-2 -translate-x-1/2 rounded-full bg-orange lg:left-0 lg:top-0 lg:-translate-x-0 lg:-translate-y-1/2"
-                  />
-
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
-                    {stage.label}
-                  </p>
-                  <h3 className="mt-3 font-heading text-[1.15rem] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink lg:text-[1.28rem]">
-                    {stage.question}
-                  </h3>
-                  <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">
-                    {stage.body}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <RewireScene />
+      <CaseStudy />
 
       <PageCta
-        title="Your operation could be the next story."
+        title="Your operation could be the next story"
         body="Tell us what's slowing you down today, and we'll show you what the after looks like."
         primary={{ label: "Request a Consultation", href: "/contact" }}
         secondary={{ label: "Explore Industries", href: "/industries" }}

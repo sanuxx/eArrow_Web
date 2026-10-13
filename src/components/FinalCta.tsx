@@ -95,13 +95,13 @@ export default function FinalCta() {
           {/*
             The `{" "}` is load-bearing. JSX strips the newlines either side of
             the <br/>, so without it the heading's text content runs together as
-            "…your people.Let's enable…" for assistive tech and search engines.
+            "…your peopleLet's enable…" for assistive tech and search engines.
             A space at the start of a wrapped line is not rendered, so the
             headline looks identical.
           */}
-          Let&rsquo;s empower your people.
+          Let&rsquo;s empower your people
           <br />{" "}
-          Let&rsquo;s enable your growth.
+          Let&rsquo;s enable your growth
         </h2>
 
         <div className="mt-12 flex flex-col items-center gap-6">

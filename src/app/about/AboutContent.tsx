@@ -6,7 +6,7 @@ import { PageCta } from "@/components/page-kit";
 import { withBasePath } from "@/lib/basePath";
 import { ArrowUpRight, QMarkLight } from "@/components/ArrowMark";
 import { SOLUTION_ART } from "@/components/solution-art";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 /*
  * About eArrow. Content from the brief's "About Us" sheet.
@@ -159,7 +159,7 @@ function Hero() {
         <div className="flex flex-col justify-center pb-4 lg:pb-16">
           <p data-a-copy className="ab-fade text-[13px] font-medium text-orange">About eArrow</p>
           <h1 className="font-spartan mt-5 text-[2.5rem] font-semibold leading-[1.02] tracking-[-0.03em] text-ink sm:text-[3.4rem] lg:text-[4rem]">
-            {["Empowering", "organisations through", "intelligent technology."].map((l, i) => (
+            {["Empowering", "organisations through", "intelligent technology"].map((l, i) => (
               <span key={l} className="block overflow-hidden pb-[0.08em]">
                 <span data-a-line className={`ab-fade block ${i === 2 ? "bg-gradient-to-r from-[#d13400] via-[#e83b00] to-[#ff9820] bg-clip-text text-transparent" : ""}`}>
                   {l}
@@ -250,83 +250,111 @@ function Hero() {
  * wide open one both crop the same picture well.
  */
 function PracticeArt({ v, id }: { v: number; id: string }) {
+  /* The site's own material: smoked glass on near-black, rims lit cream →
+     orange, warm light pooled behind — the same language as the Technology
+     lens and stack. Glows are radial gradients (no filters), so it is cheap. */
   const g = (n: string) => `${id}-${n}`;
+  const glass = `url(#${g("glass")})`;
+  const rim = `url(#${g("rim")})`;
+  const S = { fill: glass, stroke: rim, strokeWidth: 3 } as const;
   return (
     <svg viewBox="0 0 400 480" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden>
       <defs>
-        <linearGradient id={g("bg")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fff6f0" />
-          <stop offset="1" stopColor="#ffd9c2" />
-        </linearGradient>
-        <linearGradient id={g("o")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ff9a6a" />
-          <stop offset="0.55" stopColor="#ff6a2b" />
-          <stop offset="1" stopColor="#e8470c" />
-        </linearGradient>
-        <linearGradient id={g("soft")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#ffd9c2" stopOpacity="0.4" />
-        </linearGradient>
-        <radialGradient id={g("glow")} cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#ff7a3d" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#ff7a3d" stopOpacity="0" />
+        <radialGradient id={g("bg")} cx="0.3" cy="0.25" r="1">
+          <stop offset="0" stopColor="#2a1810" />
+          <stop offset="0.55" stopColor="#120c09" />
+          <stop offset="1" stopColor="#070505" />
         </radialGradient>
+        <linearGradient id={g("glass")} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#3a2a22" stopOpacity="0.92" />
+          <stop offset="1" stopColor="#120c09" stopOpacity="0.92" />
+        </linearGradient>
+        <linearGradient id={g("rim")} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fff0e4" />
+          <stop offset="0.35" stopColor="#ff9a52" />
+          <stop offset="0.7" stopColor="#e83b00" />
+          <stop offset="1" stopColor="#ffb13b" />
+        </linearGradient>
+        <linearGradient id={g("hot")} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ffb13b" />
+          <stop offset="1" stopColor="#e83b00" />
+        </linearGradient>
+        <radialGradient id={g("glow")}>
+          <stop offset="0" stopColor="#ff7a1a" stopOpacity="0.75" />
+          <stop offset="0.45" stopColor="#e83b00" stopOpacity="0.25" />
+          <stop offset="1" stopColor="#e83b00" stopOpacity="0" />
+        </radialGradient>
+        <pattern id={g("grid")} width="32" height="32" patternUnits="userSpaceOnUse">
+          <path d="M32 0H0V32" fill="none" stroke="#ffffff" strokeOpacity="0.05" />
+        </pattern>
       </defs>
       <rect width="400" height="480" fill={`url(#${g("bg")})`} />
+      <rect width="400" height="480" fill={`url(#${g("grid")})`} />
 
-      {v === 0 && (
-        /* Transformation: two broad sweeps crossing, and a wedge pointing on */
-        <g data-art>
-          <path d="M-40 360 C 80 300, 160 120, 330 40 L 440 40 L 440 -20 L -40 -20 Z" fill={`url(#${g("o")})`} opacity="0.9" />
-          <path d="M-40 380 C 90 330, 180 170, 360 90" fill="none" stroke={`url(#${g("soft")})`} strokeWidth="46" strokeLinecap="round" />
-          <path d="M160 520 C 220 400, 330 330, 460 300 L 460 520 Z" fill={`url(#${g("o")})`} opacity="0.55" />
-          <path d="M300 300 L 400 250 L 400 350 Z" fill="#ff6a2b" opacity="0.85" />
-        </g>
-      )}
-      {v === 1 && (
-        /* HR & Payroll: people as overlapping rings, drawn in sweeps */
-        <g data-art>
-          <circle cx="140" cy="200" r="150" fill={`url(#${g("glow")})`} />
-          <circle cx="150" cy="190" r="92" fill="none" stroke={`url(#${g("o")})`} strokeWidth="40" opacity="0.85" />
-          <circle cx="270" cy="250" r="78" fill="none" stroke={`url(#${g("soft")})`} strokeWidth="34" />
-          <circle cx="230" cy="380" r="118" fill={`url(#${g("o")})`} opacity="0.55" />
-          <path d="M-20 470 C 100 410, 220 420, 420 360 L 420 500 L -20 500 Z" fill="#ffffff" opacity="0.5" />
-        </g>
-      )}
-      {v === 2 && (
-        /* Education: stacked arches, like pages rising */
-        <g data-art>
-          {[0, 1, 2, 3].map((k) => (
-            <path
-              key={k}
-              d={`M${-30 + k * 26} 500 C ${-30 + k * 26} ${300 - k * 40}, ${430 - k * 26} ${300 - k * 40}, ${430 - k * 26} 500`}
-              fill={k % 2 ? "#ffffff" : `url(#${g("o")})`}
-              opacity={k % 2 ? 0.6 : 0.85 - k * 0.12}
-            />
-          ))}
-          <path d="M120 120 L 200 80 L 280 120 L 200 160 Z" fill="#ff6a2b" opacity="0.85" />
-        </g>
-      )}
-      {v === 3 && (
-        /* Business: rounded blocks handing off along a curve */
-        <g data-art>
-          <path d="M-20 140 C 120 140, 200 330, 420 330" fill="none" stroke={`url(#${g("soft")})`} strokeWidth="50" strokeLinecap="round" />
-          <rect x="40" y="70" width="120" height="120" rx="34" fill={`url(#${g("o")})`} opacity="0.9" />
-          <rect x="230" y="270" width="140" height="140" rx="40" fill={`url(#${g("o")})`} opacity="0.7" />
-          <rect x="250" y="40" width="80" height="80" rx="24" fill="#ffffff" opacity="0.7" />
-        </g>
-      )}
-      {v === 4 && (
-        /* AI & Automation: a core with orbits and moving nodes */
-        <g data-art>
-          <circle cx="200" cy="240" r="190" fill={`url(#${g("glow")})`} />
-          <ellipse cx="200" cy="240" rx="170" ry="70" fill="none" stroke={`url(#${g("soft")})`} strokeWidth="18" transform="rotate(-28 200 240)" />
-          <ellipse cx="200" cy="240" rx="170" ry="70" fill="none" stroke={`url(#${g("o")})`} strokeWidth="14" opacity="0.8" transform="rotate(32 200 240)" />
-          <circle cx="200" cy="240" r="58" fill={`url(#${g("o")})`} />
-          <circle data-node cx="352" cy="160" r="16" fill="#ffffff" />
-          <circle data-node cx="70" cy="330" r="12" fill="#ff6a2b" />
-        </g>
-      )}
+      <g data-art>
+        {v === 0 && (
+          /* Transformation: scattered panes resolving into one, the arrow through them */
+          <>
+            <circle cx="230" cy="190" r="200" fill={`url(#${g("glow")})`} />
+            <rect x="60" y="70" width="150" height="110" rx="22" {...S} opacity="0.55" transform="rotate(-12 135 125)" />
+            <rect x="170" y="120" width="170" height="125" rx="24" {...S} opacity="0.8" transform="rotate(6 255 182)" />
+            <rect x="100" y="200" width="210" height="150" rx="28" {...S} />
+            <path d="M40 420 L 330 110" stroke={`url(#${g("hot")})`} strokeWidth="10" strokeLinecap="round" />
+            <path d="M290 100 L 340 100 L 340 150" fill="none" stroke={`url(#${g("hot")})`} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          </>
+        )}
+        {v === 1 && (
+          /* HR & Payroll: three people as glass rings, one lit */
+          <>
+            <circle cx="200" cy="220" r="210" fill={`url(#${g("glow")})`} />
+            <circle cx="120" cy="170" r="52" {...S} opacity="0.7" />
+            <circle cx="280" cy="170" r="52" {...S} opacity="0.7" />
+            <circle cx="200" cy="140" r="64" {...S} />
+            <path d="M40 420 C 60 320, 180 300, 200 300 S 340 320, 360 420" {...S} />
+            <circle cx="200" cy="140" r="22" fill={`url(#${g("hot")})`} />
+          </>
+        )}
+        {v === 2 && (
+          /* Education: rising glass arches, a lit cap on top */
+          <>
+            <circle cx="200" cy="300" r="220" fill={`url(#${g("glow")})`} />
+            {[0, 1, 2].map((k) => (
+              <path
+                key={k}
+                d={`M${50 + k * 40} 500 V ${300 - k * 50} a ${150 - k * 40} ${150 - k * 40} 0 0 1 ${300 - k * 80} 0 V 500`}
+                {...S}
+                opacity={0.55 + k * 0.2}
+              />
+            ))}
+            <path d="M200 80 L 290 120 L 200 160 L 110 120 Z" fill={`url(#${g("hot")})`} />
+            <path d="M260 135 v 40" stroke="#ffb13b" strokeWidth="5" strokeLinecap="round" />
+          </>
+        )}
+        {v === 3 && (
+          /* Business: glass blocks handing off along a lit path */
+          <>
+            <circle cx="200" cy="240" r="220" fill={`url(#${g("glow")})`} />
+            <path d="M110 130 C 220 130, 180 330, 290 330" fill="none" stroke={`url(#${g("hot")})`} strokeWidth="8" strokeLinecap="round" strokeDasharray="2 16" />
+            <rect x="50" y="70" width="120" height="120" rx="30" {...S} />
+            <rect x="230" y="270" width="130" height="130" rx="32" {...S} />
+            <rect x="250" y="70" width="90" height="90" rx="24" {...S} opacity="0.6" />
+            <circle cx="110" cy="130" r="18" fill={`url(#${g("hot")})`} />
+            <circle cx="295" cy="335" r="18" fill={`url(#${g("hot")})`} />
+          </>
+        )}
+        {v === 4 && (
+          /* AI & Automation: a lit core inside two glass orbits */
+          <>
+            <circle cx="200" cy="240" r="220" fill={`url(#${g("glow")})`} />
+            <ellipse cx="200" cy="240" rx="170" ry="62" fill="none" stroke={rim} strokeWidth="3" transform="rotate(-28 200 240)" />
+            <ellipse cx="200" cy="240" rx="170" ry="62" fill="none" stroke={rim} strokeWidth="3" opacity="0.6" transform="rotate(32 200 240)" />
+            <circle cx="200" cy="240" r="70" {...S} />
+            <circle cx="200" cy="240" r="34" fill={`url(#${g("hot")})`} />
+            <circle data-node cx="345" cy="158" r="10" fill="#fff0e4" />
+            <circle data-node cx="60" cy="330" r="8" fill="#ff9a52" />
+          </>
+        )}
+      </g>
     </svg>
   );
 }
@@ -366,7 +394,7 @@ function Practices() {
           <div>
             <p className="text-[13px] font-medium text-orange">What we do</p>
             <h2 className="font-spartan mt-3 text-[2rem] font-semibold leading-[1.05] tracking-[-0.025em] text-ink sm:text-[2.6rem]">
-              Five practices, one digital ecosystem.
+              Five practices, one digital ecosystem
             </h2>
           </div>
           <a href="/solutions" className="group inline-flex items-center gap-2 text-sm font-semibold text-ink transition-colors hover:text-orange">
@@ -399,7 +427,7 @@ function Practices() {
                 {/* the art window */}
                 <span
                   className={`relative block overflow-hidden rounded-[24px] transition-[height] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] max-lg:h-[220px] ${
-                    on ? "lg:h-[64%]" : "lg:h-full"
+                    on ? "lg:h-[74%]" : "lg:h-full"
                   }`}
                 >
                   <PracticeArt v={i} id={`pa${i}`} />
@@ -409,21 +437,19 @@ function Practices() {
                     }`}
                   >
                     {/* a soft light behind the type so it always reads on the art */}
-                    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-[#fff3ec]/95 via-[#fff3ec]/70 to-transparent" />
+                    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-[#0b0807]/95 via-[#0b0807]/70 to-transparent" />
                     <span className="relative flex h-[84px] w-[84px] shrink-0 items-center justify-center rounded-[22px] bg-[#141416] shadow-[0_14px_30px_-12px_rgba(0,0,0,0.55)] sm:h-[96px] sm:w-[96px]">
                       <Art className="h-[70%] w-[70%]" />
                     </span>
                     <span className="relative min-w-0 pb-1">
-                      <span className="block font-spartan text-[1.3rem] font-semibold leading-tight tracking-[-0.02em] text-[#1d1d20] sm:text-[1.6rem]">
+                      <span className="block font-spartan text-[1.3rem] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[1.6rem]">
                         {p.title}
                       </span>
-                      <span className="block text-[13px] text-[#1d1d20]/55">@earrow</span>
-                      <span className="mt-2.5 inline-flex rounded-full bg-[#1d1d20] px-4 py-1.5 text-[13px] font-medium text-white">Explore</span>
                     </span>
                   </span>
                   {/* closed: the name, turned on its side, dark on the peach */}
                   <span
-                    className={`absolute bottom-6 left-6 hidden origin-bottom-left -rotate-90 translate-x-7 whitespace-nowrap font-spartan text-[1.35rem] font-semibold text-[#1d1d20] transition-opacity duration-300 lg:block ${
+                    className={`absolute bottom-6 left-6 hidden origin-bottom-left -rotate-90 translate-x-7 whitespace-nowrap font-spartan text-[1.35rem] font-semibold text-white transition-opacity duration-300 lg:block ${
                       on ? "opacity-0" : "opacity-100 delay-300"
                     }`}
                   >
@@ -438,12 +464,6 @@ function Practices() {
                   }`}
                 >
                   <span className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/85">{p.body}</span>
-                  <span className="mt-auto flex items-center gap-2 pt-4 text-[14px] text-white/90">
-                    <svg viewBox="0 0 16 16" className="h-4 w-4 text-[#ff7a3d]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
-                      <path d="M6.5 9.5l3-3M7 4.5l1-1a2.5 2.5 0 0 1 3.5 3.5l-1 1M9 11.5l-1 1A2.5 2.5 0 0 1 4.5 9l1-1" />
-                    </svg>
-                    earrow.lk/solutions
-                  </span>
                 </span>
 
                 {/* progress line on the open panel */}
@@ -594,7 +614,7 @@ function People() {
           <div>
             <p className="text-[13px] font-medium text-orange">Leadership</p>
             <h2 className="font-spartan mt-3 text-[2rem] font-semibold leading-[1.05] tracking-[-0.025em] text-ink sm:text-[2.6rem]">
-              People powering innovation.
+              People powering innovation
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-ink-muted lg:text-right">
@@ -620,74 +640,117 @@ function People() {
   );
 }
 
-/* ═══════════════════════════════ Values ═══════════════════════════════ */
+/* ═══════════════════════════════ Values ═══════════════════════════════
+ *
+ * Light and restrained, on the page's own tokens (so it follows the theme):
+ * a two-row marquee of the six words in ink and outline — orange only on the
+ * small separators — that speeds up and leans with scroll, then six compact
+ * cards. Hover: a lift, a soft orange shadow and an orange rule drawing in.
+ * Phones: a swipe row with dots.
+ */
 
 function Values() {
   const ref = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     const root = ref.current;
     if (!root || prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      gsap.to("[data-marquee]", { xPercent: -50, duration: 40, ease: "none", repeat: -1 });
+      const rows = gsap.utils.toArray<HTMLElement>("[data-mrow]");
+      const tweens = rows.map((r, i) =>
+        gsap.fromTo(r, { xPercent: i ? -25 : 0 }, { xPercent: i ? 0 : -25, duration: 34, ease: "none", repeat: -1 }),
+      );
+      const lean = gsap.quickTo(rows, "skewX", { duration: 0.6, ease: "power3.out" });
+      const settle = gsap.delayedCall(0.15, () => lean(0)).pause();
+      ScrollTrigger.create({
+        trigger: root,
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          const v = gsap.utils.clamp(-1, 1, self.getVelocity() / 2500);
+          tweens.forEach((t) => t.timeScale(1 + Math.abs(v) * 5));
+          lean(-v * 6);
+          settle.restart(true);
+          gsap.to(tweens, { timeScale: 1, duration: 1.2, ease: "power2.out", overwrite: true, delay: 0.1 });
+        },
+      });
       gsap.fromTo(
         "[data-value]",
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1, stagger: 0.07, ease: "power4.out", scrollTrigger: { trigger: "[data-values-grid]", start: "top 85%", once: true } }
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.9, stagger: 0.06, ease: "power3.out", scrollTrigger: { trigger: "[data-values-grid]", start: "top 88%", once: true } },
       );
     }, root);
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const cards = Array.from(track.children) as HTMLElement[];
+    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setCurrent(cards.indexOf(e.target as HTMLElement))), {
+      root: track,
+      threshold: 0.6,
+    });
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <section ref={ref} className="relative overflow-hidden bg-canvas-alt py-16 lg:py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-12">
+    <section ref={ref} className="relative overflow-hidden bg-canvas-alt py-12 lg:py-16">
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <p className="text-[13px] font-medium text-orange">What drives us</p>
         <h2 className="font-spartan mt-3 max-w-xl text-[2rem] font-semibold leading-[1.05] tracking-[-0.025em] text-ink sm:text-[2.6rem]">
-          Six words we actually hold each other to.
+          Six words we actually hold each other to
         </h2>
       </div>
 
-      {/* the six words, running */}
-      <div className="mt-12 overflow-hidden py-2" aria-hidden>
-        <div data-marquee className="flex w-max will-change-transform">
-          {[0, 1].map((rep) => (
-            <div key={rep} className="flex shrink-0 items-center">
-              {VALUES.map((v, i) => (
-                <span key={`${rep}-${v.word}`} className="flex items-center">
-                  <span
-                    className={`font-spartan px-6 text-[4.5rem] font-bold uppercase leading-none tracking-[-0.03em] sm:text-[6.5rem] lg:text-[8rem] ${
-                      i % 2 ? "text-transparent" : "bg-gradient-to-r from-[#d13400] to-[#ff9820] bg-clip-text text-transparent"
-                    }`}
-                    style={i % 2 ? { WebkitTextStroke: "1.5px var(--color-ink-muted)" } : undefined}
-                  >
-                    {v.word}
+      <div className="relative mt-8 space-y-1 overflow-hidden py-1 lg:mt-10" aria-hidden>
+        {[0, 1].map((row) => (
+          <div key={row} data-mrow className="flex w-max will-change-transform">
+            {[0, 1, 2, 3].map((rep) => (
+              <div key={rep} className="flex shrink-0 items-center">
+                {(row ? [...VALUES].reverse() : VALUES).map((v, i) => (
+                  <span key={`${rep}-${v.word}`} className="flex items-center">
+                    <span
+                      className={`font-spartan px-4 text-[2.2rem] font-bold uppercase leading-none tracking-[-0.03em] sm:text-[3rem] lg:text-[3.6rem] ${
+                        (i + row) % 2 ? "text-transparent" : "text-ink"
+                      }`}
+                      style={(i + row) % 2 ? { WebkitTextStroke: "1.2px var(--color-border-strong)" } : undefined}
+                    >
+                      {v.word}
+                    </span>
+                    <span className="h-1.5 w-1.5 rotate-45 bg-orange" />
                   </span>
-                  <span className="h-3 w-3 rounded-full bg-orange/70 sm:h-4 sm:w-4" />
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-12">
-        <div data-values-grid className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="relative mx-auto max-w-7xl lg:px-12">
+        <div
+          ref={trackRef}
+          data-values-grid
+          className="mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto px-6 pb-4 [scrollbar-width:none] sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:mt-10 lg:grid-cols-6 lg:px-0 [&::-webkit-scrollbar]:hidden"
+        >
           {VALUES.map((v) => (
-            <div
+            <article
               key={v.word}
               data-value
-              className="ab-value group relative overflow-hidden rounded-[22px] border border-border bg-surface p-7 transition-colors duration-500 hover:border-transparent"
+              className="group relative w-[62%] shrink-0 snap-center overflow-hidden rounded-[18px] border border-border bg-surface p-5 transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-orange/30 hover:shadow-[0_24px_44px_-24px_rgba(var(--orange-ch),0.55)] sm:w-auto"
             >
-              <span
-                aria-hidden
-                className="absolute inset-0 origin-bottom scale-y-0 bg-gradient-to-br from-[#e83b00] to-[#ff9820] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100"
-              />
-              <p className="font-spartan relative text-[1.9rem] font-semibold uppercase leading-none tracking-[-0.02em] text-ink transition-colors duration-500 group-hover:text-white">
-                {v.word}
-              </p>
-              <p className="relative mt-3 text-[15px] text-ink-muted transition-colors duration-500 group-hover:text-white/90">{v.line}</p>
-            </div>
+              <p className="font-spartan text-[1.35rem] font-semibold uppercase leading-none tracking-[-0.02em] text-ink lg:text-[1.25rem]">{v.word}</p>
+              <p className="mt-2 text-[13px] leading-snug text-ink-muted">{v.line}</p>
+              <span aria-hidden className="absolute inset-x-5 bottom-0 h-[2px] origin-left scale-x-0 bg-orange transition-transform duration-500 group-hover:scale-x-100" />
+            </article>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-center gap-1.5 sm:hidden" aria-hidden>
+          {VALUES.map((v, i) => (
+            <span key={v.word} className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-6 bg-orange" : "w-1.5 bg-ink-soft/40"}`} />
           ))}
         </div>
       </div>
@@ -704,7 +767,7 @@ export default function AboutContent() {
       <People />
       <Values />
       <PageCta
-        title="Let's build what your organisation needs next."
+        title="Let's build what your organisation needs next"
         body="Talk to our team about where technology can take the most weight off your operations."
         primary={{ label: "Talk to an Expert", href: "/contact" }}
         secondary={{ label: "Explore Solutions", href: "/solutions" }}

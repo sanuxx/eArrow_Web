@@ -380,7 +380,7 @@ export default function Solutions() {
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <SectionLabel index="01">Solutions</SectionLabel>
-        <SectionHeading>Technology designed around your business.</SectionHeading>
+        <SectionHeading>Technology designed around your business</SectionHeading>
 
         <div className="mt-12 flex flex-col gap-4 lg:mt-14 lg:h-[27rem] lg:flex-row">
           {SOLUTIONS.map((s, i) => {

@@ -110,15 +110,6 @@ const QUOTES: Quote[] = [
   },
 ];
 
-/** Customers with artwork on disk. The rest of the roster runs in the ticker. */
-const CUSTOMER_LOGOS = [
-  { name: "John Keells Infomate", src: withBasePath("/logos/infomate.png") },
-  { name: "Centre for Banking Studies (Central Bank of Sri Lanka)", src: withBasePath("/logos/cbs.png") },
-  { name: "Institute of Bankers of Sri Lanka", src: withBasePath("/logos/ibsl.jpg") },
-  { name: "Sri Lanka Institute of Tourism & Hotel Management", src: withBasePath("/logos/slithm.png") },
-  { name: "Aquinas College of Higher Studies", src: withBasePath("/logos/aquinas.png") },
-];
-
 /*
  * The current that runs across the section.
  *
@@ -254,39 +245,6 @@ export default function Testimonials() {
        * pre-reveal frame with nothing to restart it. A reveal belongs to the
        * thing being revealed.
        */
-      /*
-       * `.fromTo()` with an explicit end value, not `.from()`.
-       *
-       * A standalone `.from()` tween (this one is not inside the timeline
-       * above, which is what let the others get away with it — GSAP defers a
-       * timeline child's immediateRender until the timeline actually plays)
-       * renders its start state and captures its implicit end state
-       * immediately, synchronously, at creation. In development, React's
-       * StrictMode runs this effect twice on mount; the first pass's
-       * `ctx.revert()` cleanup does not reliably restore the resting opacity
-       * before the second pass re-captures it, so the "end" this tween
-       * animates toward can be recorded as 0 — the same opacity it starts
-       * from. The tween then completes at progress 1 having gone nowhere, and
-       * the logos are permanently invisible: `once: true` means it never gets
-       * a second chance to get it right.
-       *
-       * Stating the end value (0.7, the resting `opacity-70` the wall's own
-       * class already carries) removes the implicit capture entirely, so
-       * there is nothing left for the race to corrupt.
-       */
-      gsap.fromTo(
-        "[data-t='wall']",
-        { y: 18, opacity: 0 },
-        {
-          y: 0,
-          opacity: 0.7,
-          duration: 0.5,
-          stagger: 0.06,
-          ease: "power3.out",
-          scrollTrigger: { trigger: "[data-t='wall-group']", start: "top 90%", once: true },
-        },
-      );
-
       gsap.fromTo(
         "[data-t='glyph']",
         { yPercent: 10 },
@@ -473,7 +431,7 @@ export default function Testimonials() {
             eyebrow above already says TESTIMONIALS. This states the section's
             actual claim, in the voice the other headings use. */}
         <h2 className="mt-6 font-heading text-[1.29rem] font-bold tracking-[-0.03em] text-ink sm:text-[1.613rem]">
-          Proof, in their own words.
+          Proof, in their own words
         </h2>
 
         {/* The oversized quotation glyph. Same frosted treatment as the folio
@@ -707,31 +665,6 @@ export default function Testimonials() {
           strokeDashoffset="0"
             />
           </svg>
-        </div>
-
-        {/* ── Customer logo wall ───────────────────────────────────────── */}
-        <div data-t="wall-group" className="mt-4 border-t border-border pt-8">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-soft">
-            Organizations we work with
-          </p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {CUSTOMER_LOGOS.map((logo) => (
-              <span
-                key={logo.src}
-                data-t="wall"
-                title={logo.name}
-                className="flex h-16 w-36 shrink-0 items-center justify-center rounded-card border border-border bg-white p-3.5 opacity-70 shadow-[var(--shadow-sm)] grayscale transition-[filter,opacity,box-shadow,transform] duration-500 hover:-translate-y-1 hover:opacity-100 hover:shadow-[var(--shadow-card)] hover:grayscale-0"
-              >
-                <Image
-                  src={logo.src}
-                  alt={logo.name}
-                  width={144}
-                  height={64}
-                  className="h-full w-full object-contain"
-                />
-              </span>
-            ))}
-          </div>
         </div>
       </div>
     </section>

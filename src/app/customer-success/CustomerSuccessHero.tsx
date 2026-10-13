@@ -136,7 +136,7 @@ export default function CustomerSuccessHero() {
             <span data-line className="cs-fade block">Fragmented processes,</span>
           </span>
           <span className="block overflow-hidden pb-[0.06em]">
-            <span data-line className="cs-fade block">rewired into one system.</span>
+            <span data-line className="cs-fade block">rewired into one system</span>
           </span>
         </h1>
         <p data-lead className="cs-fade mx-auto mt-5 max-w-xl text-[15px] leading-relaxed text-ink-muted">

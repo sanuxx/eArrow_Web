@@ -138,7 +138,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
               Capabilities
             </SectionLabel>
             <h2 className="mt-5 max-w-xl font-heading text-[1.72rem] font-bold leading-[1.08] tracking-[-0.035em] text-white sm:text-[2.064rem] lg:text-[2.365rem]">
-              Technology designed around your business.
+              Technology designed around your business
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-white/50 lg:pb-2 lg:text-right">

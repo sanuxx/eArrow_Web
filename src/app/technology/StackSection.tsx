@@ -158,10 +158,10 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
         <div aria-hidden className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
 
         <div className="relative mx-auto grid h-full max-w-7xl grid-cols-1 grid-rows-[58%_42%] items-center px-6 pt-16 lg:grid-cols-[1.15fr_0.85fr] lg:grid-rows-1 lg:gap-10 lg:px-12 lg:pt-0">
-          {/* ── the diagram (desktop) ── */}
+          {/* ── the diagram (desktop) — scaled by height too, so the lifted top slab clears the nav ── */}
           <div className="relative h-full lg:h-[100svh]" style={{ perspective: "1600px" }}>
             <div
-              className="absolute left-1/2 top-[78%] h-0 w-0 [--s:0.44] sm:top-[78%] sm:[--s:0.66] lg:top-[76%] lg:[--s:1]"
+              className="absolute left-1/2 top-[78%] h-0 w-0 [--s:0.44] sm:top-[78%] sm:[--s:0.66] lg:top-[76%] lg:[--s:1] lg:[@media(max-height:860px)]:top-[78%] lg:[@media(max-height:860px)]:[--s:0.86] lg:[@media(max-height:740px)]:top-[79%] lg:[@media(max-height:740px)]:[--s:0.74] lg:[@media(max-height:660px)]:[--s:0.64]"
               style={{ transformStyle: "preserve-3d", transform: "scale(var(--s)) rotateX(58deg)" }}
             >
               <div data-spin style={{ transformStyle: "preserve-3d", transform: "rotateZ(-45deg)" }}>
@@ -291,7 +291,7 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
             {/* intro */}
             <div data-step className="absolute inset-x-0 top-6 lg:top-12">
               <p className="text-[13px] font-medium text-[#ff9a52]">The stack</p>
-              <h2 className="font-spartan mt-2 text-[1.8rem] font-semibold lg:mt-3 lg:text-[2.6rem] leading-[1.05] tracking-[-0.025em]">Four tiers, one architecture.</h2>
+              <h2 className="font-spartan mt-2 text-[1.8rem] font-semibold lg:mt-3 lg:text-[2.6rem] leading-[1.05] tracking-[-0.025em]">Four tiers, one architecture</h2>
               <p className="mt-3 max-w-md text-[14px] leading-relaxed text-white/65 lg:mt-5 lg:text-[16px]">
                 Read it from the bottom up. Each tier depends on the one beneath it — and security runs through all four. Scroll to
                 take it apart.
@@ -329,7 +329,7 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
           {/* ── reduced motion: the same content as cards ── */}
           <div className="hidden px-6 py-20 motion-reduce:block">
             <p className="text-[13px] font-medium text-[#ff9a52]">The stack</p>
-            <h2 className="font-spartan mt-3 text-[2rem] font-semibold leading-[1.05] tracking-[-0.025em]">Four tiers, one architecture.</h2>
+            <h2 className="font-spartan mt-3 text-[2rem] font-semibold leading-[1.05] tracking-[-0.025em]">Four tiers, one architecture</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-white/65">Each tier depends on the one beneath it — and security runs through all four.</p>
             <div className="mt-8 space-y-3">
               {layers.map((l, i) => (
