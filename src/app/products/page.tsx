@@ -6,7 +6,7 @@ import ProductsContent from "./ProductsContent";
 export const metadata: Metadata = {
   title: "Products & Platforms | eArrow",
   description:
-    "One ecosystem, multiple possibilities — HR & Payroll, Education, Hospital, Production, E-Billing, Visitor Management and Digital platforms.",
+    "One ecosystem, multiple possibilities — HR & Payroll, Higher Education, School Management, Ticketing, CRM, Uni Connect and Workflow Management platforms.",
 };
 
 export default function ProductsPage() {

@@ -127,10 +127,79 @@ function DigitalMark({ className }: Props) {
   );
 }
 
+/** TK — the ticket: notched stub, perforation, and the line it carries. */
+function TicketingMark({ className }: Props) {
+  return (
+    <Frame className={className}>
+      <path
+        d="M11 12.5h26a4 4 0 0 1 4 4v4a3.5 3.5 0 0 0 0 7v4a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4v-4a3.5 3.5 0 0 0 0-7v-4a4 4 0 0 1 4-4z"
+        {...S}
+      />
+      <path d="M30 17.5v1.5M30 23.25v1.5M30 29v1.5" {...S} />
+      <path d="M14 20.5h9M14 27.5h6" {...S} />
+    </Frame>
+  );
+}
+
+/** CR — two people: the relationship, not the record. */
+function CrmMark({ className }: Props) {
+  return (
+    <Frame className={className}>
+      <circle cx="17" cy="18" r="5" {...S} />
+      <path d="M7.5 37c1.4-5 4.8-7.6 9.5-7.6s8.1 2.6 9.5 7.6" {...S} />
+      <circle cx="32.5" cy="16" r="4.2" {...S} />
+      <path d="M30 26.6c.8-.2 1.6-.3 2.5-.3 4 0 6.9 2.3 8.1 6.7" {...S} />
+    </Frame>
+  );
+}
+
+/** UC — a hub and the people around it: connection as structure. */
+function UniConnectMark({ className }: Props) {
+  return (
+    <Frame className={className}>
+      <circle cx="24" cy="24" r="5.5" {...S} />
+      <circle cx="11" cy="12" r="3.5" {...S} />
+      <circle cx="37" cy="12" r="3.5" {...S} />
+      <circle cx="24" cy="39" r="3.5" {...S} />
+      <path d="M13.6 14.4l6.3 5.8M34.4 14.4l-6.3 5.8M24 29.5v6" {...S} />
+    </Frame>
+  );
+}
+
+/** WM — one step handing off to the next, with the identity's arrow between. */
+function WorkflowMark({ className }: Props) {
+  return (
+    <Frame className={className}>
+      <rect x="6.5" y="8" width="13" height="13" rx="4" {...S} />
+      <rect x="28.5" y="27" width="13" height="13" rx="4" {...S} />
+      <path d="M19.5 14.5H30a5 5 0 0 1 5 5v3.5" {...S} />
+      <path d="M31.5 20l3.5 3.5 3.5-3.5" {...S} />
+      <path d="M13 21v6.5a5 5 0 0 0 5 5h5" {...S} />
+    </Frame>
+  );
+}
+
+/** SS — the schoolhouse: pitched roof, arched door. */
+function SchoolMark({ className }: Props) {
+  return (
+    <Frame className={className}>
+      <path d="M7 20.5 24 9l17 11.5" {...S} />
+      <path d="M11.5 18v21h25V18" {...S} />
+      <path d="M20.5 39v-6.5a3.5 3.5 0 0 1 7 0V39" {...S} />
+      <circle cx="24" cy="22.5" r="2.6" {...S} />
+    </Frame>
+  );
+}
+
 /** Keyed by the product `key` in ProductEcosystem's PRODUCTS list. */
 export const PRODUCT_MARKS: Record<string, (props: Props) => React.ReactElement> = {
   workforce: WorkforceMark,
   education: EducationMark,
+  school: SchoolMark,
+  ticketing: TicketingMark,
+  crm: CrmMark,
+  uniconnect: UniConnectMark,
+  workflow: WorkflowMark,
   healthcare: HospitalMark,
   manufacturing: ProductionMark,
   billing: BillingMark,

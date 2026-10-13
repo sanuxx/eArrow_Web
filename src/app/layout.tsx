@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
+import { Archivo, Inter, JetBrains_Mono, League_Spartan } from "next/font/google";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import BrandIntro from "@/components/BrandIntro";
 import "./globals.css";
@@ -34,6 +34,17 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+/**
+ * League Spartan — the home hero headline (`.font-spartan`). A geometric sans
+ * with the wide, even build of the eArrow wordmark; scoped to the hero so
+ * the rest of the site keeps its display face.
+ */
+const spartan = League_Spartan({
+  variable: "--font-spartan",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
 });
 
 /**
@@ -172,7 +183,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       suppressHydrationWarning
       data-theme="light"
-      className={`${display.variable} ${inter.variable} ${jetbrains.variable} antialiased`}
+      className={`${display.variable} ${inter.variable} ${jetbrains.variable} ${spartan.variable} antialiased`}
     >
       {/*
         `h-full` on <html> and `min-h-full` on <body> are gone. Lenis' own reset

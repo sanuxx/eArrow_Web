@@ -3,10 +3,17 @@
 import { motion } from "framer-motion";
 import { PageHero, PageCta } from "@/components/page-kit";
 import { PRODUCT_MARKS } from "@/components/ProductMarks";
-import { ArrowUpRight, QMark, QMarkLight } from "@/components/ArrowMark";
+import { QMark, QMarkLight } from "@/components/ArrowMark";
 import ProductShell, { type ShellConfig } from "@/components/ProductShell";
 import ProductRing from "@/components/ProductRing";
+import LaptopShowcase, { type Screen } from "@/components/LaptopShowcase";
+import ProductStory from "@/components/ProductStory";
 import { SPRING_SOFT } from "@/components/motion-kit";
+import { withBasePath } from "@/lib/basePath";
+
+/* Screenshots live in public/products/<key>/1.webp, 2.webp, … */
+const screens = (key: string, alts: string[]): Screen[] =>
+  alts.map((alt, i) => ({ src: withBasePath(`/products/${key}/${i + 1}.webp`), alt }));
 
 /*
  * The products page.
@@ -14,8 +21,9 @@ import { SPRING_SOFT } from "@/components/motion-kit";
  * It was seven identical white cards of body copy in a three-column grid — a
  * software company describing seven pieces of software without ever showing
  * one. So the page is now a sequence of showcase rows, alternating side to
- * side, each carrying a drawn application shell for that product (see
- * ProductShell.tsx). The copy sits beside the thing it describes.
+ * side, each showing that product's real screenshots on a laptop (see
+ * LaptopShowcase.tsx), or a drawn application shell (ProductShell.tsx) where
+ * no screenshots exist yet. The copy sits beside the thing it describes.
  *
  * The catalogue mirrors the home page's ProductEcosystem deliberately — same
  * keys, same ids, same order — so a visitor arriving from that section meets
@@ -26,11 +34,17 @@ type Product = {
   key: string;
   id: string;
   label: string;
+  /** Used on the ring and mosaic tiles, where the full name will not fit. */
+  short: string;
+  /** One line under the name: the outcome, in the customer's words. */
+  tagline: string;
   domain: string;
   blurb: string;
   problem: string;
   modules: string[];
+  /** Drawn fallback, shown when a product has no real screenshots yet. */
   shell: ShellConfig;
+  screens?: Screen[];
 };
 
 const PRODUCTS: Product[] = [
@@ -38,6 +52,8 @@ const PRODUCTS: Product[] = [
     key: "workforce",
     id: "WF-01",
     label: "Arrow HR & Payroll",
+    short: "HR & Payroll",
+    tagline: "One record. Every payday, on time.",
     domain: "Workforce",
     blurb:
       "One employee record from hiring through payroll, attendance and appraisals. The same person is never re-entered into four systems.",
@@ -60,18 +76,24 @@ const PRODUCTS: Product[] = [
       },
       action: { label: "Run payroll for March", state: "Ready" },
     },
+    screens: screens("workforce", [
+      "Arrow HR main dashboard with headcount, attendance, leave and contract summaries",
+      "Arrow HR dashboard with headcount, attendance, performance and leave charts",
+    ]),
   },
   {
     key: "education",
-    id: "ED-02",
-    label: "Arrow Education",
-    domain: "Academic Operations",
+    id: "HE-02",
+    label: "Arrow Higher Education Management System",
+    short: "Higher Education",
+    tagline: "From first enquiry to graduation day.",
+    domain: "Higher Education",
     blurb:
       "Admissions, student records, billing and academic workflows on one platform, from enquiry through to graduation.",
     problem: "Admissions, academics and fees tracked in disconnected systems.",
-    modules: ["Student Information", "Admissions", "Billing", "Academic Ops"],
+    modules: ["Student Information", "Admissions", "Billing", "Exams", "Academic Ops"],
     shell: {
-      path: "arrow-edu / admissions",
+      path: "arrow-hems / admissions",
       nav: ["Overview", "Students", "Admissions", "Fees", "Exams"],
       metrics: [
         { label: "Students", value: "4,210", delta: "+318", up: true },
@@ -90,146 +112,181 @@ const PRODUCTS: Product[] = [
       },
       action: { label: "Publish intake offers", state: "42 queued" },
     },
+    screens: screens("education", [
+      "Higher education dashboard with membership, program application and registration charts",
+      "Program application management screen",
+    ]),
   },
   {
-    key: "healthcare",
-    id: "HC-03",
-    label: "Arrow Hospital",
-    domain: "Patient Care",
+    key: "ticketing",
+    id: "TK-03",
+    label: "Arrow Ticketing System",
+    short: "Ticketing",
+    tagline: "Every request owned until it's resolved.",
+    domain: "Service Desk",
     blurb:
-      "Unified patient records and billing across every department, so a patient's history follows them rather than staying behind.",
-    problem: "Patient records and billing fragmented across departments.",
-    modules: ["Patient Records", "Billing", "Insurance", "Departments"],
+      "Every request logged, routed to the right team and tracked to resolution, with SLAs that are measured rather than hoped for.",
+    problem: "Requests lost across e-mail threads and phone calls, with no view of what is still open.",
+    modules: ["Ticket Queues", "SLA Tracking", "Assignment", "Knowledge Base", "Reporting"],
     shell: {
-      path: "arrow-hospital / wards",
-      nav: ["Overview", "Patients", "Wards", "Billing", "Insurance"],
+      path: "arrow-ticketing / queue",
+      nav: ["Overview", "Queue", "My tickets", "SLAs", "Reports"],
       metrics: [
-        { label: "Admitted", value: "318", delta: "+12", up: true },
-        { label: "Occupancy", value: "87%", delta: "+4", up: true },
-        { label: "Claims", value: "96.1%", delta: "+1.4", up: true },
-      ],
-      module: {
-        type: "ring",
-        caption: "Bed occupancy",
-        value: 0.87,
-        centre: "87%",
-        note: "Live across six wards, with insurance claims reconciled on discharge.",
-      },
-      action: { label: "Reconcile today's claims", state: "18 open" },
-    },
-  },
-  {
-    key: "manufacturing",
-    id: "MF-04",
-    label: "Arrow Production",
-    domain: "Operations",
-    blurb:
-      "Live visibility into production runs, inventory levels and quality checks. You see the floor as it is now, not as it was this morning.",
-    problem: "No live view of production runs, stock levels or quality exceptions.",
-    modules: ["Production", "Inventory", "Quality Control", "Reporting"],
-    shell: {
-      path: "arrow-production / lines",
-      nav: ["Overview", "Lines", "Inventory", "Quality", "Reports"],
-      metrics: [
-        { label: "Output", value: "12,480", delta: "+640", up: true },
-        { label: "Yield", value: "97.3%", delta: "+0.8", up: true },
-        { label: "Downtime", value: "1.2h", delta: "-0.5", up: false },
+        { label: "Open", value: "184", delta: "-26", up: false },
+        { label: "Within SLA", value: "96.3%", delta: "+2.4", up: true },
+        { label: "First reply", value: "14m", delta: "-6m", up: false },
       ],
       module: {
         type: "rows",
-        caption: "Line status",
+        caption: "Priority queue",
         data: [
-          { label: "Line A — moulding", meta: "running", tone: "ok" },
-          { label: "Line B — assembly", meta: "running", tone: "ok" },
-          { label: "Line C — finishing", meta: "QC hold", tone: "warn" },
-          { label: "Line D — packing", meta: "changeover", tone: "live" },
+          { label: "#8812 — Payroll access request", meta: "assigned", tone: "ok" },
+          { label: "#8809 — Printer offline, Level 3", meta: "in progress", tone: "live" },
+          { label: "#8803 — VPN login failure", meta: "SLA at risk", tone: "warn" },
+          { label: "#8798 — New starter laptop", meta: "resolved", tone: "ok" },
         ],
       },
-      action: { label: "Release QC hold on Line C", state: "Awaiting" },
+      action: { label: "Escalate at-risk tickets", state: "4 flagged" },
     },
+    screens: screens("ticketing", [
+      "Support ticketing dashboard with tickets by status and daily and weekly raised versus resolved volume",
+      "Support ticketing analytics with tickets by organisation and category, escalations and SLA compliance by severity",
+    ]),
   },
   {
-    key: "billing",
-    id: "FN-05",
-    label: "Arrow E-Billing",
-    domain: "Finance",
+    key: "crm",
+    id: "CR-04",
+    label: "Arrow CRM",
+    short: "CRM",
+    tagline: "See the whole pipeline, not just the last call.",
+    domain: "Customer Relationships",
     blurb:
-      "Automated billing cycles and bulk distribution at enterprise scale, with reconciliation that closes itself.",
-    problem: "Billing cycles run by hand and distributed one document at a time.",
-    modules: ["E-Billing", "Bulk E-mail", "Reconciliation"],
+      "Leads, accounts and every conversation with them in one place, so the pipeline is something you can see rather than reconstruct.",
+    problem: "Customer history scattered across inboxes and spreadsheets, and a pipeline nobody trusts.",
+    modules: ["Leads", "Accounts", "Pipeline", "Activities", "Reporting"],
     shell: {
-      path: "arrow-billing / cycles",
-      nav: ["Overview", "Cycles", "Invoices", "Delivery", "Ledger"],
+      path: "arrow-crm / pipeline",
+      nav: ["Overview", "Leads", "Accounts", "Pipeline", "Reports"],
       metrics: [
-        { label: "Invoices", value: "48,900", delta: "+2,140", up: true },
-        { label: "Delivered", value: "99.2%", delta: "+0.6", up: true },
-        { label: "Reconciled", value: "94.8%", delta: "+5.1", up: true },
+        { label: "Open deals", value: "312", delta: "+28", up: true },
+        { label: "Win rate", value: "34.8%", delta: "+3.1", up: true },
+        { label: "Cycle", value: "21d", delta: "-4d", up: false },
       ],
       module: {
         type: "bars",
-        caption: "Monthly billing run",
+        caption: "Pipeline value",
         unit: "12M",
-        data: [55, 61, 58, 70, 66, 78, 74, 85, 88, 96],
+        data: [38, 44, 52, 49, 61, 66, 72, 70, 84, 93],
       },
-      action: { label: "Dispatch March cycle", state: "48.9k ready" },
+      action: { label: "Follow up stalled deals", state: "17 due" },
     },
+    screens: screens("crm", [
+      "Arrow CRM analytics dashboard with leads, pipeline value, lead sources and sales funnel",
+      "Arrow CRM dashboard summary cards",
+      "Arrow CRM tasks and follow-ups list",
+    ]),
   },
   {
-    key: "visitor",
-    id: "SC-06",
-    label: "Arrow Visitors",
-    domain: "Security",
+    key: "uniconnect",
+    id: "UC-05",
+    label: "Arrow Uni Connect",
+    short: "Uni Connect",
+    tagline: "Turn every enquiry into an enrolment.",
+    domain: "Student Recruitment",
     blurb:
-      "Controlled, auditable access across sites and facilities: every entry logged and searchable.",
-    problem: "Site access logged on paper, with no auditable trail.",
-    modules: ["Visitor Management", "Access Control", "Audit Trail"],
+      "Every enquiry, from exhibitions, agents, referrals and the website, tracked from first contact to enrolment, with follow-ups that escalate themselves when they slip.",
+    problem: "Student leads scattered across agents, spreadsheets and social inboxes, with follow-ups that quietly go cold.",
+    modules: ["Leads & Inquiries", "Pipeline", "Follow-Ups & Escalations", "Agent Portal", "Commission", "Intake Cycles"],
     shell: {
-      path: "arrow-visitors / gate",
-      nav: ["Overview", "On site", "Passes", "Sites", "Audit"],
+      path: "arrow-uniconnect / pipeline",
+      nav: ["Overview", "Leads", "Pipeline", "Follow-ups", "Reports"],
       metrics: [
-        { label: "On site", value: "146", delta: "+22", up: true },
-        { label: "Passes today", value: "389", delta: "+41", up: true },
-        { label: "Overstays", value: "3", delta: "-2", up: false },
-      ],
-      module: {
-        type: "rows",
-        caption: "Recent movements",
-        data: [
-          { label: "Contractor — East gate", meta: "checked in", tone: "ok" },
-          { label: "Supplier delivery — Dock 2", meta: "checked in", tone: "ok" },
-          { label: "Visitor pass #4471", meta: "overstay", tone: "warn" },
-          { label: "Staff — main lobby", meta: "checked out", tone: "live" },
-        ],
-      },
-      action: { label: "Review overstay alerts", state: "3 flagged" },
-    },
-  },
-  {
-    key: "digital",
-    id: "DX-07",
-    label: "Arrow Digital",
-    domain: "Experience",
-    blurb:
-      "Websites, portals and commerce platforms built for growth, and measured against it once they're live.",
-    problem: "A web presence that can't keep pace with how the business sells.",
-    modules: ["Web Platforms", "E-Commerce", "Portals"],
-    shell: {
-      path: "arrow-digital / performance",
-      nav: ["Overview", "Pages", "Commerce", "Leads", "Insights"],
-      metrics: [
-        { label: "Sessions", value: "128k", delta: "+18%", up: true },
-        { label: "Conversion", value: "4.6%", delta: "+0.9", up: true },
-        { label: "Load", value: "0.9s", delta: "-0.3", up: false },
+        { label: "Active leads", value: "61", delta: "+9", up: true },
+        { label: "Enrolments", value: "13", delta: "+4", up: true },
+        { label: "Lead → enrol", value: "18.8%", delta: "+2.3", up: true },
       ],
       module: {
         type: "ring",
-        caption: "Core web vitals",
-        value: 0.94,
-        centre: "94",
-        note: "Measured on real visits rather than a lab score. This is the number the business is actually judged on.",
+        caption: "Inquiry to lead",
+        value: 0.425,
+        centre: "42%",
+        note: "Share of inquiries qualified into leads this intake cycle.",
       },
-      action: { label: "Ship checkout experiment", state: "Staged" },
+      action: { label: "Escalate overdue follow-ups", state: "55 overdue" },
     },
+    screens: screens("uniconnect", [
+      "Uni Connect dashboard with lead pipeline by stage, follow-up status and recent activity",
+      "Uni Connect leads list filtered by university, program and source",
+      "Uni Connect follow-up tracker with task reminders and escalations",
+    ]),
+  },
+  {
+    key: "workflow",
+    id: "WM-06",
+    label: "Arrow Workflow Management System",
+    short: "Workflow",
+    tagline: "Approvals that move on their own.",
+    domain: "Process Automation",
+    blurb:
+      "Approvals and internal processes mapped once and run automatically, with every step visible and every decision on record.",
+    problem: "Approvals waiting in inboxes, with no way to see where a request is stuck.",
+    modules: ["Process Designer", "Approvals", "Forms", "Escalations", "Audit Trail"],
+    shell: {
+      path: "arrow-workflow / approvals",
+      nav: ["Overview", "Processes", "Approvals", "Forms", "Audit"],
+      metrics: [
+        { label: "In flight", value: "527", delta: "+44", up: true },
+        { label: "On time", value: "93.5%", delta: "+4.7", up: true },
+        { label: "Avg. approval", value: "6.2h", delta: "-2.1h", up: false },
+      ],
+      module: {
+        type: "rows",
+        caption: "Awaiting approval",
+        data: [
+          { label: "Purchase request — IT equipment", meta: "step 2 of 3", tone: "live" },
+          { label: "Leave request — Finance", meta: "approved", tone: "ok" },
+          { label: "Vendor onboarding — Logistics", meta: "overdue", tone: "warn" },
+          { label: "Expense claim — Sales", meta: "approved", tone: "ok" },
+        ],
+      },
+      action: { label: "Nudge overdue approvers", state: "6 pending" },
+    },
+    screens: screens("workflow", [
+      "Workflow management dashboard with tasks, completion rate, SLA compliance, approvals and escalations",
+      "Resource and capacity view with per-person workload status and findings",
+    ]),
+  },
+  {
+    key: "school",
+    id: "SS-07",
+    label: "Arrow School Management System",
+    short: "School",
+    tagline: "The whole school, run from one place.",
+    domain: "School Administration",
+    blurb:
+      "Enrolment, attendance, fees, exams and parent communication for schools, run from one system instead of registers and ledgers.",
+    problem: "Attendance, marks and fee records kept by hand, and parents kept in the dark.",
+    modules: ["Enrolment", "Attendance", "Fees", "Exams & Reports", "Parent Portal"],
+    shell: {
+      path: "arrow-school / classes",
+      nav: ["Overview", "Students", "Classes", "Fees", "Parents"],
+      metrics: [
+        { label: "Students", value: "1,860", delta: "+94", up: true },
+        { label: "Attendance", value: "95.8%", delta: "+1.2", up: true },
+        { label: "Fees paid", value: "89.3%", delta: "+4.0", up: true },
+      ],
+      module: {
+        type: "bars",
+        caption: "Term attendance",
+        unit: "10W",
+        data: [88, 91, 90, 93, 92, 94, 95, 93, 96, 96],
+      },
+      action: { label: "Send term reports to parents", state: "Ready" },
+    },
+    screens: screens("school", [
+      "School management dashboard with students, collections, outstanding fees and admissions trend",
+      "Student profiles list with admission numbers, classes and application status",
+    ]),
   },
 ];
 
@@ -354,7 +411,7 @@ function EcosystemMosaic() {
                 graphic but nowhere near the 4.5:1 that text this small needs.
               */}
               <span className="relative text-center font-mono text-[8.5px] uppercase leading-tight tracking-[0.1em] text-ink-muted transition-colors duration-400 group-hover:text-ink">
-                {p.label.replace("Arrow ", "")}
+                {p.short}
               </span>
             </motion.a>
           );
@@ -364,11 +421,11 @@ function EcosystemMosaic() {
   );
 }
 
-/* Labels are already prefixed "Arrow " by the page heading above each
-   showcase; on a 96px card the prefix is seven repetitions of one word. */
+/* Full names like "Arrow Higher Education Management System" will not fit a
+   96px card, so the ring uses each product's short label. */
 const RING_ITEMS = PRODUCTS.map((p) => ({
   key: p.key,
-  label: p.label.replace("Arrow ", ""),
+  label: p.short,
   href: `#${p.key}`,
 }));
 
@@ -456,69 +513,61 @@ export default function ProductsContent() {
               }`}
             />
 
+            {/*
+              Ambient warmth. A white ground with two screenshots on it read as
+              empty; these give each showcase a light source. The big halo sits
+              behind the laptop, a smaller amber one behind the copy, each on
+              its own slow drift so neighbouring sections never move in step.
+            */}
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+              <span
+                className={`product-glow absolute top-1/2 h-[620px] w-[620px] -translate-y-1/2 rounded-full blur-[90px] lg:h-[760px] lg:w-[760px] ${
+                  flipped ? "-left-40 lg:left-[2%]" : "-right-40 lg:right-[2%]"
+                }`}
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(var(--orange-ch),0.34) 0%, rgba(var(--orange-ch),0.16) 42%, transparent 70%)",
+                  animationDelay: `${i * -3}s`,
+                }}
+              />
+              <span
+                className={`product-glow product-glow--free absolute top-[8%] h-[380px] w-[380px] rounded-full blur-[80px] ${
+                  flipped ? "right-[6%]" : "left-[2%]"
+                }`}
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(255,177,59,0.32) 0%, rgba(255,177,59,0.10) 45%, transparent 70%)",
+                  animationDelay: `${i * -3 - 7}s`,
+                  animationDuration: "22s",
+                }}
+              />
+              {/* a warm pool under the laptop */}
+              <span
+                className={`absolute bottom-[12%] hidden h-[120px] lg:block w-[46%] rounded-[50%] blur-[50px] ${
+                  flipped ? "left-[6%]" : "right-[6%]"
+                }`}
+                style={{ background: "rgba(var(--orange-ch),0.22)" }}
+              />
+            </div>
+
             <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
               <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 {/* ── Copy ── */}
-                <motion.div
-                  initial={{ opacity: 0, y: 26 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={SPRING_SOFT}
-                  className={flipped ? "lg:order-2" : ""}
-                >
-                  <div className="flex items-center gap-4">
-                    {Mark && (
-                      <span
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-tile text-white shadow-[0_14px_34px_-12px_rgba(var(--orange-ch),0.75)]"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, var(--color-orange), var(--color-amber))",
-                        }}
-                      >
-                        <Mark className="h-[54%] w-[54%]" />
-                      </span>
-                    )}
-                    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
-                      {product.id} · {product.domain}
-                    </span>
-                  </div>
-
-                  <h2 className="mt-7 font-heading text-[1.72rem] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-[2.064rem]">
-                    {product.label}
-                  </h2>
-
-                  <p className="mt-5 max-w-md text-base leading-[1.75] text-ink-muted">
-                    {product.blurb}
-                  </p>
-
-                  <div className="mt-7 max-w-md rounded-tile border-l-2 border-orange bg-surface-sunken px-5 py-4">
-                    <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
-                      The problem it solves
-                    </p>
-                    <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
-                      {product.problem}
-                    </p>
-                  </div>
-
-                  <ul className="mt-6 flex flex-wrap gap-2">
-                    {product.modules.map((m) => (
-                      <li
-                        key={m}
-                        className="rounded-full border border-border bg-surface px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted"
-                      >
-                        {m}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <a
-                    href="/contact"
-                    className="group mt-8 inline-flex items-center gap-2.5 text-sm font-semibold text-ink transition-colors hover:text-orange"
-                  >
-                    Book a walkthrough
-                    <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  </a>
-                </motion.div>
+                <div className={flipped ? "lg:order-2" : ""}>
+                  <ProductStory
+                    index={i}
+                    total={PRODUCTS.length}
+                    id={product.id}
+                    domain={product.domain}
+                    label={product.label}
+                    short={product.short}
+                    tagline={product.tagline}
+                    blurb={product.blurb}
+                    problem={product.problem}
+                    modules={product.modules}
+                    Mark={Mark}
+                  />
+                </div>
 
                 {/* ── The product itself ── */}
                 <motion.div
@@ -528,7 +577,11 @@ export default function ProductsContent() {
                   transition={{ ...SPRING_SOFT, delay: 0.08 }}
                   className={flipped ? "lg:order-1" : ""}
                 >
-                  <ProductShell config={product.shell} />
+                  {product.screens ? (
+                    <LaptopShowcase screens={product.screens} />
+                  ) : (
+                    <ProductShell config={product.shell} />
+                  )}
                 </motion.div>
               </div>
             </div>

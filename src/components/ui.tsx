@@ -11,9 +11,9 @@ import { SPRING, EASE_BACK } from "./motion-kit";
  * assembled instead of designed.
  */
 
-/** Mono eyebrow with an index and a rule, e.g. `[03] ── INDUSTRIES`. */
+/** Mono eyebrow with a rule, e.g. `── INDUSTRIES`. Sections are not numbered;
+    `index` is accepted for compatibility and ignored. */
 export function SectionLabel({
-  index,
   children,
   className,
 }: {
@@ -25,7 +25,6 @@ export function SectionLabel({
     <div
       className={`flex items-center gap-3 font-mono text-[10px] font-medium uppercase tracking-[0.28em] text-orange ${className ?? ""}`}
     >
-      {index && <span className="text-ink-soft">[{index}]</span>}
       <span className="h-px w-6 bg-orange/50" />
       <span>{children}</span>
     </div>

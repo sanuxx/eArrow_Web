@@ -170,7 +170,7 @@ export default function RewireScene() {
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber">
-          08 — Case Study
+          Case Study
         </p>
 
         <h2 className="mt-5 max-w-3xl font-heading text-[1.8rem] font-extrabold leading-[1.06] tracking-[-0.038em] text-white sm:text-[2.4rem] lg:text-[2.9rem]">

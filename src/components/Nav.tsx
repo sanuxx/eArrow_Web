@@ -9,6 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 import { ArrowGlyph } from "./ArrowMark";
 import { useSmoothScroll } from "./SmoothScrollProvider";
 import { withBasePath } from "@/lib/basePath";
+import { enabledLinks } from "@/lib/features";
 
 /*
  * Real routes rather than in-page anchors.
@@ -33,11 +34,14 @@ const LINKS = [
   { label: "Insights", href: "/insights" },
 ];
 
+const VISIBLE_LINKS = enabledLinks(LINKS);
+
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroScrub, setHeroScrub] = useState(false);
   const [darkHero, setDarkHero] = useState(false);
+  const [heroCine, setHeroCine] = useState(false);
   const lenis = useSmoothScroll();
   const pathname = usePathname();
 
@@ -77,12 +81,15 @@ export default function Nav() {
       /* Set by `PageHero` while a `tone="dark"` masthead is mounted — see the
          note there. Without it the links would stay ink on a black hero. */
       setDarkHero(root.dataset.heroTone === "dark");
+      /* Set by CinematicHero while its dark stage fills the viewport: the bar
+         stays transparent over it instead of lifting onto a white ground. */
+      setHeroCine(root.dataset.heroCine === "1");
     };
     read();
     const mo = new MutationObserver(read);
     mo.observe(root, {
       attributes: true,
-      attributeFilter: ["data-hero-scrub", "data-hero-tone"],
+      attributeFilter: ["data-hero-scrub", "data-hero-tone", "data-hero-cine"],
     });
     return () => mo.disconnect();
   }, []);
@@ -111,7 +118,7 @@ export default function Nav() {
     };
   }, [menuOpen, lenis]);
 
-  const lifted = scrolled || menuOpen;
+  const lifted = (scrolled && !heroCine) || menuOpen;
 
   /*
    * Whether the bar is currently sitting on a dark surface, which is the only
@@ -185,7 +192,7 @@ export default function Nav() {
         </Link>
 
         <ul className="hidden items-center gap-5 lg:flex xl:gap-7">
-          {LINKS.map((link) => {
+          {VISIBLE_LINKS.map((link) => {
             const active =
               link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
             return (
@@ -258,22 +265,20 @@ export default function Nav() {
       />
 
       {menuOpen && (
-        <ul className="flex flex-col gap-1 border-t border-border bg-canvas px-6 py-4 lg:hidden">
-          {LINKS.map((link, i) => (
+        /* fills the screen below the bar, so the page never shows through */
+        <ul className="flex h-[calc(100svh-73px)] flex-col gap-1 overflow-y-auto border-t border-border bg-canvas px-6 py-6 lg:hidden">
+          {VISIBLE_LINKS.map((link) => (
             <li key={link.label}>
               <Link prefetch={false}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-4 rounded-2xl px-2 py-3 text-base font-medium text-ink-muted transition-colors hover:bg-line hover:text-ink"
+                className="flex items-center rounded-2xl px-2 py-3 text-lg font-medium text-ink transition-colors hover:bg-line hover:text-orange"
               >
-                <span className="font-mono text-[10px] tracking-[0.2em] text-ink-soft">
-                  0{i + 1}
-                </span>
                 {link.label}
               </Link>
             </li>
           ))}
-          <li className="mt-2">
+          <li className="mt-auto pt-4">
             <Link prefetch={false}
               href="/contact"
               onClick={() => setMenuOpen(false)}

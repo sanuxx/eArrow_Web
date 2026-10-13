@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "./ArrowMark";
 import { withBasePath } from "@/lib/basePath";
+import { enabledLinks } from "@/lib/features";
 
 const SITEMAP = [
   { label: "Solutions", href: "/solutions" },
@@ -69,7 +70,7 @@ export default function Footer() {
               Company
             </p>
             <ul className="mt-4 space-y-2.5">
-              {COMPANY.map((l) => (
+              {enabledLinks(COMPANY).map((l) => (
                 <li key={l.label}>
                   <Link prefetch={false}
                     href={l.href}

@@ -1,16 +1,16 @@
 import Nav from "@/components/Nav";
-import HeroAct from "@/components/hero/HeroAct";
+import CinematicHero from "@/components/hero/CinematicHero";
 import ClientTicker from "@/components/ClientTicker";
 import Solutions from "@/components/Solutions";
 import ProductEcosystem from "@/components/ProductEcosystem";
 import FeaturedProduct from "@/components/FeaturedProduct";
 import TickerBand from "@/components/TickerBand";
-import Industries from "@/components/Industries";
 import WhyEarrow from "@/components/WhyEarrow";
 import Testimonials from "@/components/Testimonials";
 import Insights from "@/components/Insights";
 import FinalCta from "@/components/FinalCta";
 import Footer from "@/components/Footer";
+import { FEATURES } from "@/lib/features";
 
 export default function Home() {
   return (
@@ -26,16 +26,16 @@ export default function Home() {
             aperture onto the stats, so the metrics are revealed *through* the
             hero rather than scrolled to after it — which means Stats has to be
             composed inside it rather than listed here. */}
-        <HeroAct />
+        <CinematicHero />
         <ClientTicker />
         <Solutions />
         <ProductEcosystem />
         <FeaturedProduct />
         <TickerBand />
-        <Industries />
         <WhyEarrow />
         <Testimonials />
-        <Insights />
+        {/* Hidden while FEATURES.insights is off — see src/lib/features.ts */}
+        {FEATURES.insights && <Insights />}
         <FinalCta />
       </main>
       <Footer />

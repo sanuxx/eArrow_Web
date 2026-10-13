@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { notFound } from "next/navigation";
 import InsightsContent from "./InsightsContent";
+import { FEATURES } from "@/lib/features";
 
 export const metadata: Metadata = {
   title: "Insights | eArrow",
@@ -10,6 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default function InsightsPage() {
+  /* Disabled for now — set FEATURES.insights to true in src/lib/features.ts */
+  if (!FEATURES.insights) notFound();
   return (
     <>
       <Nav />

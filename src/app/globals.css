@@ -2050,3 +2050,136 @@ a:focus-visible, button:focus-visible {
     background: color-mix(in oklab, var(--color-surface) 88%, transparent);
   }
 }
+
+/*
+ * Product showcase glows (products page). A slow drift and breathe, so the
+ * warm light behind each laptop feels ambient rather than painted on.
+ */
+@keyframes product-glow-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  50% { transform: translate3d(28px, -22px, 0) scale(1.08); opacity: 0.8; }
+}
+@keyframes product-glow-drift-free {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  50% { transform: translate3d(-24px, 26px, 0) scale(1.1); opacity: 0.75; }
+}
+.product-glow { animation: product-glow-drift 18s ease-in-out infinite; will-change: transform; }
+.product-glow--free { animation-name: product-glow-drift-free; }
+@media (prefers-reduced-motion: reduce) {
+  .product-glow { animation: none; }
+}
+
+/*
+ * Cinematic home hero (components/hero/CinematicHero.tsx).
+ *
+ * The frame before act one plays. These are in CSS rather than set by GSAP so
+ * nothing flashes at its final position between first paint and hydration —
+ * the letterbox bars are closed over all of it anyway, but the brand curtain
+ * is skipped on repeat visits and then this is the only thing holding the
+ * frame. Reduced motion never matches, so it gets the composed still.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .cine .cine-sun,
+  .cine .cine-cloud,
+  .cine .cine-char,
+  .cine .cine-reveal,
+  .cine .cine-wall-lift,
+  .cine .cine-trust,
+  .cine .cine-cue,
+  .cine .cine-stats {
+    opacity: 0;
+  }
+  /* the opening haze is up before hydration, and burns off on play */
+  .cine .cine-haze {
+    opacity: 1;
+  }
+}
+
+/* Film grain: fractal noise, tiled. Static — the eye reads still grain over
+   moving footage as texture, and animating it would cost a repaint a frame. */
+.cine-grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+@keyframes cine-cue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(340%); }
+}
+.cine-cue-dot { animation: cine-cue 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+/* Home hero headline face — see layout.tsx. */
+.font-spartan { font-family: var(--font-spartan), var(--font-heading), sans-serif; }
+
+/*
+ * Solutions masthead (app/solutions/SolutionsHero.tsx) — the frame before the
+ * GSAP entrance plays, so nothing flashes at its final state on hydration.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .sol-hero .sol-fade {
+    opacity: 0;
+  }
+}
+
+/* Customer Success masthead (app/customer-success/CustomerSuccessHero.tsx) —
+   held hidden until the GSAP entrance plays. */
+@media (prefers-reduced-motion: no-preference) {
+  .cs-hero .cs-fade {
+    opacity: 0;
+  }
+}
+
+/* Industries page (app/industries/IndustriesContent.tsx) */
+@media (prefers-reduced-motion: no-preference) {
+  .ind-hero .ind-fade {
+    opacity: 0;
+  }
+}
+
+/* About page (app/about/AboutContent.tsx) */
+@media (prefers-reduced-motion: no-preference) {
+  .ab-hero .ab-fade {
+    opacity: 0;
+  }
+}
+@keyframes ab-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.ab-progress { animation: ab-progress 4.2s linear forwards; }
+
+/* Industries hero: the sector currently playing in the reel */
+.ind-item.is-on {
+  color: #fff;
+}
+
+/* Industries tunnel (app/industries/IndustriesContent.tsx) */
+@media (prefers-reduced-motion: no-preference) {
+  .ind-tunnel .ind-fade {
+    opacity: 0;
+  }
+}
+@keyframes ind-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+.ind-bob { display: inline-block; animation: ind-bob 1.6s ease-in-out infinite; }
+
+/* Industries tunnel: fog for parts of 3D devices — opacity on a leaf only;
+   on a preserve-3d ancestor it would flatten the device. */
+.fogp { opacity: var(--fog, 1); }
+
+/* Arrow HR dashboard (components/HrDashboard.tsx): tab text over the sliding pill */
+.hr-tab { color: #2b2b33; transition: color 0.35s ease; }
+.hr-tab.is-on { color: #fff; background: transparent; }
+
+/* Customer Success hero gradient: the light top follows the theme */
+.cs-hero { --cs-a: #fffaf6; --cs-b: #fff3ea; --cs-c: #ffd7b8; }
+:root[data-theme="dark"] .cs-hero { --cs-a: #08080a; --cs-b: #140906; --cs-c: #4a1806; }
+
+/* Technology hero (app/technology/TechnologyHero.tsx): held until GSAP plays */
+@media (prefers-reduced-motion: no-preference) {
+  .tech-hero .th-fade { opacity: 0; }
+}
+
+/* Technology hero letterbox: closed before the open plays, gone for reduced motion */
+@media (prefers-reduced-motion: reduce) { .tech-hero [data-bar] { display: none; } }

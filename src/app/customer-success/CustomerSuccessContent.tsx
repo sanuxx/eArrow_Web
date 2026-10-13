@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PageHero, PageCta } from "@/components/page-kit";
-import SignalWeave from "./SignalWeave";
+import { PageCta } from "@/components/page-kit";
+import CustomerSuccessHero from "./CustomerSuccessHero";
 import RewireScene from "./RewireScene";
 
 /*
@@ -54,33 +54,7 @@ const STAGES = [
 export default function CustomerSuccessContent() {
   return (
     <>
-      <PageHero
-        index="06"
-        eyebrow="Customer Success"
-        tone="dark"
-        backdrop={<SignalWeave />}
-        contentY="top"
-        title={
-          <>
-            Fragmented processes,
-            <br />
-            <span className="text-amber">rewired into one system.</span>
-          </>
-        }
-        lead="Every engagement here starts as scattered manual work and ends as connected digital operations. These are those stories, told through what actually changed."
-        footer={
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/55">
-            <span className="flex items-center gap-2.5">
-              <span aria-hidden className="h-1 w-1 rounded-full bg-amber" />
-              Verified outcomes only
-            </span>
-            <span className="flex items-center gap-2.5">
-              <span aria-hidden className="h-1 w-1 rounded-full bg-amber" />
-              Named systems, named changes
-            </span>
-          </div>
-        }
-      />
+      <CustomerSuccessHero />
 
       {/* ── The four questions ─────────────────────────────────────────────
           Set on a rail: a hairline runs the width with a node above each
@@ -90,7 +64,7 @@ export default function CustomerSuccessContent() {
       <section className="relative overflow-hidden bg-canvas-alt py-14 lg:py-20">
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-orange">
-            07 — How we tell it
+            How we tell it
           </p>
           <h2 className="mt-5 max-w-2xl font-heading text-[1.8rem] font-extrabold leading-[1.06] tracking-[-0.038em] text-ink sm:text-[2.3rem] lg:text-[2.6rem]">
             Every story answers the same four questions.
@@ -126,7 +100,7 @@ export default function CustomerSuccessContent() {
                   />
 
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft">
-                    {String(i + 1).padStart(2, "0")} · {stage.label}
+                    {stage.label}
                   </p>
                   <h3 className="mt-3 font-heading text-[1.15rem] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink lg:text-[1.28rem]">
                     {stage.question}

@@ -433,9 +433,7 @@ export default function Solutions() {
                     live ? "opacity-0" : "opacity-100 delay-150"
                   }`}
                 >
-                  <span className="font-mono text-[10px] tracking-[0.24em] text-orange">
-                    {s.n}
-                  </span>
+                  <span />
                   <span
                     className="font-heading text-[1.15rem] font-bold tracking-[-0.02em] text-ink"
                     style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}

@@ -400,10 +400,7 @@ export function NumberedBlocks({
           transition={{ ...SPRING_SOFT, delay: (i % 2) * 0.06 + Math.floor(i / 2) * 0.05 }}
           className="edge-sweep group relative bg-surface px-7 py-9 transition-colors duration-500 hover:bg-surface-sunken lg:px-9"
         >
-          <span className="font-mono text-[10px] font-medium tracking-[0.24em] text-orange">
-            {String(i + 1).padStart(2, "0")}
-          </span>
-          <h3 className="mt-4 font-heading text-[1.075rem] font-bold tracking-[-0.02em] text-ink">
+          <h3 className="font-heading text-[1.075rem] font-bold tracking-[-0.02em] text-ink">
             {item.title}
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-ink-muted">{item.body}</p>
@@ -432,9 +429,6 @@ export function CapabilityGroup({
       className="surface-card edge-sweep group relative overflow-hidden rounded-card px-7 py-8 transition-colors duration-400 hover:border-orange/30"
     >
       <div className="flex items-baseline gap-4">
-        <span className="font-mono text-[10px] tracking-[0.22em] text-ink-soft">
-          {String(index + 1).padStart(2, "0")}
-        </span>
         <h3 className="font-heading text-base font-bold tracking-[-0.02em] text-ink">
           {name}
         </h3>

@@ -122,7 +122,9 @@ export function CountUp({
   duration?: number;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  /* vertical inset only: an all-sides inset hides numbers that sit near the
+     left or right edge on a phone, and they would never start counting */
+  const inView = useInView(ref, { once: true, margin: "-80px 0px" });
   const reduced = useReducedMotion();
 
   const match = NUMERIC.exec(value);
