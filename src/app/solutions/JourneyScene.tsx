@@ -213,7 +213,6 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
                     className="journey-core absolute left-1/2 top-[44%] h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full"
                     style={{
                       background: "radial-gradient(circle, rgba(255,240,214,0.85) 0%, rgba(255,190,110,0.4) 40%, transparent 70%)",
-                      filter: "blur(26px)",
                     }}
                   />
                   {/* The mark, lit from behind. */}
@@ -227,7 +226,6 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
                   className="pointer-events-none absolute inset-x-0 top-0 h-[62%]"
                   style={{
                     background: `radial-gradient(70% 62% at 50% 40%, rgba(${glow.ch}, 0.3), transparent 72%)`,
-                    filter: "blur(34px)",
                   }}
                 />
 

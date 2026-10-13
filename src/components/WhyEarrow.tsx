@@ -91,11 +91,11 @@ export default function WhyEarrow() {
         className="pointer-events-none absolute inset-x-0 -top-32 -bottom-32"
       >
         <span
-          className="absolute left-[-10%] top-[8%] h-[560px] w-[560px] rounded-full opacity-60 blur-[130px]"
+          className="absolute left-[-10%] top-[8%] h-[560px] w-[560px] rounded-full opacity-60"
           style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.22), transparent 68%)" }}
         />
         <span
-          className="absolute right-[-12%] bottom-[6%] h-[620px] w-[620px] rounded-full opacity-50 blur-[140px]"
+          className="absolute right-[-12%] bottom-[6%] h-[620px] w-[620px] rounded-full opacity-50"
           style={{ background: "radial-gradient(circle, rgba(var(--orange-ch), 0.18), transparent 70%)" }}
         />
       </motion.div>

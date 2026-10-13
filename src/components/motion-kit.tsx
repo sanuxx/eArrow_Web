@@ -194,41 +194,25 @@ export function FloatingOrbs({
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className ?? ""}`}
     >
-      {orbs.map((o, i) => {
-        const drift = o.drift ?? 36;
-        return (
-          <motion.div
-            key={i}
-            initial={false}
-            animate={
-              reduced
-                ? undefined
-                : {
-                    x: [0, drift, -drift * 0.6, 0],
-                    y: [0, -drift * 0.8, drift * 0.5, 0],
-                    scale: [1, 1.06, 0.97, 1],
-                  }
-            }
-            transition={{
-              duration: o.duration ?? 22,
-              delay: o.delay ?? 0,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute rounded-full"
-            style={{
-              ...o.at,
-              width: o.size,
-              height: o.size,
-              opacity: o.opacity ?? 0.5,
-              filter: `blur(${o.blur ?? 90}px)`,
-              background: `radial-gradient(circle at 35% 35%, ${
-                o.from ?? "var(--color-amber)"
-              }, ${o.to ?? "var(--color-orange)"} 70%, transparent 72%)`,
-            }}
-          />
-        );
-      })}
+      {/* CSS loops with constant keyframes (compositor, paused off screen),
+          and a soft-edged gradient instead of a large blur filter */}
+      {orbs.map((o, i) => (
+        <div
+          key={i}
+          className={`absolute rounded-full ${reduced ? "" : "orb-drift"}`}
+          style={{
+            ...o.at,
+            width: o.size,
+            height: o.size,
+            opacity: o.opacity ?? 0.5,
+            animationDuration: `${o.duration ?? 22}s`,
+            animationDelay: `${-(o.delay ?? 0)}s`,
+            background: `radial-gradient(circle at 40% 40%, ${o.from ?? "var(--color-amber)"}, ${
+              o.to ?? "var(--color-orange)"
+            } 34%, transparent 68%)`,
+          }}
+        />
+      ))}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 /*
  * Industries landing — a dark studio-style hero (after the agreed reference),
@@ -41,19 +41,11 @@ export default function IndustriesLanding() {
         .fromTo("[data-l-copy]", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 1, stagger: 0.1 }, 0.7);
 
       /* the light band drifts and breathes */
-      const loops = [
-        gsap.to("[data-l-band]", { xPercent: 6, yPercent: -4, rotation: 2, duration: 9, ease: "sine.inOut", yoyo: true, repeat: -1 }),
-        gsap.to("[data-l-band2]", { xPercent: -5, yPercent: 5, duration: 11, ease: "sine.inOut", yoyo: true, repeat: -1 }),
-        /* the cursor nudges at the word now and then */
-        gsap.to("[data-l-cursor]", { x: 4, y: -3, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 2.5 }),
-      ];
-      /* nothing loops while the hero is off screen */
-      ScrollTrigger.create({
-        trigger: root,
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) => loops.forEach((t) => (self.isActive ? t.resume() : t.pause())),
-      });
+      /* (lib/gsap pauses these while the hero is off screen) */
+      gsap.to("[data-l-band]", { xPercent: 6, yPercent: -4, rotation: 2, duration: 9, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      gsap.to("[data-l-band2]", { xPercent: -5, yPercent: 5, duration: 11, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      /* the cursor nudges at the word now and then */
+      gsap.to("[data-l-cursor]", { x: 4, y: -3, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 2.5 });
     }, root);
 
     return () => {

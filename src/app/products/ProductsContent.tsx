@@ -324,7 +324,7 @@ function EcosystemMosaic() {
       {/* Ambient bloom, warmest behind the identity tile in the top-left. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -inset-10 rounded-panel blur-2xl"
+        className="pointer-events-none absolute -inset-10 rounded-panel"
         style={{
           background:
             "radial-gradient(circle at 22% 26%, rgba(var(--orange-ch), 0.20), transparent 62%)",
@@ -560,7 +560,7 @@ export default function ProductsContent() {
             */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
               <span
-                className={`product-glow absolute top-1/2 h-[620px] w-[620px] -translate-y-1/2 rounded-full blur-[90px] lg:h-[760px] lg:w-[760px] ${
+                className={`product-glow absolute top-1/2 h-[620px] w-[620px] -translate-y-1/2 rounded-full lg:h-[760px] lg:w-[760px] ${
                   flipped ? "-left-40 lg:left-[2%]" : "-right-40 lg:right-[2%]"
                 }`}
                 style={{
@@ -570,7 +570,7 @@ export default function ProductsContent() {
                 }}
               />
               <span
-                className={`product-glow product-glow--free absolute top-[8%] h-[380px] w-[380px] rounded-full blur-[80px] ${
+                className={`product-glow product-glow--free absolute top-[8%] h-[380px] w-[380px] rounded-full ${
                   flipped ? "right-[6%]" : "left-[2%]"
                 }`}
                 style={{
@@ -582,10 +582,10 @@ export default function ProductsContent() {
               />
               {/* a warm pool under the laptop */}
               <span
-                className={`absolute bottom-[12%] hidden h-[120px] lg:block w-[46%] rounded-[50%] blur-[50px] ${
+                className={`absolute bottom-[12%] hidden h-[120px] lg:block w-[46%] rounded-[50%] ${
                   flipped ? "left-[6%]" : "right-[6%]"
                 }`}
-                style={{ background: "rgba(var(--orange-ch),0.22)" }}
+                style={{ background: "radial-gradient(closest-side, rgba(var(--orange-ch),0.22), transparent)" }}
               />
             </div>
 

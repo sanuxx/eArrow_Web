@@ -373,7 +373,6 @@ export default function Solutions() {
           style={{
             background:
               "radial-gradient(60% 70% at 50% 50%, rgba(var(--amber-ch), 0.16), transparent 72%)",
-            filter: "blur(60px)",
           }}
         />
       </div>

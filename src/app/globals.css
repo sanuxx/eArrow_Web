@@ -1048,11 +1048,21 @@ a:focus-visible, button:focus-visible {
 
 .ring-spin {
   transform-style: preserve-3d;
+  will-change: transform; /* its own layer, so the spin can run on the compositor */
   animation: ring-spin var(--ring-dur) linear infinite;
 }
 
+/* A midpoint keyframe on every full turn: 0 and 360deg resolve to the same
+   matrix, and Chrome then treats the animation as having no visible change
+   and will not run it on the compositor. */
 @keyframes ring-spin {
-  to {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(-180deg);
+  }
+  100% {
     transform: rotateY(-360deg);
   }
 }
@@ -1063,16 +1073,27 @@ a:focus-visible, button:focus-visible {
 
 .ring-face {
   transform-style: preserve-3d;
+  will-change: transform;
   animation: ring-face var(--ring-dur) linear infinite;
 }
 
+/* constant keyframes so the spin runs on the compositor; the card's own
+   angle is a static rotation on .ring-offset inside (rotations about one
+   axis add, so this is the same motion as rotating from -a to 360 - a) */
 @keyframes ring-face {
-  from {
-    transform: rotateY(calc(0deg - var(--a)));
+  0% {
+    transform: rotateY(0deg);
   }
-  to {
-    transform: rotateY(calc(360deg - var(--a)));
+  50% {
+    transform: rotateY(180deg);
   }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+.ring-offset {
+  transform-style: preserve-3d;
+  transform: rotateY(calc(0deg - var(--a)));
 }
 
 /*
@@ -1087,21 +1108,26 @@ a:focus-visible, button:focus-visible {
  * property alone here keeps one writer per property — the same rule
  * `.mosaic` and `.duotone` follow above, for the same reason.
  */
+/* The per-card fade by distance used to run here. Inside the 3D ring Chrome
+   could not hand it to the compositor, so it cost a style pass every frame —
+   most of the products page's idle CPU on a phone. The perspective already
+   reads as depth, so the fade is gone. */
 .ring-depth {
-  animation: ring-depth var(--ring-dur) linear infinite;
+  opacity: 1;
 }
 
+/* opacity only: a filter here repainted all seven cards every frame */
 @keyframes ring-depth {
   0%,
   100% {
-    filter: opacity(1);
+    opacity: 1;
   }
   25%,
   75% {
-    filter: opacity(0.9) blur(0.2px);
+    opacity: 0.9;
   }
   50% {
-    filter: opacity(0.72) blur(0.6px);
+    opacity: 0.72;
   }
 }
 
@@ -1880,12 +1906,14 @@ a:focus-visible, button:focus-visible {
   animation: client-sweep 19s ease-in-out infinite alternate;
 }
 
+/* moved by transform (composited), not `left` (layout every frame):
+   -22% → 74% of the strip is 200% of the sweep's own 48% width */
 @keyframes client-sweep {
   from {
-    left: -22%;
+    transform: translate(0, -50%);
   }
   to {
-    left: 74%;
+    transform: translate(200%, -50%);
   }
 }
 
@@ -2168,23 +2196,116 @@ a:focus-visible, button:focus-visible {
    on a preserve-3d ancestor it would flatten the device. */
 .fogp { opacity: var(--fog, 1); }
 
+/* About: the portrait columns drift, alternating direction */
+.about-reel {
+  animation: about-reel-up 38s linear infinite;
+  will-change: transform;
+}
+.about-reel--down {
+  animation-name: about-reel-down;
+}
+@keyframes about-reel-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+@keyframes about-reel-down {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
+}
+
+/* Products: each laptop floats */
+.laptop-float {
+  animation: laptop-float 6s ease-in-out infinite;
+}
+@keyframes laptop-float {
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+/* FloatingOrbs (motion-kit): a slow wander */
+.orb-drift {
+  animation: orb-drift 22s ease-in-out infinite;
+}
+@keyframes orb-drift {
+  33% {
+    transform: translate(9%, -8%) scale(1.06);
+  }
+  66% {
+    transform: translate(-6%, 5%) scale(0.97);
+  }
+}
+
+/* Products: the floor shadow under each laptop breathes */
+.laptop-shadow {
+  animation: laptop-shadow 6s ease-in-out infinite;
+}
+@keyframes laptop-shadow {
+  50% {
+    transform: scaleX(0.9);
+    opacity: 0.35;
+  }
+}
+
+/* Home hero: the arc of screens turns slowly. A CSS animation (constant
+   keyframes) so it runs on the compositor rather than the main thread. */
+.cine-ring-turn {
+  transform-style: preserve-3d;
+  animation: cine-ring-turn 110s linear infinite;
+}
+@keyframes cine-ring-turn {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(-180deg);
+  }
+  100% {
+    transform: rotateY(-360deg);
+  }
+}
+
+/* Budget devices (lib/gsap sets .low-power) hold the decorative CSS loops */
+.low-power .cine-ring-turn,
+.low-power .ring-spin,
+.low-power .ring-face,
+.low-power .globe-meridian,
+.low-power .globe-glow,
+.low-power .product-glow,
+.low-power .about-reel,
+.low-power .laptop-float,
+.low-power .laptop-shadow,
+.low-power .orb-drift,
+.low-power .journey-core,
+.low-power .ct-ping {
+  animation-play-state: paused !important;
+}
+
+/* Sections out of view hold their CSS loops (set by OffscreenAnimations) */
+[data-offscreen] *,
+[data-offscreen] *::before,
+[data-offscreen] *::after {
+  animation-play-state: paused !important;
+}
+
 /* Industries tunnel: light by default, dark with the site's dark theme */
 .ind-tunnel {
-  --t-bg: #fff7f0;
+  --t-bg: #f7f2ec;
   --t-ink: #1c120d;
   --t-muted: rgba(28, 18, 13, 0.62);
   --t-chip: rgba(255, 255, 255, 0.72);
   --t-chip-ring: rgba(120, 40, 0, 0.14);
   --t-grad-o: 1;
-  --t-vig: rgba(232, 59, 0, 0.16);
-  --t-flare: rgba(232, 59, 0, 0.5);
-  --t-flare-core: rgba(255, 106, 26, 0.85);
-  --t-flash: rgba(255, 106, 26, 0.35);
+  --t-vig: rgba(232, 59, 0, 0.05);
 }
 /* the hand-off from the dark landing: above the tunnel in light, inside it in dark */
 .ind-lead-dark { display: none; }
 :root[data-theme="dark"] .ind-lead-dark { display: block; }
 :root[data-theme="dark"] .ind-lead-light { display: none; }
+/* per-theme layers inside the tunnel */
+.ind-dark-only { display: none; }
+:root[data-theme="dark"] .ind-dark-only { display: block; }
+:root[data-theme="dark"] .ind-light-only { display: none; }
 :root[data-theme="dark"] .ind-tunnel {
   --t-bg: #060507;
   --t-ink: #ffffff;
@@ -2193,9 +2314,6 @@ a:focus-visible, button:focus-visible {
   --t-chip-ring: rgba(255, 255, 255, 0.15);
   --t-grad-o: 0.35;
   --t-vig: rgba(0, 0, 0, 0.65);
-  --t-flare: rgba(255, 177, 59, 0.55);
-  --t-flare-core: rgba(255, 230, 200, 0.8);
-  --t-flash: rgba(255, 200, 140, 0.7);
 }
 
 /* Arrow HR dashboard (components/HrDashboard.tsx): tab text over the sliding pill */
@@ -2227,6 +2345,15 @@ a:focus-visible, button:focus-visible {
    stand are replaced by 3D parts, so hide the drawn ones */
 .device-3d .device-power { display: none; }
 .device-3d .device-frame { position: relative; }
+
+/* Contact (app/contact/ContactContent.tsx) */
+@media (prefers-reduced-motion: no-preference) {
+  .ct-page .ct-fade { opacity: 0; }
+}
+.ct-ping { animation: ct-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+@keyframes ct-ping {
+  75%, 100% { transform: scale(2.4); opacity: 0; }
+}
 
 /* Industries landing (app/industries/IndustriesLanding.tsx) */
 @media (prefers-reduced-motion: no-preference) {

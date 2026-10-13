@@ -124,11 +124,8 @@ function Hero() {
         .fromTo("[data-col]", { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1.6, stagger: 0.12, ease: "power4.out" }, 0.3)
         .fromTo("[data-stat]", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1, stagger: 0.1 }, 0.9);
 
-      /* the portrait columns drift, alternating direction */
-      (q("[data-reel]") as HTMLElement[]).forEach((el, i) => {
-        const up = i % 2 === 0;
-        gsap.fromTo(el, { yPercent: up ? 0 : -50 }, { yPercent: up ? -50 : 0, duration: 38 + i * 6, ease: "none", repeat: -1 });
-      });
+      /* the portrait columns drift, alternating direction — a CSS loop on
+         [data-reel] (.about-reel), so it runs on the compositor */
 
       /* counters */
       (q("[data-count]") as HTMLElement[]).forEach((el) => {
@@ -203,7 +200,11 @@ function Hero() {
           <div className="grid h-full grid-cols-3 gap-3 sm:gap-4">
             {cols.map((col, c) => (
               <div key={c} data-col className={`ab-fade relative ${c === 1 ? "mt-16" : ""}`}>
-                <div data-reel className="flex flex-col gap-3 will-change-transform sm:gap-4">
+                <div
+                  data-reel
+                  className={`about-reel flex flex-col gap-3 sm:gap-4 ${c % 2 ? "about-reel--down" : ""}`}
+                  style={{ animationDuration: `${38 + c * 6}s` }}
+                >
                   {[...col, ...col].map((p, i) => (
                     <figure key={`${p.name}-${i}`} className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-surface-sunken">
                       <span className="duotone absolute inset-0">

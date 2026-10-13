@@ -112,10 +112,8 @@ const shot = (s: string) => withBasePath(`/products/${s}.webp`);
  * while the section is on screen. Being soft, the canvas renders at a quarter
  * resolution and is scaled up, which costs little and blurs for free.
  *
- * Shot like a film: widescreen bars close in when the flight starts and the
- * sector name runs as a subtitle in the lower bar; an anamorphic flare lies
- * across the vanishing point and flashes, with a light leak sweeping the
- * frame, on every cut to a new sector; a vignette and plain grain finish it.
+ * Shot like a film: a warm light leak sweeps the frame on every cut to a
+ * new sector, and a vignette and plain grain finish it.
  *
  * Budget: the aurora draws at 30fps on a quarter-size canvas and only while
  * the section is on screen; per-plane opacity is written only when it
@@ -497,9 +495,10 @@ function Tunnel() {
     const drawAurora = () => {
       c2d.globalCompositeOperation = "source-over";
       c2d.clearRect(0, 0, cw, ch);
-      const dark = document.documentElement.dataset.theme === "dark";
-      c2d.globalCompositeOperation = dark ? "lighter" : "source-over";
-      const boost = dark ? 1 : 0.85;
+      /* the aurora belongs to the dark theme; light has its corner glows */
+      if (document.documentElement.dataset.theme !== "dark") return;
+      c2d.globalCompositeOperation = "lighter";
+      const boost = 1;
       const cx = cw / 2;
       const cy = ch / 2;
       for (const b of bands) {
@@ -555,7 +554,11 @@ function Tunnel() {
     };
     const wash = gsap.timeline({ repeat: -1, paused: true })
       .to(q("[data-tgrad]"), { rotation: 360, duration: 48, ease: "none" }, 0)
-      .to(q("[data-tgrad]"), { scale: 1.18, xPercent: 6, yPercent: -4, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+      .to(q("[data-tgrad]"), { scale: 1.18, xPercent: 6, yPercent: -4, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0)
+      /* light: the corner glows drift, swell and lean, each on its own path */
+      .to(q("[data-glow='a']"), { xPercent: 14, yPercent: 10, scale: 1.15, rotation: 12, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0)
+      .to(q("[data-glow='b']"), { xPercent: -12, yPercent: -9, scale: 1.12, rotation: -10, duration: 16, ease: "sine.inOut", yoyo: true, repeat: 2 }, 0)
+      .to(q("[data-glow='c']"), { xPercent: -18, yPercent: 14, scale: 1.25, duration: 8, ease: "sine.inOut", yoyo: true, repeat: 5 }, 0);
     const run = (on: boolean) => {
       cancelAnimationFrame(raf);
       prev = 0;
@@ -568,11 +571,9 @@ function Tunnel() {
     const hudName = q("[data-hud-name]")[0] as HTMLElement;
     const hudBar = q("[data-hud-bar]")[0] as HTMLElement;
     let station = -1;
-    const flash = q("[data-flash]")[0] as HTMLElement;
     const leak = q("[data-leak]")[0] as HTMLElement;
-    /* a cut to a new sector: the flare flashes and a light leak sweeps the frame */
+    /* a cut to a new sector: a light leak sweeps the frame */
     const cut = () => {
-      gsap.fromTo(flash, { opacity: 0, scaleX: 0.6 }, { opacity: 1, scaleX: 1.15, duration: 0.35, ease: "power2.out", yoyo: true, repeat: 1, repeatDelay: 0.15, overwrite: true });
       gsap.fromTo(
         leak,
         { xPercent: 0 },
@@ -645,16 +646,6 @@ function Tunnel() {
         .fromTo("[data-t-copy]", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1, stagger: 0.1 }, 0.6);
 
       render(0);
-      /* widescreen bars close in while the stage is pinned */
-      gsap.set("[data-bar]", { scaleY: 0 });
-      ScrollTrigger.create({
-        trigger: track,
-        start: "top top",
-        end: "bottom bottom",
-        onToggle: (self) => gsap.to("[data-bar]", { scaleY: self.isActive ? 1 : 0, duration: 0.9, ease: "power3.inOut", overwrite: true }),
-      });
-      /* the resting flare breathes */
-      gsap.to("[data-flare]", { scaleX: 1.12, opacity: 0.75, duration: 3.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
       ScrollTrigger.create({ trigger: track, start: "top bottom", end: "bottom top", onToggle: (self) => run(self.isActive) });
       gsap.to(cameraZ, {
         s: end,
@@ -704,13 +695,32 @@ function Tunnel() {
     <section ref={trackRef} className="ind-tunnel relative bg-[var(--t-bg)] text-[var(--t-ink)]" style={{ height: `${INDUSTRIES.length * 95 + 140}svh` }}>
       {/* the hand-off from the dark landing, so there is never a hard edge.
           Light: a short dark-to-light ramp at the top of the track — once the
-          stage pins it sits behind the nav and the top widescreen bar.
+          stage pins it sits behind the nav.
           Dark: a long dark lead-in that scrolls away as the stage pins */}
-      <div aria-hidden className="ind-lead-light pointer-events-none absolute inset-x-0 -top-px z-20 h-[180px]" style={{ background: "linear-gradient(180deg, #060507 0%, rgba(6,5,7,0.62) 32%, rgba(6,5,7,0.2) 66%, rgba(6,5,7,0) 100%)" }} />
+      <div aria-hidden className="ind-lead-light pointer-events-none absolute inset-x-0 -top-px z-20 h-[96px]" style={{ background: "linear-gradient(180deg, #060507 0%, rgba(6,5,7,0.6) 40%, rgba(6,5,7,0.15) 75%, rgba(6,5,7,0) 100%)" }} />
       <div aria-hidden className="ind-lead-dark pointer-events-none absolute inset-x-0 -top-2 z-20 h-[60svh] bg-gradient-to-b from-[#060507] via-[#060507]/70 to-transparent" />
       <div className="sticky top-0 h-[100svh] overflow-hidden">
-        {/* the moving orange gradient: soft washes of brand orange that drift and turn */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" style={{ opacity: "var(--t-grad-o)" }}>
+        {/* light: a cream ground with two big, soft orange glows in opposite
+            corners and a clear middle; they drift slowly */}
+        <div aria-hidden className="ind-light-only pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            data-glow="a"
+            className="absolute -left-[22vw] -top-[30vw] aspect-square w-[68vw] rounded-full will-change-transform"
+            style={{ background: "radial-gradient(closest-side, rgba(255,106,42,0.95) 0%, rgba(255,140,80,0.7) 30%, rgba(255,178,128,0.38) 58%, rgba(255,210,170,0) 100%)" }}
+          />
+          <div
+            data-glow="b"
+            className="absolute -bottom-[42vw] -right-[12vw] aspect-square w-[78vw] rounded-full will-change-transform"
+            style={{ background: "radial-gradient(closest-side, rgba(255,106,42,1) 0%, rgba(255,128,64,0.78) 28%, rgba(255,170,115,0.4) 58%, rgba(255,210,170,0) 100%)" }}
+          />
+          <div
+            data-glow="c"
+            className="absolute -right-[16vw] top-[42%] aspect-square w-[34vw] rounded-full will-change-transform"
+            style={{ background: "radial-gradient(closest-side, rgba(255,120,60,0.75) 0%, rgba(255,160,105,0.35) 50%, rgba(255,210,170,0) 100%)" }}
+          />
+        </div>
+        {/* dark: soft washes of brand orange that drift and turn */}
+        <div aria-hidden className="ind-dark-only pointer-events-none absolute inset-0 overflow-hidden" style={{ opacity: "var(--t-grad-o)" }}>
           <div
             data-tgrad
             className="absolute -inset-[30%] will-change-transform"
@@ -720,21 +730,10 @@ function Tunnel() {
             }}
           />
         </div>
-        {/* the landing's orange light, glowing from the end of the tunnel */}
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 34% 30% at 50% 50%, rgba(255,106,26,0.32), rgba(232,59,0,0.12) 45%, transparent 75%), radial-gradient(ellipse 80% 70% at 50% 120%, rgba(232,59,0,0.22), transparent 70%)" }} />
+        {/* the landing's orange light, glowing from the end of the tunnel (dark) */}
+        <div aria-hidden className="ind-dark-only pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 34% 30% at 50% 50%, rgba(255,106,26,0.32), rgba(232,59,0,0.12) 45%, transparent 75%), radial-gradient(ellipse 80% 70% at 50% 120%, rgba(232,59,0,0.22), transparent 70%)" }} />
         {/* the aurora, drawn per frame */}
         <canvas data-rings aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
-
-        {/* anamorphic flare across the vanishing point: a resting streak, and a brighter one for cuts.
-            The lines part in the middle, so they read as passing behind the sector copy */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2">
-          <div data-flare className="relative mx-auto h-[90px] w-[88vw] opacity-50" style={{ background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,140,50,0.35), transparent 70%)" }}>
-            <div className="absolute inset-x-[6%] top-1/2 h-px -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, var(--t-flare) 30%, var(--t-flare-core) 36%, transparent 43%, transparent 57%, var(--t-flare-core) 64%, var(--t-flare) 70%, transparent)" }} />
-          </div>
-          <div data-flash className="absolute inset-x-0 top-1/2 h-[140px] -translate-y-1/2 opacity-0" style={{ background: "radial-gradient(ellipse 48% 18% at 50% 50%, var(--t-flash), rgba(255,106,26,0.2) 45%, transparent 75%)" }}>
-            <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, var(--t-flare) 26%, var(--t-flare-core) 36%, transparent 43%, transparent 57%, var(--t-flare-core) 64%, var(--t-flare) 74%, transparent)" }} />
-          </div>
-        </div>
 
         {/* the camera */}
         <div data-cam className="absolute inset-0" style={{ perspective: `${P}px`, transformStyle: "preserve-3d" }}>
@@ -822,14 +821,11 @@ function Tunnel() {
           style={{ background: "radial-gradient(ellipse 50% 60% at 50% 50%, rgba(255,150,60,0.22), rgba(232,59,0,0.08) 50%, transparent 75%)" }}
         />
 
-        {/* widescreen bars; the lower one carries the sector as a subtitle */}
-        <div aria-hidden data-bar className="pointer-events-none absolute inset-x-0 top-0 z-30 h-[calc(76px+7vh)] origin-top bg-black" />
-        <div data-bar className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex h-[11vh] origin-bottom items-center justify-center bg-black">
-          <div data-hud className="w-[min(520px,88vw)] opacity-0">
-            <p data-hud-name className="text-center text-[12px] font-medium uppercase tracking-[0.32em] text-white/70" />
-            <div className="mt-2.5 h-px overflow-hidden bg-white/10">
-              <span data-hud-bar className="block h-full origin-left scale-x-0 bg-gradient-to-r from-[#e83b00] to-[#ffb13b]" />
-            </div>
+        {/* where you are: the sector and a progress line */}
+        <div data-hud className="pointer-events-none absolute inset-x-0 bottom-6 z-10 mx-auto w-[min(520px,88vw)] opacity-0">
+          <p data-hud-name className="text-center text-[12px] font-medium uppercase tracking-[0.32em] text-[var(--t-muted)]" />
+          <div className="mt-2.5 h-px overflow-hidden bg-[var(--t-chip-ring)]">
+            <span data-hud-bar className="block h-full origin-left scale-x-0 bg-gradient-to-r from-[#e83b00] to-[#ffb13b]" />
           </div>
         </div>
         <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 z-30 opacity-[0.035]" />

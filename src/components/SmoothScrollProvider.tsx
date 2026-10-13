@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef } from "react";
 import Lenis from "lenis";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { gsap, ScrollTrigger, isLowPower } from "@/lib/gsap";
 
 /**
  * Lenis smooth scroll, driven by GSAP's ticker.
@@ -67,6 +67,9 @@ export default function SmoothScrollProvider({
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Touch scrolling is already smooth natively, and Lenis would keep a rAF
+    // loop alive on every frame for nothing; budget devices skip it too.
+    if (window.matchMedia("(pointer: coarse)").matches || isLowPower()) return;
 
     const instance = new Lenis({
       autoRaf: false, // we drive it from gsap.ticker below

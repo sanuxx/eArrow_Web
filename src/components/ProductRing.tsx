@@ -60,7 +60,8 @@ export default function ProductRing({
    * that moment is `(a / 360 - 1)` cycles — negative, so it applies from the
    * first frame instead of holding the card still for most of a lap.
    */
-  const depthDelay = (angle: number) => `calc((${angle / 360} - 1) * var(--ring-dur))`;
+  const depthDelay = (angle: number) =>
+    `calc((${angle / 360} - 1) * var(--ring-dur))`;
 
   /* Placed by margin rather than `translate(-50%,-50%)`: the offset has to
      leave the box centred on the ring's axis, which is also the transform
@@ -80,7 +81,13 @@ export default function ProductRing({
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <span className="absolute left-1/2 top-[56%] h-[34%] w-[104%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-border-strong" />
           <span className="absolute left-1/2 top-[56%] h-[24%] w-[76%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-border" />
-          <span className="absolute left-1/2 top-[60%] h-[22%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-[50%]" style={{ background: "radial-gradient(closest-side, rgba(232,59,0,0.18), transparent)" }} />
+          <span
+            className="absolute left-1/2 top-[60%] h-[22%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-[50%]"
+            style={{
+              background:
+                "radial-gradient(closest-side, rgba(232,59,0,0.18), transparent)",
+            }}
+          />
         </div>
         {/*
           The entrance and the tilt are on two different elements on purpose.
@@ -108,75 +115,88 @@ export default function ProductRing({
                     <ellipse key={dy} cx="50" cy={50 + dy} rx={rx} ry="6.5" />
                   ))}
 
-                  {/* Meridians: three, a third of a turn apart. */}
-                  {[0, 1, 2].map((i) => (
-                    <ellipse
-                      key={i}
-                      className="globe-meridian"
-                      cx="50"
-                      cy="50"
-                      rx="48"
-                      ry="48"
-                      style={{ animationDelay: `${(-14 / 3) * i}s` }}
-                    />
-                  ))}
                 </g>
 
                 {/* The limb, a shade brighter than the grid inside it. */}
-                <circle cx="50" cy="50" r="48" stroke="rgba(255, 236, 214, 0.5)" strokeWidth="0.8" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="48"
+                  stroke="rgba(255, 236, 214, 0.5)"
+                  strokeWidth="0.8"
+                />
               </svg>
+
+              {/* Meridians: three, a third of a turn apart. Each is its own svg
+                  box and the box is what turns: a transform on an element
+                  inside an svg repaints every frame, one on the box itself runs
+                  on the compositor. */}
+              {[0, 1, 2].map((i) => (
+                <svg
+                  key={i}
+                  className="globe-grid globe-meridian"
+                  viewBox="0 0 100 100"
+                  fill="none"
+                  style={{ animationDelay: `${(-14 / 3) * i}s` }}
+                >
+                  <ellipse cx="50" cy="50" rx="48" ry="48" stroke="rgba(255, 232, 205, 0.34)" strokeWidth="0.7" />
+                </svg>
+              ))}
 
               <QMarkLight className="absolute left-1/2 top-1/2 h-auto w-[38%] -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_2px_8px_rgba(120,24,0,0.55)]" />
             </div>
 
             <div className="ring-spin absolute inset-0">
-            {/* ── The seven platforms ───────────────────────────────────── */}
-            {items.map((item, i) => {
-              const angle = step * i;
-              const Mark = PRODUCT_MARKS[item.key];
+              {/* ── The seven platforms ───────────────────────────────────── */}
+              {items.map((item, i) => {
+                const angle = step * i;
+                const Mark = PRODUCT_MARKS[item.key];
 
-              return (
-                <div
-                  key={item.key}
-                  className="ring-slot absolute left-1/2 top-1/2"
-                  style={slot(angle)}
-                >
+                return (
                   <div
-                    className="ring-face h-full w-full"
-                    style={{ "--a": `${angle}deg` } as React.CSSProperties}
+                    key={item.key}
+                    className="ring-slot absolute left-1/2 top-1/2"
+                    style={slot(angle)}
                   >
                     <div
-                      className="ring-depth h-full w-full"
-                      style={{ animationDelay: depthDelay(angle) }}
+                      className="ring-face h-full w-full"
+                      style={{ "--a": `${angle}deg` } as React.CSSProperties}
                     >
-                      <a
-                        href={item.href}
-                        className="surface-card group relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-card px-1.5 shadow-[var(--shadow-lift)] transition-colors duration-300 hover:border-orange/45"
-                      >
-                        <span
-                          aria-hidden
-                          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                          style={{
-                            background:
-                              "linear-gradient(to top, rgba(var(--orange-ch), 0.14), transparent 62%)",
-                          }}
-                        />
+                      {/* the card's fixed angle, kept out of the spin's keyframes */}
+                      <div className="ring-offset h-full w-full">
+                        <div
+                          className="ring-depth h-full w-full"
+                          style={{ animationDelay: depthDelay(angle) }}
+                        >
+                          <a
+                            href={item.href}
+                            className="surface-card group relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-card px-1.5 shadow-[var(--shadow-lift)] transition-colors duration-300 hover:border-orange/45"
+                          >
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                              style={{
+                                background:
+                                  "linear-gradient(to top, rgba(var(--orange-ch), 0.14), transparent 62%)",
+                              }}
+                            />
 
-                        {Mark && (
-                          <span className="relative flex h-[42%] w-[42%] items-center justify-center rounded-tile border border-border bg-surface-sunken transition-colors duration-300 group-hover:border-orange/30 group-hover:bg-white">
-                            <Mark className="h-[55%] w-[55%] text-ink-muted transition-colors duration-300 group-hover:text-orange" />
-                          </span>
-                        )}
+                            {Mark && (
+                              <span className="relative flex h-[42%] w-[42%] items-center justify-center rounded-tile border border-border bg-surface-sunken transition-colors duration-300 group-hover:border-orange/30 group-hover:bg-white">
+                                <Mark className="h-[55%] w-[55%] text-ink-muted transition-colors duration-300 group-hover:text-orange" />
+                              </span>
+                            )}
 
-                        <span className="relative px-1 text-center text-[10.5px] font-semibold leading-tight text-ink transition-colors duration-300 group-hover:text-orange lg:text-[11.5px]">
-                          {item.label}
-                        </span>
-                      </a>
+                            <span className="relative px-1 text-center text-[10.5px] font-semibold leading-tight text-ink transition-colors duration-300 group-hover:text-orange lg:text-[11.5px]">
+                              {item.label}
+                            </span>
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           </div>
         </motion.div>

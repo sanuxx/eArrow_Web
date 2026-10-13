@@ -161,7 +161,7 @@ export default function Nav() {
               // of the hero scrub. Visually near-identical; vastly cheaper —
               // see the note on the observer above.
               "border-b border-border bg-canvas"
-            : "border-b border-border bg-canvas/80 backdrop-blur-2xl backdrop-saturate-150"
+            : "border-b border-border bg-canvas/95 [@media(hover:hover)_and_(pointer:fine)]:bg-canvas/80 [@media(hover:hover)_and_(pointer:fine)]:backdrop-blur-2xl [@media(hover:hover)_and_(pointer:fine)]:backdrop-saturate-150"
           : "border-b border-transparent bg-transparent"
       }`}
     >
@@ -178,12 +178,13 @@ export default function Nav() {
             The drop shadow goes with the dark state. On white it was a grey
             haze around black artwork.
           */}
+          {/* cropped to the wordmark, so the size set here is the size you see */}
           <Image
-            src={withBasePath("/earrow-logo-white.png")}
+            src={withBasePath("/earrow-logo-trim.png")}
             alt="eArrow"
-            width={220}
-            height={91}
-            className={`h-9 w-auto transition-[filter] duration-500 sm:h-11 ${
+            width={1200}
+            height={292}
+            className={`h-[26px] w-auto transition-[filter] duration-500 sm:h-[31px] lg:h-[34px] ${
               onDark ? "drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]" : ""
             }`}
             style={onDark ? undefined : { filter: "var(--logo-filter)" }}

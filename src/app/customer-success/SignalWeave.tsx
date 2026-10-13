@@ -142,7 +142,6 @@ export default function SignalWeave() {
         style={{
           background:
             "radial-gradient(circle, rgba(var(--orange-ch), 0.3), rgba(var(--amber-ch), 0.1) 45%, transparent 70%)",
-          filter: "blur(120px)",
         }}
       />
     </div>

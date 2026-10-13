@@ -147,7 +147,7 @@ export default function ClientTicker() {
       {/* The house light — warm, low, and behind everything. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[150%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[130px]"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[150%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           background:
             "radial-gradient(circle, rgba(var(--orange-ch), 0.22), rgba(var(--amber-ch), 0.08) 45%, transparent 70%)",

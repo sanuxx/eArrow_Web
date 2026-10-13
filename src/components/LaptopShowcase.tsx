@@ -75,10 +75,6 @@ export default function LaptopShowcase({ screens }: { screens: Screen[] }) {
     py.set(0);
   };
 
-  const float = reduce
-    ? {}
-    : { y: [0, -9, 0], transition: { duration: 6, repeat: Infinity, ease: "easeInOut" as const } };
-
   return (
     <div
       ref={ref}
@@ -90,7 +86,8 @@ export default function LaptopShowcase({ screens }: { screens: Screen[] }) {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <motion.div animate={float}>
+      {/* the float is a CSS loop: compositor-driven and paused off screen */}
+      <div className={reduce ? undefined : "laptop-float"}>
         <motion.div
           style={reduce ? undefined : { rotateX, rotateY, transformStyle: "preserve-3d" }}
           className="relative"
@@ -171,21 +168,13 @@ export default function LaptopShowcase({ screens }: { screens: Screen[] }) {
             <span aria-hidden className="absolute -bottom-[2px] right-[8%] h-[3px] w-[7%] rounded-full bg-black/35" />
           </div>
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* ── Floor shadow, tightening as the laptop rises ── */}
-      <motion.div
+      {/* a CSS loop (compositor, paused off screen) rather than a JS one */}
+      <div
         aria-hidden
-        animate={
-          reduce
-            ? undefined
-            : {
-                scaleX: [1, 0.9, 1],
-                opacity: [0.55, 0.35, 0.55],
-                transition: { duration: 6, repeat: Infinity, ease: "easeInOut" },
-              }
-        }
-        className="mx-auto mt-3 h-[20px] w-[88%] rounded-[50%] opacity-55 blur-[14px]"
+        className="laptop-shadow mx-auto mt-3 h-[20px] w-[88%] rounded-[50%] opacity-55"
         style={{
           background:
             "radial-gradient(closest-side, rgba(120,30,0,0.55), rgba(var(--orange-ch),0.35) 60%, transparent)",

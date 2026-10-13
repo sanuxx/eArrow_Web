@@ -28,11 +28,11 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="col-span-2 lg:col-span-1">
             <Image
-              src={withBasePath("/earrow-logo-white.png")}
+              src={withBasePath("/earrow-logo-trim.png")}
               alt="eArrow"
-              width={220}
-              height={91}
-              className="h-8 w-auto sm:h-9"
+              width={1200}
+              height={292}
+              className="h-7 w-auto sm:h-8"
               style={{ filter: "var(--logo-filter)" }}
             />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-muted sm:mt-5">

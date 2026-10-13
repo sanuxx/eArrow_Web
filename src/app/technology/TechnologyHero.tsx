@@ -175,7 +175,7 @@ export default function TechnologyHero() {
       </div>
 
       {/* film: grain and vignette */}
-      <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 z-[5] opacity-[0.06] mix-blend-overlay" />
+      <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 z-[5] opacity-[0.035]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[5]" style={{ background: "radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(0,0,0,0.55) 100%)" }} />
 
       {/* ── Copy ── */}

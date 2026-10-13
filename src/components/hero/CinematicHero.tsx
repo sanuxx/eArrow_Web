@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, prefersReducedMotion, isLowPower } from "@/lib/gsap";
 import { withBasePath } from "@/lib/basePath";
 import { curtainActive, onCurtainLift } from "../brand-curtain";
 
@@ -80,7 +80,7 @@ function SplitLine({ text, soft }: { text: string; soft: boolean }) {
         {words.map((w, wi) => (
           <span key={wi} className="inline-block whitespace-nowrap">
             {[...w].map((ch, ci) => (
-              <span key={ci} data-char className="cine-char inline-block will-change-transform">
+              <span key={ci} data-char className="cine-char inline-block">
                 {ch}
               </span>
             ))}
@@ -99,7 +99,9 @@ function SplitLine({ text, soft }: { text: string; soft: boolean }) {
  */
 function CloudBank({ id, seed, density, className }: { id: string; seed: number; density: number; className: string }) {
   return (
-    <svg aria-hidden className={className} preserveAspectRatio="none" viewBox="0 0 1600 500">
+    // will-change: the noise filter is costly to draw, so it is drawn once into
+    // its own layer and the drift only moves that layer
+    <svg aria-hidden className={className} style={{ willChange: "transform" }} preserveAspectRatio="none" viewBox="0 0 1600 500">
       <defs>
         <filter id={`${id}-f`} x="0" y="0" width="100%" height="100%">
           <feTurbulence type="fractalNoise" baseFrequency="0.0032 0.0085" numOctaves="5" seed={seed} />
@@ -149,6 +151,8 @@ export default function CinematicHero() {
     const reel = q("[data-reel]")[0] as HTMLElement;
     const reelName = q("[data-reel-name]")[0] as HTMLElement;
     let reelTick: (() => void) | null = null;
+    /* phones and budget devices get the same story with fewer per-frame costs */
+    const lite = window.matchMedia("(pointer: coarse)").matches || isLowPower();
 
     // `ctx` is read inside the intro's onComplete, which only fires after this assignment.
     const ctx: gsap.Context = gsap.context(() => {
@@ -167,11 +171,15 @@ export default function CinematicHero() {
       };
       layoutRing();
 
-      /* ── Ambient: the carousel turns, the clouds drift, the sun breathes ── */
-      gsap.to(ring, { rotationY: "-=360", duration: 110, ease: "none", repeat: -1 });
-      gsap.to("[data-cloud-wrap=back] svg", { xPercent: -6, duration: 38, ease: "sine.inOut", yoyo: true, repeat: -1 });
-      gsap.to("[data-cloud-wrap=front] svg", { xPercent: 7, duration: 26, ease: "sine.inOut", yoyo: true, repeat: -1 });
-      gsap.to("[data-sun-core]", { scale: 1.06, opacity: 0.9, duration: 5, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      /* ── Ambient: the clouds drift, the sun breathes (the carousel's turn is
+         a CSS animation on [data-ring-turn], so it runs on the compositor) ── */
+      /* phones and budget devices keep the still sky: the drift is subtle and
+         every moving layer here is full-width */
+      if (!lite) {
+        gsap.to("[data-cloud-wrap=back] svg", { xPercent: -6, duration: 38, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        gsap.to("[data-cloud-wrap=front] svg", { xPercent: 7, duration: 26, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        gsap.to("[data-sun-core]", { scale: 1.06, opacity: 0.9, duration: 5, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      }
 
       /* ── ACT ONE ──────────────────────────────────────────────────────── */
       const intro = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
@@ -190,8 +198,8 @@ export default function CinematicHero() {
         .fromTo("[data-cloud-wrap=front]", { yPercent: 45, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 2.8, ease: "power3.out" }, 0.35)
         .fromTo(
           chars,
-          { yPercent: 110, rotationX: -70, opacity: 0, filter: "blur(10px)" },
-          { yPercent: 0, rotationX: 0, opacity: 1, filter: "blur(0px)", duration: 1.2, stagger: 0.03 },
+          { yPercent: 110, rotationX: -70, opacity: 0, ...(lite ? {} : { filter: "blur(10px)" }) },
+          { yPercent: 0, rotationX: 0, opacity: 1, ...(lite ? {} : { filter: "blur(0px)" }), duration: 1.2, stagger: 0.03 },
           0.7
         )
         .fromTo("[data-reveal]", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 1.1, stagger: 0.12 }, 1.5)
@@ -201,8 +209,11 @@ export default function CinematicHero() {
 
       intro.eventCallback("onComplete", () => {
         ctx.add(buildPush);
-        /* a slow push-in that never quite stops — the camera is never locked off */
-        ctx.add(() => gsap.to(camera, { scale: 1.03, duration: 16, ease: "sine.inOut", yoyo: true, repeat: -1 }));
+        /* a slow push-in that never quite stops — the camera is never locked off.
+           It moves the whole 3D scene every frame, so phones and budget devices
+           skip it */
+        if (!lite)
+          ctx.add(() => gsap.to(camera, { scale: 1.03, duration: 16, ease: "sine.inOut", yoyo: true, repeat: -1 }));
       });
 
       const release = curtainActive() ? onCurtainLift(() => intro.play()) : (intro.play(), () => {});
@@ -292,7 +303,8 @@ export default function CinematicHero() {
               yPercent: () => -gsap.utils.random(120, 320),
               xPercent: () => gsap.utils.random(-60, 60),
               rotation: () => gsap.utils.random(-25, 25),
-              filter: "blur(6px)",
+              /* a per-letter blur on every scroll frame is too costly on phones */
+              ...(lite ? {} : { filter: "blur(6px)" }),
               opacity: 0,
               duration: 0.3,
               stagger: { each: 0.004, from: "center" },
@@ -431,7 +443,11 @@ export default function CinematicHero() {
 
           {/* ── Headline, copy, actions ── */}
           <div data-px="6" className="absolute inset-x-0 top-0 z-20 motion-reduce:relative">
-            <div className="mx-auto flex max-w-5xl flex-col items-center px-6 pt-[clamp(108px,15vh,160px)] text-center motion-reduce:pb-32">
+            {/* phones: the block spans from under the nav to just above the arc of
+                screens, and the headline, copy and actions share that height
+                evenly — no empty band, at any phone height (71% is the arc's
+                line, a card is ~14vw tall above it) */}
+            <div className="mx-auto flex max-w-5xl flex-col items-center px-6 pt-[clamp(108px,15vh,160px)] text-center motion-reduce:pb-32 max-sm:h-[calc(71svh-17vw)] max-sm:justify-evenly max-sm:pb-4 max-sm:pt-[76px] max-sm:motion-reduce:h-auto">
               <h1
                 data-title
                 className="font-spartan text-[2.5rem] font-medium leading-[1.02] tracking-[-0.035em] drop-shadow-[0_6px_30px_rgba(120,30,0,0.35)] sm:text-[3.3rem] md:text-[3.9rem] lg:text-[4.3rem] xl:text-[4.6rem]"
@@ -443,18 +459,18 @@ export default function CinematicHero() {
 
               <p
                 data-reveal
-                className="cine-reveal mt-6 max-w-xl text-[0.95rem] leading-[1.7] text-white/90 drop-shadow-[0_2px_12px_rgba(120,30,0,0.35)] sm:text-[1.02rem]"
+                className="cine-reveal mt-6 max-w-xl max-sm:mt-0 text-[0.95rem] leading-[1.7] text-white/90 drop-shadow-[0_2px_12px_rgba(120,30,0,0.35)] sm:text-[1.02rem]"
               >
                 Intelligent business solutions and technology services designed to help organizations
                 work smarter, grow faster, and create lasting impact.
               </p>
 
-              <div data-reveal className="cine-reveal mt-8 flex flex-wrap items-center justify-center gap-3">
+              <div data-reveal className="cine-reveal mt-8 flex flex-wrap items-center justify-center gap-3 max-sm:mt-0 max-sm:flex-nowrap max-sm:gap-2.5">
                 <Link
                   prefetch={false}
                   data-magnetic
                   href="/contact"
-                  className="inline-flex items-center rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-7 py-3.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_28px_-8px_rgba(232,59,0,0.75),inset_0_1px_0_rgba(255,255,255,0.4)] ring-1 ring-white/25 transition-[box-shadow,filter] duration-300 hover:shadow-[0_14px_36px_-8px_rgba(232,59,0,0.9),inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-110"
+                  className="inline-flex items-center whitespace-nowrap rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-7 py-3.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] max-sm:px-5 max-sm:py-3 max-sm:text-[11px] max-sm:tracking-[0.1em] text-white shadow-[0_10px_28px_-8px_rgba(232,59,0,0.75),inset_0_1px_0_rgba(255,255,255,0.4)] ring-1 ring-white/25 transition-[box-shadow,filter] duration-300 hover:shadow-[0_14px_36px_-8px_rgba(232,59,0,0.9),inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-110"
                 >
                   See Features
                 </Link>
@@ -462,10 +478,10 @@ export default function CinematicHero() {
                   prefetch={false}
                   data-magnetic
                   href="/solutions"
-                  className="group inline-flex items-center gap-3 rounded-full bg-white py-1.5 pl-6 pr-1.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] text-[#1a0a03] shadow-[0_10px_30px_-10px_rgba(120,30,0,0.6)] transition-colors hover:bg-[#fff4ea]"
+                  className="group inline-flex items-center gap-3 whitespace-nowrap rounded-full bg-white py-1.5 pl-6 pr-1.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em] max-sm:gap-2 max-sm:pl-4 max-sm:text-[11px] max-sm:tracking-[0.1em] text-[#1a0a03] shadow-[0_10px_30px_-10px_rgba(120,30,0,0.6)] transition-colors hover:bg-[#fff4ea]"
                 >
                   Get Started
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#140802] text-[#ff7a1a] transition-transform duration-300 group-hover:rotate-45">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#140802] text-[#ff7a1a] max-sm:h-8 max-sm:w-8 transition-transform duration-300 group-hover:rotate-45">
                     <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M5 11L11 5M6 5h5v5" />
                     </svg>
@@ -482,6 +498,7 @@ export default function CinematicHero() {
                 <div style={{ transform: "rotateX(-7deg)", transformStyle: "preserve-3d" }}>
                   <div data-ring-spin style={{ transformStyle: "preserve-3d" }}>
                     <div data-ring className="relative" style={{ transformStyle: "preserve-3d" }}>
+                      <div className="cine-ring-turn absolute left-0 top-0">
                       {CARDS.map((c, i) => (
                         <figure
                           key={i}
@@ -507,6 +524,7 @@ export default function CinematicHero() {
                           />
                         </figure>
                       ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -569,7 +587,7 @@ export default function CinematicHero() {
         {/* ── Screen space ── */}
         {/* the reel: a film subtitle naming the product facing camera */}
         <div data-reel className="pointer-events-none absolute inset-x-0 bottom-[12%] z-20 flex justify-center px-6 opacity-0">
-          <div className="rounded-2xl bg-[#1a0802]/45 px-7 py-3 text-center backdrop-blur-md">
+          <div className="rounded-2xl bg-[#1a0802]/70 px-7 py-3 text-center">
             <p className="text-[11px] font-semibold tracking-[0.32em] text-[#ffb070]">NOW SHOWING</p>
             <div className="mt-1 overflow-hidden pb-1">
               <p data-reel-name className="font-spartan text-[clamp(1.4rem,2.8vw,2.4rem)] font-semibold leading-tight tracking-[-0.01em] text-white">
@@ -581,7 +599,7 @@ export default function CinematicHero() {
 
         {/* morning haze the opening burns off */}
         <div data-haze aria-hidden className="cine-haze pointer-events-none absolute inset-0 z-30 bg-[#fff1e3] opacity-0 motion-reduce:hidden" />
-        <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay" />
+        <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 opacity-[0.035]" />
 
         {/* scroll cue */}
         <div data-cue className="cine-cue pointer-events-none absolute bottom-6 right-8 z-30 hidden flex-col items-center gap-3 text-[10px] font-semibold tracking-[0.24em] text-[#6b2306] lg:flex">

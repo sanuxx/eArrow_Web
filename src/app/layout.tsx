@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, Inter, JetBrains_Mono, League_Spartan } from "next/font/google";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import BrandIntro from "@/components/BrandIntro";
+import OffscreenAnimations from "@/components/OffscreenAnimations";
 import "./globals.css";
 
 /**
@@ -246,6 +247,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           */}
           <BrandIntro />
           {children}
+          <OffscreenAnimations />
         </SmoothScrollProvider>
       </body>
     </html>

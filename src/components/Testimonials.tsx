@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { SectionLabel } from "./ui";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, prefersReducedMotion, isLowPower } from "@/lib/gsap";
 import { withBasePath } from "@/lib/basePath";
 
 /*
@@ -166,6 +166,9 @@ export default function Testimonials() {
   const currentRef = useRef<SVGSVGElement>(null);
   const ringRef = useRef<SVGCircleElement>(null);
   const autoplay = useRef<gsap.core.Tween | null>(null);
+  /* autoplay runs only while the section is on screen and not being read */
+  const onScreen = useRef(true);
+  const reading = useRef(false);
 
   /*
    * StrictMode invokes effects twice on mount, so a `didMount` boolean would be
@@ -278,7 +281,10 @@ export default function Testimonials() {
        * re-synchronise every few seconds and the eye catches the loop, where
        * 7 / 9.5 / 12 never quite repeat.
        */
-      waves.forEach((path, i) => {
+      /* Reshaping a path every frame is costly on phones; there the waves hold
+         their shape and the charge still flows along them. */
+      const morph = !window.matchMedia("(pointer: coarse)").matches && !isLowPower();
+      if (morph) waves.forEach((path, i) => {
         gsap.fromTo(
           path,
           { attr: { d: WAVE_A } },
@@ -294,11 +300,12 @@ export default function Testimonials() {
 
       if (charge) {
         gsap.set(charge, { opacity: 0.9 });
-        gsap.fromTo(
-          charge,
-          { attr: { d: WAVE_A } },
-          { attr: { d: WAVE_B }, duration: WAVES[0].period, ease: "sine.inOut", repeat: -1, yoyo: true },
-        );
+        if (morph)
+          gsap.fromTo(
+            charge,
+            { attr: { d: WAVE_A } },
+            { attr: { d: WAVE_B }, duration: WAVES[0].period, ease: "sine.inOut", repeat: -1, yoyo: true },
+          );
         gsap.fromTo(
           charge,
           { strokeDashoffset: 2290 },
@@ -389,15 +396,35 @@ export default function Testimonials() {
           onComplete: () => go(1),
         },
       );
+      if (!onScreen.current || reading.current) autoplay.current.pause();
     }, root);
 
     return () => ctx.revert();
   }, [index, go]);
 
+  /* Off screen, nothing cycles: no re-render, no word animation nobody sees */
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      onScreen.current = e.isIntersecting;
+      if (!e.isIntersecting) autoplay.current?.pause();
+      else if (!reading.current) autoplay.current?.play();
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   /* Autoplay yields to the reader: hovering or focusing anywhere in the section
      holds the current quote until they leave. */
-  const hold = () => autoplay.current?.pause();
-  const resume = () => autoplay.current?.play();
+  const hold = () => {
+    reading.current = true;
+    autoplay.current?.pause();
+  };
+  const resume = () => {
+    reading.current = false;
+    if (onScreen.current) autoplay.current?.play();
+  };
 
   return (
     <section
@@ -420,7 +447,7 @@ export default function Testimonials() {
       */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-0 h-[520px] w-[520px] rounded-full opacity-50 blur-[140px]"
+        className="pointer-events-none absolute -right-24 top-0 h-[520px] w-[520px] rounded-full opacity-50"
         style={{ background: "radial-gradient(circle, rgba(var(--amber-ch), 0.16), transparent 70%)" }}
       />
 
@@ -444,13 +471,6 @@ export default function Testimonials() {
           aria-hidden
           className="pointer-events-none absolute right-4 top-16 select-none lg:right-10"
         >
-          <span
-            className="absolute -inset-6 backdrop-blur-[10px]"
-            style={{
-              maskImage: "radial-gradient(closest-side, #000 25%, transparent 92%)",
-              WebkitMaskImage: "radial-gradient(closest-side, #000 25%, transparent 92%)",
-            }}
-          />
           <span
             data-t="glyph"
             className="relative block font-heading text-[13.76rem] font-extrabold leading-[0.7] text-orange opacity-[0.12] lg:text-[18.92rem]"

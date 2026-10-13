@@ -118,7 +118,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
       */}
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute h-[70%] w-[62%] rounded-full blur-[140px]"
+        className="pointer-events-none absolute h-[70%] w-[62%] rounded-full"
         animate={{
           left: `${28 + (active / (groups.length - 1)) * 44}%`,
           top: `${18 + (active % 3) * 16}%`,
