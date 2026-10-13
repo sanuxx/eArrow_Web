@@ -349,17 +349,17 @@ function MobileDeck() {
   }, []);
 
   return (
-    <section ref={ref} className="ind-tunnel bg-[#060507] px-4 pb-16 pt-16">
+    <section ref={ref} className="ind-tunnel bg-[var(--t-bg)] px-4 pb-16 pt-16">
       <div className="text-center">
-        <h2 className="font-spartan text-[2.2rem] font-semibold leading-[1.02] tracking-[-0.035em] text-white">
+        <h2 className="font-spartan text-[2.2rem] font-semibold leading-[1.02] tracking-[-0.035em] text-[var(--t-ink)]">
           <span className="block overflow-hidden pb-[0.06em]">
             <span data-m-h className="ind-fade block">Built for</span>
           </span>
           <span className="block overflow-hidden pb-[0.08em]">
-            <span data-m-h className="ind-fade block">every industry.</span>
+            <span data-m-h className="ind-fade block">every industry</span>
           </span>
         </h2>
-        <p data-m-copy className="ind-fade mx-auto mt-4 max-w-xs text-[15px] leading-relaxed text-white/65">
+        <p data-m-copy className="ind-fade mx-auto mt-4 max-w-xs text-[15px] leading-relaxed text-[var(--t-muted)]">
           The same connected ecosystem, configured for the way each sector <span className="text-orange">actually works</span>.
         </p>
       </div>
@@ -497,7 +497,9 @@ function Tunnel() {
     const drawAurora = () => {
       c2d.globalCompositeOperation = "source-over";
       c2d.clearRect(0, 0, cw, ch);
-      c2d.globalCompositeOperation = "lighter";
+      const dark = document.documentElement.dataset.theme === "dark";
+      c2d.globalCompositeOperation = dark ? "lighter" : "source-over";
+      const boost = dark ? 1 : 0.85;
       const cx = cw / 2;
       const cy = ch / 2;
       for (const b of bands) {
@@ -523,8 +525,8 @@ function Tunnel() {
         c2d.rotate(th + Math.PI / 2 + w * 0.22); // lie along the wall
         c2d.scale(1, T / L);
         const g = c2d.createRadialGradient(0, 0, 0, 0, 0, L);
-        g.addColorStop(0, `rgba(${b.tone},${(0.78 * a * clear).toFixed(3)})`);
-        g.addColorStop(0.4, `rgba(${b.tone},${(0.36 * a * clear).toFixed(3)})`);
+        g.addColorStop(0, `rgba(${b.tone},${(0.78 * boost * a * clear).toFixed(3)})`);
+        g.addColorStop(0.4, `rgba(${b.tone},${(0.36 * boost * a * clear).toFixed(3)})`);
         g.addColorStop(1, `rgba(${b.tone},0)`);
         c2d.fillStyle = g;
         c2d.beginPath();
@@ -551,10 +553,16 @@ function Tunnel() {
       }
       raf = requestAnimationFrame(tick);
     };
+    const wash = gsap.timeline({ repeat: -1, paused: true })
+      .to(q("[data-tgrad]"), { rotation: 360, duration: 48, ease: "none" }, 0)
+      .to(q("[data-tgrad]"), { scale: 1.18, xPercent: 6, yPercent: -4, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
     const run = (on: boolean) => {
       cancelAnimationFrame(raf);
       prev = 0;
-      if (on) raf = requestAnimationFrame(tick);
+      if (on) {
+        raf = requestAnimationFrame(tick);
+        wash.resume();
+      } else wash.pause();
     };
     const hud = q("[data-hud]")[0] as HTMLElement;
     const hudName = q("[data-hud-name]")[0] as HTMLElement;
@@ -693,12 +701,25 @@ function Tunnel() {
   };
 
   return (
-    <section ref={trackRef} className="ind-tunnel relative bg-[#060507] text-white" style={{ height: `${INDUSTRIES.length * 95 + 140}svh` }}>
-      {/* a dark lead-in at the very top of the track: the aurora rises out of the
-          landing's dark instead of starting at a hard edge. It sits in the
-          track, not the sticky stage, so it scrolls away as the stage pins */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-2 z-20 h-[60svh] bg-gradient-to-b from-[#060507] via-[#060507]/70 to-transparent" />
+    <section ref={trackRef} className="ind-tunnel relative bg-[var(--t-bg)] text-[var(--t-ink)]" style={{ height: `${INDUSTRIES.length * 95 + 140}svh` }}>
+      {/* the hand-off from the dark landing, so there is never a hard edge.
+          Light: a short dark-to-light ramp at the top of the track — once the
+          stage pins it sits behind the nav and the top widescreen bar.
+          Dark: a long dark lead-in that scrolls away as the stage pins */}
+      <div aria-hidden className="ind-lead-light pointer-events-none absolute inset-x-0 -top-px z-20 h-[180px]" style={{ background: "linear-gradient(180deg, #060507 0%, rgba(6,5,7,0.62) 32%, rgba(6,5,7,0.2) 66%, rgba(6,5,7,0) 100%)" }} />
+      <div aria-hidden className="ind-lead-dark pointer-events-none absolute inset-x-0 -top-2 z-20 h-[60svh] bg-gradient-to-b from-[#060507] via-[#060507]/70 to-transparent" />
       <div className="sticky top-0 h-[100svh] overflow-hidden">
+        {/* the moving orange gradient: soft washes of brand orange that drift and turn */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" style={{ opacity: "var(--t-grad-o)" }}>
+          <div
+            data-tgrad
+            className="absolute -inset-[30%] will-change-transform"
+            style={{
+              background:
+                "radial-gradient(ellipse 26% 22% at 36% 42%, rgba(255,138,61,0.55), transparent 100%), radial-gradient(ellipse 24% 22% at 66% 58%, rgba(255,177,59,0.5), transparent 100%), radial-gradient(ellipse 28% 18% at 50% 70%, rgba(232,59,0,0.38), transparent 100%), radial-gradient(ellipse 20% 18% at 58% 30%, rgba(255,106,26,0.35), transparent 100%)",
+            }}
+          />
+        </div>
         {/* the landing's orange light, glowing from the end of the tunnel */}
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 34% 30% at 50% 50%, rgba(255,106,26,0.32), rgba(232,59,0,0.12) 45%, transparent 75%), radial-gradient(ellipse 80% 70% at 50% 120%, rgba(232,59,0,0.22), transparent 70%)" }} />
         {/* the aurora, drawn per frame */}
@@ -708,10 +729,10 @@ function Tunnel() {
             The lines part in the middle, so they read as passing behind the sector copy */}
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2">
           <div data-flare className="relative mx-auto h-[90px] w-[88vw] opacity-50" style={{ background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,140,50,0.35), transparent 70%)" }}>
-            <div className="absolute inset-x-[6%] top-1/2 h-px -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(255,177,59,0.55) 30%, rgba(255,230,200,0.8) 36%, transparent 43%, transparent 57%, rgba(255,230,200,0.8) 64%, rgba(255,177,59,0.55) 70%, transparent)" }} />
+            <div className="absolute inset-x-[6%] top-1/2 h-px -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, var(--t-flare) 30%, var(--t-flare-core) 36%, transparent 43%, transparent 57%, var(--t-flare-core) 64%, var(--t-flare) 70%, transparent)" }} />
           </div>
-          <div data-flash className="absolute inset-x-0 top-1/2 h-[140px] -translate-y-1/2 opacity-0" style={{ background: "radial-gradient(ellipse 48% 18% at 50% 50%, rgba(255,200,140,0.7), rgba(255,106,26,0.25) 45%, transparent 75%)" }}>
-            <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(255,210,160,0.9) 26%, #fff5ea 36%, transparent 43%, transparent 57%, #fff5ea 64%, rgba(255,210,160,0.9) 74%, transparent)" }} />
+          <div data-flash className="absolute inset-x-0 top-1/2 h-[140px] -translate-y-1/2 opacity-0" style={{ background: "radial-gradient(ellipse 48% 18% at 50% 50%, var(--t-flash), rgba(255,106,26,0.2) 45%, transparent 75%)" }}>
+            <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, var(--t-flare) 26%, var(--t-flare-core) 36%, transparent 43%, transparent 57%, var(--t-flare-core) 64%, var(--t-flare) 74%, transparent)" }} />
           </div>
         </div>
 
@@ -748,12 +769,12 @@ function Tunnel() {
             {/* the title, in the mouth of the tunnel */}
             <div data-z={0} data-kind="title" className="absolute w-[min(900px,88vw)] text-center" style={{ transform: "translate3d(-50%, -50%, 0)" }}>
               <p data-t-copy className="ind-fade text-[12px] font-semibold uppercase tracking-[0.2em] text-orange">Eight sectors · one ecosystem</p>
-              <h2 className="font-spartan mt-4 text-[2.2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-[3rem]">
+              <h2 className="font-spartan mt-4 text-[2.2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-[var(--t-ink)] sm:text-[3rem]">
                 <span className="block overflow-hidden pb-[0.06em]">
                   <span data-t className="ind-fade block">Fly through every sector</span>
                 </span>
               </h2>
-              <p data-t-copy className="ind-fade mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
+              <p data-t-copy className="ind-fade mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--t-ink)]">
                 Keep scrolling
                 <span aria-hidden className="ind-bob text-orange">↓</span>
               </p>
@@ -774,14 +795,14 @@ function Tunnel() {
                     opacity: 0,
                   }}
                 >
-                  <h2 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.03em] text-white sm:text-[4rem] lg:text-[4.8rem]">
+                  <h2 className="font-spartan text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--t-ink)] sm:text-[4rem] lg:text-[4.8rem]">
                     {ind.name}
                   </h2>
-                  <p className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-white/65 sm:text-[17px]">{ind.line}</p>
+                  <p className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-[var(--t-muted)] sm:text-[17px]">{ind.line}</p>
                   <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.2em] text-orange">Related systems</p>
                   <div className="mt-3 flex flex-wrap justify-center gap-2">
                     {systemsFor(ind).map((p) => (
-                      <span key={p} className="rounded-full bg-white/[0.08] px-4 py-2 text-[13px] font-semibold text-white ring-1 ring-white/15">
+                      <span key={p} className="rounded-full bg-[var(--t-chip)] px-4 py-2 text-[13px] font-semibold text-[var(--t-ink)] ring-1 ring-[var(--t-chip-ring)]">
                         {PRODUCT_FULL[p]}
                       </span>
                     ))}
@@ -793,7 +814,7 @@ function Tunnel() {
         </div>
 
         {/* film finish: a vignette, and a warm light leak that sweeps the frame on each cut */}
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0,0,0,0.65) 100%)" }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, var(--t-vig) 100%)" }} />
         <div
           aria-hidden
           data-leak

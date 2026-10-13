@@ -2168,6 +2168,36 @@ a:focus-visible, button:focus-visible {
    on a preserve-3d ancestor it would flatten the device. */
 .fogp { opacity: var(--fog, 1); }
 
+/* Industries tunnel: light by default, dark with the site's dark theme */
+.ind-tunnel {
+  --t-bg: #fff7f0;
+  --t-ink: #1c120d;
+  --t-muted: rgba(28, 18, 13, 0.62);
+  --t-chip: rgba(255, 255, 255, 0.72);
+  --t-chip-ring: rgba(120, 40, 0, 0.14);
+  --t-grad-o: 1;
+  --t-vig: rgba(232, 59, 0, 0.16);
+  --t-flare: rgba(232, 59, 0, 0.5);
+  --t-flare-core: rgba(255, 106, 26, 0.85);
+  --t-flash: rgba(255, 106, 26, 0.35);
+}
+/* the hand-off from the dark landing: above the tunnel in light, inside it in dark */
+.ind-lead-dark { display: none; }
+:root[data-theme="dark"] .ind-lead-dark { display: block; }
+:root[data-theme="dark"] .ind-lead-light { display: none; }
+:root[data-theme="dark"] .ind-tunnel {
+  --t-bg: #060507;
+  --t-ink: #ffffff;
+  --t-muted: rgba(255, 255, 255, 0.65);
+  --t-chip: rgba(255, 255, 255, 0.08);
+  --t-chip-ring: rgba(255, 255, 255, 0.15);
+  --t-grad-o: 0.35;
+  --t-vig: rgba(0, 0, 0, 0.65);
+  --t-flare: rgba(255, 177, 59, 0.55);
+  --t-flare-core: rgba(255, 230, 200, 0.8);
+  --t-flash: rgba(255, 200, 140, 0.7);
+}
+
 /* Arrow HR dashboard (components/HrDashboard.tsx): tab text over the sliding pill */
 .hr-tab { color: #2b2b33; transition: color 0.35s ease; }
 .hr-tab.is-on { color: #fff; background: transparent; }
