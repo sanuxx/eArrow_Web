@@ -635,6 +635,9 @@ export default function ProductsContent() {
                     problem={product.problem}
                     modules={product.modules}
                     moduleGroups={product.moduleGroups}
+                    media={
+                      product.screens ? <LaptopShowcase screens={product.screens} /> : <ProductShell config={product.shell} />
+                    }
                     Mark={Mark}
                   />
                 </div>
@@ -645,7 +648,8 @@ export default function ProductsContent() {
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ ...SPRING_SOFT, delay: 0.08 }}
-                  className={flipped ? "lg:order-1" : ""}
+                  /* desktop only — on smaller screens it sits inside the story, under the name */
+                  className={`hidden lg:block ${flipped ? "lg:order-1" : ""}`}
                 >
                   {product.screens ? (
                     <LaptopShowcase screens={product.screens} />

@@ -418,8 +418,8 @@ function Statements() {
       <span
         data-glow
         aria-hidden
-        className="pointer-events-none absolute -right-[10%] top-[-20%] h-[120%] w-[65%]"
-        style={{ background: "radial-gradient(circle, rgba(232,59,0,0.28), rgba(255,177,59,0.06) 48%, transparent 70%)" }}
+        className="pointer-events-none absolute -right-[45%] top-[-10%] h-[110%] w-[150%] lg:-right-[10%] lg:top-[-20%] lg:h-[120%] lg:w-[65%]"
+        style={{ background: "radial-gradient(closest-side, rgba(232,59,0,0.28), rgba(255,177,59,0.07) 55%, transparent 100%)" }}
       />
       <QMarkLight className="pointer-events-none absolute -bottom-24 -left-20 h-auto w-[460px] opacity-[0.04]" />
 

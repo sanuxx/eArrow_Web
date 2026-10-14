@@ -136,7 +136,9 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
           only where it dissolves into the dark, which is exactly what a
           bottom-only radius does and what a circle cannot.
         */}
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-14 lg:grid-cols-3 lg:gap-7">
+        {/* phones and tablets: a swipeable row (the pager on each card shows
+            where it sits); desktop: three across */}
+        <div className="-mx-6 mt-10 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-2 [scrollbar-width:none] lg:mx-0 lg:mt-14 lg:grid lg:grid-cols-3 lg:gap-7 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
           {STAGES.map((s, i) => {
             /* Deepest to lightest across the three, all from the brand ramp. */
             const glow = [
@@ -151,9 +153,9 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
                 href={s.href}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-70px" }}
+                viewport={{ once: true, margin: "-70px 0px" }}
                 transition={{ ...SPRING_SOFT, delay: i * 0.12 }}
-                className="journey-card group relative flex min-h-[30rem] flex-col overflow-hidden rounded-[1.75rem] lg:min-h-[32rem]"
+                className="journey-card group relative flex h-[35.5rem] w-[84%] shrink-0 snap-start flex-col overflow-hidden rounded-[1.75rem] sm:w-[46%] lg:h-auto lg:min-h-[32rem] lg:w-auto"
               >
                 {/*
                   ── The dome ──

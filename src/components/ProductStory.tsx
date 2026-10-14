@@ -29,6 +29,8 @@ type Props = {
   problem: string;
   modules: string[];
   moduleGroups?: { title: string; items: string[] }[];
+  /** On phones and tablets the product itself sits right under its name. */
+  media?: React.ReactNode;
   Mark?: (props: { className?: string }) => React.ReactElement;
 };
 
@@ -91,6 +93,7 @@ export default function ProductStory({
   problem,
   modules,
   moduleGroups,
+  media,
 }: Props) {
   const reduce = useReducedMotion();
   const name = label.replace(/^Arrow\s+/, "");
@@ -132,6 +135,8 @@ export default function ProductStory({
       >
         {tagline}
       </motion.p>
+
+      {media && <div className="relative mt-8 lg:hidden">{media}</div>}
 
       {/* ── Before → With Arrow ── */}
       <motion.div

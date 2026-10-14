@@ -150,7 +150,7 @@ export default function SolutionsHero({
         <h1 className="font-spartan text-[2.05rem] font-medium leading-[1.06] tracking-[-0.03em] text-ink-muted sm:text-[3.4rem] lg:text-[4.1rem]">
           <span className="block overflow-hidden pb-[0.08em]">
             <span data-word className="sol-fade inline-block">
-              <span className="bg-gradient-to-r from-[#d13400] via-[#e83b00] to-[#ff9820] bg-clip-text font-semibold text-transparent">
+              <span className="bg-gradient-to-r from-[#d13400] via-[#e83b00] to-[#ff9820] bg-clip-text font-semibold text-transparent max-sm:block">
                 Business Solutions
               </span>{" "}
               by eArrow
@@ -168,17 +168,18 @@ export default function SolutionsHero({
           intelligent automation, managed IT and digital growth — delivered by one technology partner.
         </p>
 
-        <div data-copy className="sol-fade mt-8 flex flex-wrap items-center justify-center gap-3">
+        {/* phones: two equal, full-width buttons, stacked */}
+        <div data-copy className="sol-fade mt-8 flex flex-wrap items-center justify-center gap-3 max-sm:w-full max-sm:max-w-[320px] max-sm:flex-col max-sm:items-stretch">
           <a
             href="/contact"
-            className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-[#ff7a1a] to-[#e83b00] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_-8px_rgba(232,59,0,0.75),inset_0_1px_0_rgba(255,255,255,0.45)] transition-transform duration-300 hover:-translate-y-0.5"
+            className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-[#ff7a1a] to-[#e83b00] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_-8px_rgba(232,59,0,0.75),inset_0_1px_0_rgba(255,255,255,0.45)] transition-transform duration-300 hover:-translate-y-0.5"
           >
             Request a consultation
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
           </a>
           <a
             href="#capabilities"
-            className="group inline-flex items-center gap-2 rounded-full border border-border bg-surface px-6 py-3 text-sm font-semibold text-ink shadow-[0_6px_18px_-10px_rgba(120,40,0,0.35)] transition-transform duration-300 hover:-translate-y-0.5"
+            className="group inline-flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-6 py-3 text-sm font-semibold text-ink shadow-[0_6px_18px_-10px_rgba(120,40,0,0.35)] transition-transform duration-300 hover:-translate-y-0.5"
           >
             See what we cover
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />

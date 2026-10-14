@@ -74,6 +74,16 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
     return () => window.clearTimeout(id);
   }, [active, taken, paused, groups.length]);
 
+  /* on phones the index is a sideways row: keep the live pill in view */
+  const indexRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = indexRef.current;
+    const tab = tabRefs.current[active];
+    if (!row || !tab || row.scrollWidth <= row.clientWidth) return;
+    const left = row.scrollLeft + tab.getBoundingClientRect().left - row.getBoundingClientRect().left - 24;
+    row.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [active]);
+
   const choose = useCallback((i: number) => {
     setActive(i);
     setTaken(true);
@@ -126,7 +136,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
         transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         style={{
           background:
-            "radial-gradient(circle, rgba(var(--orange-ch), 0.55), rgba(var(--amber-ch), 0.2) 44%, transparent 70%)",
+            "radial-gradient(closest-side, rgba(var(--orange-ch), 0.55), rgba(var(--amber-ch), 0.2) 55%, transparent 100%)",
         }}
       />
       <QMarkLight className="pointer-events-none absolute -bottom-24 -left-20 h-auto w-[420px] opacity-[0.035]" />
@@ -153,7 +163,9 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
             aria-label="Capability domains"
             aria-orientation="vertical"
             onKeyDown={onKeyDown}
-            className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:flex lg:flex-col lg:gap-0"
+            ref={indexRef}
+            /* phones and tablets: one swipeable row of pills; desktop: the column */
+            className="-mx-6 flex snap-x scroll-px-6 gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden"
           >
             {groups.map((g, i) => {
               const live = i === active;
@@ -170,7 +182,9 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
                   aria-controls="cap-stage"
                   tabIndex={live ? 0 : -1}
                   onClick={() => choose(i)}
-                  className="group relative overflow-hidden rounded-tile px-3 py-2.5 text-left lg:rounded-none lg:border-b lg:border-white/10 lg:px-0 lg:py-3.5"
+                  className={`group relative shrink-0 snap-start overflow-hidden rounded-full border px-4 py-2 text-left transition-colors duration-300 lg:shrink lg:rounded-none lg:border-0 lg:border-b lg:border-white/10 lg:bg-transparent lg:px-0 lg:py-3.5 ${
+                    live ? "border-amber/60 bg-white/[0.08]" : "border-white/12 bg-white/[0.03]"
+                  }`}
                 >
                   {/*
                     The progress bar is the tell that this is moving on its own.
@@ -191,14 +205,14 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
 
                   <span className="flex items-center gap-2.5">
                     <span
-                      className={`font-mono text-[10px] tracking-[0.2em] transition-colors duration-300 ${
+                      className={`hidden font-mono text-[10px] tracking-[0.2em] transition-colors duration-300 lg:inline ${
                         live ? "text-amber" : "text-white/25"
                       }`}
                     >
                       {g.code}
                     </span>
                     <span
-                      className={`text-[13px] font-semibold leading-tight transition-colors duration-300 ${
+                      className={`whitespace-nowrap text-[13px] font-semibold leading-tight transition-colors duration-300 lg:whitespace-normal ${
                         live ? "text-white" : "text-white/45 group-hover:text-white/80"
                       }`}
                     >
@@ -239,7 +253,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
                 */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -top-10 right-0 select-none font-heading text-[9rem] font-extrabold leading-none tracking-[-0.06em] text-white/[0.05] sm:text-[13rem] lg:-top-16 lg:text-[16rem]"
+                  className="pointer-events-none absolute -top-6 right-0 select-none font-heading text-[6.5rem] font-extrabold leading-none tracking-[-0.06em] text-white/[0.05] sm:text-[13rem] lg:-top-16 lg:text-[16rem]"
                 >
                   {group.code.replace(/\D/g, "")}
                 </span>
