@@ -42,6 +42,8 @@ type Product = {
   blurb: string;
   problem: string;
   modules: string[];
+  /** Full module catalogue, grouped (shown in place of `modules` when present). */
+  moduleGroups?: { title: string; items: string[] }[];
   /** Drawn fallback, shown when a product has no real screenshots yet. */
   shell: ShellConfig;
   screens?: Screen[];
@@ -60,6 +62,34 @@ const PRODUCTS: Product[] = [
     problem:
       "Employee data spread across spreadsheets, with manual approvals and delayed reporting.",
     modules: ["Payroll", "Attendance", "Self-Service", "Performance", "Reporting"],
+    moduleGroups: [
+      {
+        title: "Core modules",
+        items: [
+          "Company Set Up / Master Data",
+          "User Access Control Management",
+          "Employee Database & Information Management",
+          "Onboarding & Offboarding",
+          "Time & Attendance Management",
+          "Leave & Absence Management",
+          "Employee Self Service (ESS) & Manager Self Service (MSS)",
+        ],
+      },
+      {
+        title: "Premium modules",
+        items: [
+          "Recruitment & Applicant Tracking",
+          "Benefit Management",
+          "Performance Management",
+          "Training & Development",
+          "Asset Management",
+          "Employee Correspondence / HR Letter Generation",
+          "Mobile App",
+          "Bulk Data Uploads",
+          "Analytics & Reporting",
+        ],
+      },
+    ],
     shell: {
       path: "arrow-hr / dashboard",
       nav: ["Overview", "People", "Payroll", "Time", "Reports"],
@@ -604,6 +634,7 @@ export default function ProductsContent() {
                     blurb={product.blurb}
                     problem={product.problem}
                     modules={product.modules}
+                    moduleGroups={product.moduleGroups}
                     Mark={Mark}
                   />
                 </div>
