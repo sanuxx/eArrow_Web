@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Marquee, CountUp } from "./motion-kit";
+import { Marquee } from "./motion-kit";
 import { withBasePath } from "@/lib/basePath";
 
 /**
@@ -84,7 +85,7 @@ const CLIENTS: Client[] = [
   { name: "Prasara Washing Plant Dankotuwa (Pvt) Ltd", logo: withBasePath("/clients/prasara.webp") },
 ];
 
-function Badge({ client, small = false }: { client: Client; small?: boolean }) {
+function Badge({ client, size = "md" }: { client: Client; size?: "lg" | "md" | "sm" }) {
   /*
    * Taller than the original 80px, because the wall is now entirely artwork.
    * `object-contain` fits a mark to whichever edge binds first, so at 80px
@@ -92,12 +93,12 @@ function Badge({ client, small = false }: { client: Client; small?: boolean }) {
    * spanned the full 176px. The extra height is what evens those two out
    * without stretching either.
    */
-  const h = small ? "h-16" : "h-24";
+  const box = { lg: "h-28 w-60 p-4", md: "h-24 w-52 p-3.5", sm: "h-16 w-40 p-3" }[size];
 
   return (
     <div
       title={client.name}
-      className={`client-panel mx-2 flex ${h} ${small ? "w-40" : "w-52"} shrink-0 items-center justify-center rounded-card bg-white p-3.5 transition-all duration-300 hover:-translate-y-1`}
+      className={`client-panel mx-2 flex ${box} shrink-0 items-center justify-center rounded-card bg-white transition-all duration-300 hover:-translate-y-1`}
     >
       <Image
         src={client.logo}
@@ -121,10 +122,91 @@ function Badge({ client, small = false }: { client: Client; small?: boolean }) {
  * populated at any list length, and a marquee only loops seamlessly when it
  * holds enough to cover the width twice.
  */
-const FOCAL = CLIENTS.slice(0, Math.ceil(CLIENTS.length / 2));
-const BACK = CLIENTS.slice(FOCAL.length);
-const BACK_TOP = BACK.slice(0, Math.ceil(BACK.length / 2));
-const BACK_BOTTOM = BACK.slice(Math.ceil(BACK.length / 2));
+/* The headline clients, by request: they take the lit front row on desktop
+   and lead the grid on phones. Listed by name so the order is deliberate. */
+const FEATURED_NAMES = [
+  "Ceylon Chamber of Commerce – Import Section",
+  "Centre for Banking Studies (Central Bank of Sri Lanka)",
+  "John Keells Infomate",
+  "Institute of Bankers of Sri Lanka (IBSL)",
+  "Sri Lanka Cricket",
+  "Dialog",
+  "DIMO",
+  "Motha Confectionery",
+  "Sri Lanka Air Force",
+];
+const FEATURED = FEATURED_NAMES.map((n) => CLIENTS.find((c) => c.name === n)).filter((c): c is Client => !!c);
+const REST = CLIENTS.filter((c) => !FEATURED_NAMES.includes(c.name));
+const BACK_TOP = REST.slice(0, Math.ceil(REST.length / 2));
+const BACK_BOTTOM = REST.slice(Math.ceil(REST.length / 2));
+
+/*
+ * Phones: a turning wall.
+ *
+ * Thirty-five marks in a grid were a mess at phone width, and a moving row
+ * only ever shows two or three. Instead: nine equal tiles, opening on the
+ * featured clients, and every so often one tile flips over to the next client
+ * — so every organisation comes round, while the screen only ever holds nine
+ * calm tiles. It turns only while on screen; under reduced motion it stays on
+ * the featured nine.
+ */
+const WALL = [...FEATURED, ...REST];
+const TILES = 9;
+
+function FlipWall() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState<number[]>(() => Array.from({ length: TILES }, (_, i) => i));
+  const [turns, setTurns] = useState<number[]>(() => Array(TILES).fill(0));
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let visible = false;
+    let next = TILES;
+    let last = -1;
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
+    io.observe(el);
+    const timer = setInterval(() => {
+      if (!visible) return;
+      let tile = Math.floor(Math.random() * TILES);
+      if (tile === last) tile = (tile + 4) % TILES;
+      last = tile;
+      setShown((s) => {
+        let pick = next % WALL.length;
+        while (s.includes(pick)) pick = (pick + 1) % WALL.length;
+        next = pick + 1;
+        const copy = [...s];
+        copy[tile] = pick;
+        return copy;
+      });
+      setTurns((t) => t.map((n, i) => (i === tile ? n + 1 : n)));
+    }, 1300);
+    return () => {
+      clearInterval(timer);
+      io.disconnect();
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="relative mx-auto mt-10 max-w-sm px-6 md:hidden">
+      <ul className="grid grid-cols-3 gap-3">
+        {shown.map((idx, t) => {
+          const c = WALL[idx];
+          return (
+            <li key={t} className="client-panel relative aspect-square overflow-hidden rounded-2xl bg-white [perspective:600px]">
+              <div key={turns[t]} className="logo-flip absolute inset-0 flex items-center justify-center p-3">
+                <Image src={c.logo} alt={c.name} width={140} height={140} className="h-full w-full object-contain" />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+        All {WALL.length} clients turn through the wall
+      </p>
+    </div>
+  );
+}
 
 export default function ClientTicker() {
   return (
@@ -164,17 +246,8 @@ export default function ClientTicker() {
       <span aria-hidden className="client-sweep" />
 
       <div className="relative mx-auto max-w-7xl px-6 text-center lg:px-12">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/55">
-          Trusted by
-        </p>
-        {/*
-          The number is the strongest fact this section has. Counted from the
-          list rather than written down, so it cannot drift as clients are
-          added — and set in amber rather than orange because on this ground
-          orange is the one brand value that goes muddy.
-        */}
-        <p className="mt-4 font-heading text-[2.75rem] font-extrabold leading-none tracking-[-0.04em] text-amber lg:text-[3.4rem]">
-          <CountUp value={`${CLIENTS.length}`} />
+        <p className="mx-auto max-w-xl font-heading text-[1.15rem] font-semibold leading-snug tracking-[-0.01em] text-white/85 sm:text-[1.35rem]">
+          Proud to power progress for businesses that trust us.
         </p>
         <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.3em] text-white/55">
           Organizations across Sri Lanka
@@ -182,7 +255,7 @@ export default function ClientTicker() {
       </div>
 
       {/* ── The stage: three rows on a focal plane ──────────────────────── */}
-      <div className="client-wall relative mt-14 space-y-3.5">
+      <div className="client-wall relative mt-14 hidden space-y-3.5 md:block">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
@@ -205,15 +278,15 @@ export default function ClientTicker() {
         <div className="client-row client-row--back">
           <Marquee duration={84}>
             {BACK_TOP.map((c) => (
-              <Badge key={c.name} client={c} small />
+              <Badge key={c.name} client={c} size="sm" />
             ))}
           </Marquee>
         </div>
 
         <div className="client-row">
           <Marquee duration={54} reverse>
-            {FOCAL.map((c) => (
-              <Badge key={c.name} client={c} />
+            {FEATURED.map((c) => (
+              <Badge key={c.name} client={c} size="lg" />
             ))}
           </Marquee>
         </div>
@@ -221,7 +294,7 @@ export default function ClientTicker() {
         <div className="client-row client-row--back">
           <Marquee duration={96}>
             {BACK_BOTTOM.map((c) => (
-              <Badge key={c.name} client={c} small />
+              <Badge key={c.name} client={c} size="sm" />
             ))}
           </Marquee>
         </div>
@@ -231,6 +304,9 @@ export default function ClientTicker() {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
         />
       </div>
+
+      {/* Phones: the turning wall (below) */}
+      <FlipWall />
     </section>
   );
 }

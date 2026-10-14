@@ -242,143 +242,40 @@ function Hero() {
 
 /* ═══════════════════════════ What we do ═══════════════════════════ */
 
-/* ── Practice illustrations ───────────────────────────────────────────────
- *
- * One family of generated artwork: a peach ground with broad, soft-edged
- * orange sweeps, each practice composed from the same curves into its own
- * motif. Drawn as SVG with gradients — no images, crisp at any size, and
- * `preserveAspectRatio="xMidYMid slice"` so a narrow closed panel and the
- * wide open one both crop the same picture well.
+/* each card's light falls from a different place, so the five read as a set
+   rather than as copies */
+/* the liquid light: soft colour pools that drift, swell and merge (CSS
+   loops — compositor-only, paused off screen, held on budget devices) */
+const LIQUID = [
+  { c: "rgba(255,214,170,0.95)", x: "-12%", y: "-30%", s: "78%", a: "liq-a", d: 13 },
+  { c: "rgba(255,98,26,0.95)", x: "38%", y: "-6%", s: "86%", a: "liq-b", d: 16 },
+  { c: "rgba(194,30,0,0.95)", x: "-28%", y: "34%", s: "92%", a: "liq-c", d: 18 },
+  { c: "rgba(255,150,60,0.9)", x: "50%", y: "40%", s: "70%", a: "liq-a", d: 15 },
+  { c: "rgba(90,8,0,0.9)", x: "10%", y: "70%", s: "80%", a: "liq-b", d: 20 },
+];
+
+const PRACTICE_LIGHT = [
+  "radial-gradient(120% 95% at 85% 12%, #ffd8a8 0%, #ff8a2a 20%, #e83b00 46%, #8f1800 74%, #1a0400 100%)",
+  "radial-gradient(120% 95% at 15% 18%, #ffd8a8 0%, #ff8a2a 20%, #e83b00 46%, #8f1800 74%, #1a0400 100%)",
+  "radial-gradient(120% 95% at 70% 85%, #ffd8a8 0%, #ff8a2a 22%, #e83b00 48%, #8f1800 76%, #1a0400 100%)",
+  "radial-gradient(120% 95% at 28% 78%, #ffd8a8 0%, #ff8a2a 22%, #e83b00 48%, #8f1800 76%, #1a0400 100%)",
+  "radial-gradient(120% 95% at 50% 6%, #ffd8a8 0%, #ff8a2a 20%, #e83b00 46%, #8f1800 74%, #1a0400 100%)",
+];
+
+/*
+ * The five practices as cards: a black bezel; up top, a liquid red-orange
+ * light that keeps moving, the practice's name in the corner; below, a
+ * dark folder-tab panel with the title, what it does, its mark and the way in.
+ * Five across on desktop, a swipeable row on phones and tablets.
  */
-function PracticeArt({ v, id }: { v: number; id: string }) {
-  /* The site's own material: smoked glass on near-black, rims lit cream →
-     orange, warm light pooled behind — the same language as the Technology
-     lens and stack. Glows are radial gradients (no filters), so it is cheap. */
-  const g = (n: string) => `${id}-${n}`;
-  const glass = `url(#${g("glass")})`;
-  const rim = `url(#${g("rim")})`;
-  const S = { fill: glass, stroke: rim, strokeWidth: 3 } as const;
-  return (
-    <svg viewBox="0 0 400 480" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden>
-      <defs>
-        <radialGradient id={g("bg")} cx="0.3" cy="0.25" r="1">
-          <stop offset="0" stopColor="#2a1810" />
-          <stop offset="0.55" stopColor="#120c09" />
-          <stop offset="1" stopColor="#070505" />
-        </radialGradient>
-        <linearGradient id={g("glass")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#3a2a22" stopOpacity="0.92" />
-          <stop offset="1" stopColor="#120c09" stopOpacity="0.92" />
-        </linearGradient>
-        <linearGradient id={g("rim")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fff0e4" />
-          <stop offset="0.35" stopColor="#ff9a52" />
-          <stop offset="0.7" stopColor="#e83b00" />
-          <stop offset="1" stopColor="#ffb13b" />
-        </linearGradient>
-        <linearGradient id={g("hot")} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffb13b" />
-          <stop offset="1" stopColor="#e83b00" />
-        </linearGradient>
-        <radialGradient id={g("glow")}>
-          <stop offset="0" stopColor="#ff7a1a" stopOpacity="0.75" />
-          <stop offset="0.45" stopColor="#e83b00" stopOpacity="0.25" />
-          <stop offset="1" stopColor="#e83b00" stopOpacity="0" />
-        </radialGradient>
-        <pattern id={g("grid")} width="32" height="32" patternUnits="userSpaceOnUse">
-          <path d="M32 0H0V32" fill="none" stroke="#ffffff" strokeOpacity="0.05" />
-        </pattern>
-      </defs>
-      <rect width="400" height="480" fill={`url(#${g("bg")})`} />
-      <rect width="400" height="480" fill={`url(#${g("grid")})`} />
-
-      <g data-art>
-        {v === 0 && (
-          /* Transformation: scattered panes resolving into one, the arrow through them */
-          <>
-            <circle cx="230" cy="190" r="200" fill={`url(#${g("glow")})`} />
-            <rect x="60" y="70" width="150" height="110" rx="22" {...S} opacity="0.55" transform="rotate(-12 135 125)" />
-            <rect x="170" y="120" width="170" height="125" rx="24" {...S} opacity="0.8" transform="rotate(6 255 182)" />
-            <rect x="100" y="200" width="210" height="150" rx="28" {...S} />
-            <path d="M40 420 L 330 110" stroke={`url(#${g("hot")})`} strokeWidth="10" strokeLinecap="round" />
-            <path d="M290 100 L 340 100 L 340 150" fill="none" stroke={`url(#${g("hot")})`} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-          </>
-        )}
-        {v === 1 && (
-          /* HR & Payroll: three people as glass rings, one lit */
-          <>
-            <circle cx="200" cy="220" r="210" fill={`url(#${g("glow")})`} />
-            <circle cx="120" cy="170" r="52" {...S} opacity="0.7" />
-            <circle cx="280" cy="170" r="52" {...S} opacity="0.7" />
-            <circle cx="200" cy="140" r="64" {...S} />
-            <path d="M40 420 C 60 320, 180 300, 200 300 S 340 320, 360 420" {...S} />
-            <circle cx="200" cy="140" r="22" fill={`url(#${g("hot")})`} />
-          </>
-        )}
-        {v === 2 && (
-          /* Education: rising glass arches, a lit cap on top */
-          <>
-            <circle cx="200" cy="300" r="220" fill={`url(#${g("glow")})`} />
-            {[0, 1, 2].map((k) => (
-              <path
-                key={k}
-                d={`M${50 + k * 40} 500 V ${300 - k * 50} a ${150 - k * 40} ${150 - k * 40} 0 0 1 ${300 - k * 80} 0 V 500`}
-                {...S}
-                opacity={0.55 + k * 0.2}
-              />
-            ))}
-            <path d="M200 80 L 290 120 L 200 160 L 110 120 Z" fill={`url(#${g("hot")})`} />
-            <path d="M260 135 v 40" stroke="#ffb13b" strokeWidth="5" strokeLinecap="round" />
-          </>
-        )}
-        {v === 3 && (
-          /* Business: glass blocks handing off along a lit path */
-          <>
-            <circle cx="200" cy="240" r="220" fill={`url(#${g("glow")})`} />
-            <path d="M110 130 C 220 130, 180 330, 290 330" fill="none" stroke={`url(#${g("hot")})`} strokeWidth="8" strokeLinecap="round" strokeDasharray="2 16" />
-            <rect x="50" y="70" width="120" height="120" rx="30" {...S} />
-            <rect x="230" y="270" width="130" height="130" rx="32" {...S} />
-            <rect x="250" y="70" width="90" height="90" rx="24" {...S} opacity="0.6" />
-            <circle cx="110" cy="130" r="18" fill={`url(#${g("hot")})`} />
-            <circle cx="295" cy="335" r="18" fill={`url(#${g("hot")})`} />
-          </>
-        )}
-        {v === 4 && (
-          /* AI & Automation: a lit core inside two glass orbits */
-          <>
-            <circle cx="200" cy="240" r="220" fill={`url(#${g("glow")})`} />
-            <ellipse cx="200" cy="240" rx="170" ry="62" fill="none" stroke={rim} strokeWidth="3" transform="rotate(-28 200 240)" />
-            <ellipse cx="200" cy="240" rx="170" ry="62" fill="none" stroke={rim} strokeWidth="3" opacity="0.6" transform="rotate(32 200 240)" />
-            <circle cx="200" cy="240" r="70" {...S} />
-            <circle cx="200" cy="240" r="34" fill={`url(#${g("hot")})`} />
-            <circle data-node cx="345" cy="158" r="10" fill="#fff0e4" />
-            <circle data-node cx="60" cy="330" r="8" fill="#ff9a52" />
-          </>
-        )}
-      </g>
-    </svg>
-  );
-}
-
 function Practices() {
-  const [active, setActive] = useState(0);
-  const [hold, setHold] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (hold || prefersReducedMotion()) return;
-    const t = setTimeout(() => setActive((a) => (a + 1) % WHAT_WE_DO.length), 4200);
-    return () => clearTimeout(t);
-  }, [active, hold]);
-
-  /* the illustrations breathe; the open one's art drifts a touch more */
+  /* the cards rise in as the section arrives */
   useEffect(() => {
     const root = ref.current;
     if (!root || prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      gsap.utils.toArray<SVGGElement>("[data-art]").forEach((g, i) =>
-        gsap.to(g, { y: i % 2 ? 10 : -10, x: i % 2 ? -6 : 6, duration: 5 + i, ease: "sine.inOut", yoyo: true, repeat: -1 }),
-      );
       gsap.fromTo(
         "[data-practice]",
         { y: 40, opacity: 0 },
@@ -404,76 +301,83 @@ function Practices() {
           </a>
         </div>
 
-        <div ref={ref} className="mt-10 flex flex-col gap-4 lg:h-[520px] lg:flex-row" onMouseLeave={() => setHold(false)}>
+        <div
+          ref={ref}
+          /* one row: five across on desktop, a swipeable row below that */
+          className="-mx-6 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-6 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-5 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden"
+        >
           {WHAT_WE_DO.map((p, i) => {
             const Art = SOLUTION_ART[p.art];
-            const on = i === active;
             return (
-              <button
+              <article
                 key={p.title}
-                type="button"
                 data-practice
-                onMouseEnter={() => {
-                  setActive(i);
-                  setHold(true);
-                }}
-                onFocus={() => setActive(i)}
-                onClick={() => setActive(i)}
-                aria-expanded={on}
-                /* the charcoal frame; an orange shadow wells up underneath on hover */
-                className={`group relative flex flex-col rounded-[30px] bg-[#1d1d20] p-2 text-left transition-[flex-grow,box-shadow,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_36px_60px_-22px_rgba(232,59,0,0.75)] lg:min-w-0 ${
-                  on ? "shadow-[0_30px_56px_-26px_rgba(232,59,0,0.6)] lg:flex-[3.4]" : "shadow-[0_18px_36px_-26px_rgba(0,0,0,0.45)] lg:flex-1"
-                }`}
+                className="group w-[84%] shrink-0 snap-center rounded-[34px] bg-black p-[9px] shadow-[0_30px_60px_-34px_rgba(0,0,0,0.6)] lg:rounded-[28px] lg:p-[7px] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_40px_70px_-30px_rgba(232,59,0,0.55)] sm:w-[46%] lg:w-auto"
               >
-                {/* the art window */}
-                <span
-                  className={`relative block overflow-hidden rounded-[24px] transition-[height] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] max-lg:h-[220px] ${
-                    on ? "lg:h-[74%]" : "lg:h-full"
-                  }`}
-                >
-                  <PracticeArt v={i} id={`pa${i}`} />
-                  <span
-                    className={`absolute inset-x-0 bottom-0 flex items-end gap-4 p-4 transition-opacity duration-500 sm:p-5 ${
-                      on ? "opacity-100 lg:delay-200" : "lg:opacity-0"
-                    }`}
-                  >
-                    {/* a soft light behind the type so it always reads on the art */}
-                    <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-[#0b0807]/95 via-[#0b0807]/70 to-transparent" />
-                    <span className="relative flex h-[84px] w-[84px] shrink-0 items-center justify-center rounded-[22px] bg-[#141416] shadow-[0_14px_30px_-12px_rgba(0,0,0,0.55)] sm:h-[96px] sm:w-[96px]">
-                      <Art className="h-[70%] w-[70%]" />
-                    </span>
-                    <span className="relative min-w-0 pb-1">
-                      <span className="block font-spartan text-[1.3rem] font-semibold leading-tight tracking-[-0.02em] text-white sm:text-[1.6rem]">
-                        {p.title}
-                      </span>
-                    </span>
-                  </span>
-                  {/* closed: the name, turned on its side, dark on the peach */}
-                  <span
-                    className={`absolute bottom-6 left-6 hidden origin-bottom-left -rotate-90 translate-x-7 whitespace-nowrap font-spartan text-[1.35rem] font-semibold text-white transition-opacity duration-300 lg:block ${
-                      on ? "opacity-0" : "opacity-100 delay-300"
-                    }`}
-                  >
-                    {p.short}
-                  </span>
-                </span>
+                <div className="relative aspect-[0.9] overflow-hidden rounded-[26px] bg-[#1f1f1f] lg:aspect-[0.6] lg:rounded-[22px]">
+                  {/* ── the light: liquid colour, always moving ── */}
+                  <div aria-hidden className="absolute inset-x-0 top-0 h-[37%] overflow-hidden">
+                    <span className="absolute inset-0" style={{ background: PRACTICE_LIGHT[i] }} />
+                    {LIQUID.map((b, k) => (
+                      <span
+                        key={k}
+                        className={`liq ${b.a} absolute aspect-square rounded-full`}
+                        style={{
+                          left: b.x,
+                          top: b.y,
+                          width: b.s,
+                          background: `radial-gradient(closest-side, ${b.c}, transparent)`,
+                          animationDuration: `${b.d + i * 1.5}s`,
+                          animationDelay: `${-(i * 3.7 + k * 2.3)}s`,
+                        }}
+                      />
+                    ))}
+                    {/* light streaks, like a long exposure through glass */}
+                    <span
+                      className="liq-streak absolute -left-[20%] top-[18%] h-[22%] w-[140%] rounded-[50%]"
+                      style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,240,225,0.55), transparent)", animationDelay: `${-i * 2.9}s` }}
+                    />
+                    <span
+                      className="liq-streak liq-streak--slow absolute -left-[30%] top-[48%] h-[14%] w-[160%] rounded-[50%]"
+                      style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(255,200,150,0.4), transparent)", animationDelay: `${-i * 4.1}s` }}
+                    />
+                    {/* depth: darker toward the folder, and a fine grain */}
+                    <span className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/35" />
+                    <span className="cine-grain absolute inset-0 opacity-[0.07]" />
+                  </div>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-[37%]">
+                    <p className="absolute right-5 top-4 max-w-[70%] text-right font-heading text-[1rem] font-semibold leading-tight text-white drop-shadow-[0_2px_10px_rgba(70,10,0,0.55)] lg:right-4 lg:top-3.5 lg:text-[0.85rem]">
+                      {p.short}
+                    </p>
+                  </div>
 
-                {/* open: identity row overlapping the art, then the story on charcoal */}
-                <span
-                  className={`relative flex flex-1 flex-col px-3 pb-3 transition-opacity duration-500 ${
-                    on ? "opacity-100 lg:delay-200" : "lg:pointer-events-none lg:hidden lg:opacity-0"
-                  }`}
-                >
-                  <span className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/85">{p.body}</span>
-                </span>
+                  {/* ── the folder: a raised tab on the left, stepping down to the right ── */}
+                  <div className="absolute inset-x-0 bottom-0 top-[30%]">
+                    <span aria-hidden className="absolute left-0 top-0 h-12 w-[48%] rounded-tl-[22px] bg-[#1f1f1f]" />
+                    <svg aria-hidden viewBox="0 0 60 30" preserveAspectRatio="none" className="absolute top-0 h-[30px] w-[60px]" style={{ left: "calc(48% - 1px)" }}>
+                      <path d="M0 0 C 26 0, 32 30, 60 30 L 0 30 Z" fill="#1f1f1f" />
+                    </svg>
+                    <span aria-hidden className="absolute inset-x-0 bottom-0 top-[29px] rounded-tr-[22px] bg-[#1f1f1f]" />
 
-                {/* progress line on the open panel */}
-                {on && !hold && (
-                  <span aria-hidden className="absolute inset-x-6 bottom-2.5 hidden h-[2px] overflow-hidden rounded-full bg-white/10 lg:block">
-                    <span key={active} className="ab-progress block h-full origin-left bg-gradient-to-r from-[#e83b00] to-[#ffb13b]" />
-                  </span>
-                )}
-              </button>
+                    <div className="relative flex h-full flex-col px-5 pb-5 pt-[44px] sm:px-6 lg:px-4 lg:pb-4">
+                      <h3 className="font-heading text-[1.12rem] font-semibold leading-tight tracking-[-0.01em] text-white lg:text-[0.98rem]">{p.title}</h3>
+                      <p className="mt-1.5 line-clamp-3 text-[13.5px] leading-snug text-white/55 lg:line-clamp-6 lg:text-[12.5px]">{p.body}</p>
+                      <div className="mt-auto flex items-end justify-between gap-4 pt-3">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.06] ring-1 ring-white/10 lg:h-9 lg:w-9 lg:rounded-xl">
+                          <Art className="h-7 w-7" />
+                        </span>
+                        <a
+                          href="/solutions"
+                          className="group/x inline-flex items-center gap-1.5 text-[14px] font-semibold text-white transition-colors hover:text-[#ffb070] lg:text-[13px]"
+                        >
+                          Explore
+                          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/x:-translate-y-0.5 group-hover/x:translate-x-0.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
             );
           })}
         </div>

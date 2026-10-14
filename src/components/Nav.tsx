@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useScroll, useSpring } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
-import { ArrowGlyph } from "./ArrowMark";
 import { useSmoothScroll } from "./SmoothScrollProvider";
 import { withBasePath } from "@/lib/basePath";
 import { enabledLinks } from "@/lib/features";
@@ -225,20 +224,18 @@ export default function Nav() {
 
         <div className="flex items-center gap-3 lg:gap-4">
           <ThemeToggle />
-          <Link prefetch={false}
-            href="/contact"
-            /* White pill on the dark hero; ink pill on the canvas. `bg-white`
-               everywhere meant the button vanished the moment the bar took a
-               light ground. */
-            className={`group relative hidden items-center gap-2 overflow-hidden rounded-full px-5 py-2.5 text-[0.8125rem] font-semibold shadow-md transition-all duration-300 hover:scale-105 sm:inline-flex ${
-              onDark
-                ? "bg-white text-black hover:bg-neutral-100"
-                : "bg-ink text-canvas hover:opacity-90"
-            }`}
-          >
-            <span>Get Started</span>
-            <ArrowGlyph className="relative h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-          </Link>
+          {/* The ISO 27001 certification in place of a call to action, on a
+              white chip so the blue mark reads on the orange hero, the light
+              bar and in dark mode alike */}
+          <span className="flex h-10 items-center rounded-xl bg-white px-2.5 shadow-md ring-1 ring-black/5 sm:h-11 sm:px-3">
+            <Image
+              src={withBasePath("/badges/iso-27001.png")}
+              alt="ISO 27001 certified"
+              width={1033}
+              height={410}
+              className="h-[26px] w-auto sm:h-[30px]"
+            />
+          </span>
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}

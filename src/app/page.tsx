@@ -6,7 +6,6 @@ import ProductEcosystem from "@/components/ProductEcosystem";
 import FeaturedProduct from "@/components/FeaturedProduct";
 import TickerBand from "@/components/TickerBand";
 import WhyEarrow from "@/components/WhyEarrow";
-import Testimonials from "@/components/Testimonials";
 import Insights from "@/components/Insights";
 import FinalCta from "@/components/FinalCta";
 import Footer from "@/components/Footer";
@@ -33,7 +32,6 @@ export default function Home() {
         <FeaturedProduct />
         <TickerBand />
         <WhyEarrow />
-        <Testimonials />
         {/* Hidden while FEATURES.insights is off — see src/lib/features.ts */}
         {FEATURES.insights && <Insights />}
         <FinalCta />

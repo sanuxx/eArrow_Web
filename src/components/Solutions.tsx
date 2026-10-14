@@ -5,6 +5,7 @@ import { useState, type MouseEvent } from "react";
 import { ArrowGlyph } from "./ArrowMark";
 import { SectionLabel, SectionHeading } from "./ui";
 import { SPRING_SOFT } from "./motion-kit";
+import { withBasePath } from "@/lib/basePath";
 
 /*
  * Brief: "Don't make them ordinary rectangular cards."
@@ -14,126 +15,15 @@ import { SPRING_SOFT } from "./motion-kit";
  * which gives the section a reading order instead of three things competing at
  * the same volume.
  *
- * Every card is white + black type + an orange-gradient illustration drawn from
- * the same stacked rounded-rectangle vocabulary as the logo. The material comes
+ * Every card is white + black type + its own artwork. The material comes
  * from `.surface-card` (lit top edge, layered shadow) and `.edge-sweep` (a
  * gradient hairline that draws across the top on hover); on top of that each
  * card carries a cursor-tracked spotlight, an ember bloom in the far corner,
- * and an illustration whose parts move independently while the card is hovered.
+ * and artwork that eases forward while the card is hovered.
  */
 
-type IllustrationProps = { className?: string };
-
-/*
- * The illustrations sit in a sunken well, so they are authored against
- * `--color-surface-sunken` and need no per-theme variants. Each moving part is
- * its own `<g>` because a transform on the `<rect>` itself is measured in user
- * units, not CSS pixels, and would scale with the viewBox.
- */
-
-/*
- * One row per platform named in the card's chips — HR & Payroll, Education,
- * Hospital, Production, E-Billing — with the third lit.
- *
- * It was three pills and two dots. In the lead card's well that drawing had
- * roughly 400px of height to fill and did not come close, so the card's largest
- * element was also its emptiest. Five rows carry the same vocabulary at a
- * density that suits the space, and they now correspond to something: the count
- * matches the chips directly above.
- */
-const SW_ROWS = [
-  { y: 8, w: 118, o: 0.2, lift: "group-hover:-translate-x-2" },
-  { y: 34, w: 96, o: 0.32, lift: "group-hover:translate-x-2" },
-  { y: 60, w: 140, o: 1, lift: "group-hover:translate-x-3" },
-  { y: 86, w: 84, o: 0.28, lift: "group-hover:-translate-x-1" },
-  { y: 112, w: 110, o: 0.18, lift: "group-hover:translate-x-1" },
-];
-
-function SoftwareIllustration({ className }: IllustrationProps) {
-  return (
-    <svg viewBox="0 0 200 140" fill="none" className={className} aria-hidden>
-      <defs>
-        <linearGradient id="sol-a" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" style={{ stopColor: "var(--color-orange)" }} />
-          <stop offset="100%" style={{ stopColor: "var(--color-amber)" }} />
-        </linearGradient>
-      </defs>
-      {SW_ROWS.map((r, i) => (
-        <g
-          key={r.y}
-          className={`transition-transform duration-700 ease-out ${r.lift}`}
-          style={{ transitionDelay: `${i * 55}ms` }}
-        >
-          <rect x="14" y={r.y} width={r.w} height="20" rx="10" fill="url(#sol-a)" opacity={r.o} />
-          <circle cx={r.w + 28} cy={r.y + 10} r="6" fill="url(#sol-a)" opacity={r.o} />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function ServicesIllustration({ className }: IllustrationProps) {
-  return (
-    <svg viewBox="0 0 200 140" fill="none" className={className} aria-hidden>
-      <defs>
-        <linearGradient id="sol-b" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" style={{ stopColor: "var(--color-orange)" }} />
-          <stop offset="100%" style={{ stopColor: "var(--color-amber)" }} />
-        </linearGradient>
-      </defs>
-      {/* Concentric shells around a solid core: infrastructure wrapped in support. */}
-      <g
-        className="origin-center transition-transform duration-700 ease-out group-hover:scale-105"
-        style={{ transformBox: "fill-box" }}
-      >
-        <rect x="26" y="16" width="148" height="108" rx="40" stroke="url(#sol-b)" strokeWidth="7" opacity="0.18" />
-      </g>
-      <g
-        className="origin-center transition-transform duration-700 ease-out group-hover:scale-[1.08]"
-        style={{ transformBox: "fill-box" }}
-      >
-        <rect x="50" y="34" width="100" height="72" rx="30" stroke="url(#sol-b)" strokeWidth="7" opacity="0.45" />
-      </g>
-      <g
-        className="origin-center transition-transform duration-700 ease-out group-hover:scale-90"
-        style={{ transformBox: "fill-box" }}
-      >
-        <rect x="76" y="52" width="48" height="36" rx="18" fill="url(#sol-b)" />
-      </g>
-    </svg>
-  );
-}
-
-const DIGITAL_BARS = [
-  { x: 20, y: 88, h: 36, opacity: 0.28, lift: "group-hover:-translate-y-1" },
-  { x: 64, y: 62, h: 62, opacity: 0.5, lift: "group-hover:-translate-y-2" },
-  { x: 108, y: 34, h: 90, opacity: 0.75, lift: "group-hover:-translate-y-3" },
-  { x: 152, y: 14, h: 110, opacity: 1, lift: "group-hover:-translate-y-4" },
-];
-
-function DigitalIllustration({ className }: IllustrationProps) {
-  return (
-    <svg viewBox="0 0 200 140" fill="none" className={className} aria-hidden>
-      <defs>
-        <linearGradient id="sol-c" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" style={{ stopColor: "var(--color-orange)" }} />
-          <stop offset="100%" style={{ stopColor: "var(--color-amber)" }} />
-        </linearGradient>
-      </defs>
-      {/* A growth curve told in the logo's pill shape — each column lifts further,
-          and staggering the delays turns four tweens into one gesture. */}
-      {DIGITAL_BARS.map((b, i) => (
-        <g
-          key={b.x}
-          className={`transition-transform duration-700 ease-out ${b.lift}`}
-          style={{ transitionDelay: `${i * 70}ms` }}
-        >
-          <rect x={b.x} y={b.y} width="34" height={b.h} rx="17" fill="url(#sol-c)" opacity={b.opacity} />
-        </g>
-      ))}
-    </svg>
-  );
-}
+/* Each solution is shown by its own artwork (public/Home/solutions), served as
+   compressed WebP sized for the card. */
 
 type Solution = {
   n: string;
@@ -143,7 +33,8 @@ type Solution = {
   chips: string[];
   cta: string;
   href: string;
-  Illustration: (props: IllustrationProps) => React.ReactElement;
+  image: string;
+  alt: string;
 };
 
 const SOLUTIONS: Solution[] = [
@@ -155,7 +46,8 @@ const SOLUTIONS: Solution[] = [
     chips: ["HR & Payroll", "Education", "Hospital", "Production", "E-Billing"],
     cta: "Explore Software",
     href: "#products",
-    Illustration: SoftwareIllustration,
+    image: "/Home/solutions/software-solutions.webp",
+    alt: "A laptop, tablet and phone running business software",
   },
   {
     n: "02",
@@ -165,7 +57,8 @@ const SOLUTIONS: Solution[] = [
     chips: ["Infrastructure", "Support", "Access Control"],
     cta: "Explore Services",
     href: "#contact",
-    Illustration: ServicesIllustration,
+    image: "/Home/solutions/managed-services.webp",
+    alt: "Server racks connected to a glowing cloud",
   },
   {
     n: "03",
@@ -175,7 +68,8 @@ const SOLUTIONS: Solution[] = [
     chips: ["Web Platforms", "E-Commerce", "Portals"],
     cta: "Explore Digital",
     href: "#contact",
-    Illustration: DigitalIllustration,
+    image: "/Home/solutions/digital-experiences.webp",
+    alt: "A person relaxing beside a phone showing a designed digital experience",
   },
 ];
 
@@ -234,7 +128,14 @@ function Well({
       <span className="absolute right-4 top-4 font-mono text-[10px] tracking-[0.2em] text-ink-soft">
         {s.id}
       </span>
-      <s.Illustration className={`relative h-full w-full ${svgClassName ?? ""}`} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={withBasePath(s.image)}
+        alt={s.alt}
+        loading="lazy"
+        draggable={false}
+        className={`relative h-full w-full object-contain drop-shadow-[0_18px_30px_rgba(120,40,0,0.22)] ${svgClassName ?? ""}`}
+      />
     </div>
   );
 }

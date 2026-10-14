@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { SectionLabel } from "@/components/ui";
 import { ArrowUpRight, QMarkLight } from "@/components/ArrowMark";
 import { SPRING_SOFT } from "@/components/motion-kit";
+import { withBasePath } from "@/lib/basePath";
 
 /*
  * The journey — Run / Optimise / Grow.
@@ -42,44 +43,8 @@ import { SPRING_SOFT } from "@/components/motion-kit";
  * cannot drift out of step with it.
  */
 
-type IconProps = { className?: string };
-
-const STROKE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-} as const;
-
-/** Run — the systems of record, as stacked rows. */
-function RunIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden {...STROKE}>
-      <path d="M22 30h56M22 50h38M22 70h48" />
-    </svg>
-  );
-}
-
-/** Optimise — tuning, as sliders. */
-function OptimiseIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden {...STROKE}>
-      <path d="M20 34h60M20 66h60" />
-      <circle cx="64" cy="34" r="10" fill="currentColor" />
-      <circle cx="38" cy="66" r="10" fill="currentColor" />
-    </svg>
-  );
-}
-
-/** Grow — the arrow motif, trending up and to the right. */
-function GrowIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden {...STROKE}>
-      <path d="M20 68l20-20 16 16 24-28M62 34h18v18" />
-    </svg>
-  );
-}
+/* Each stage is shown by its own photograph (public/Solutions/The Journey),
+   served as compressed WebP and warmed with a brand tint. */
 
 const STAGES = [
   {
@@ -94,7 +59,8 @@ const STAGES = [
     href: "/products",
     detail:
       "People, students, patients, production and billing all depend on the same systems of record, running on one platform instead of five.",
-    Icon: RunIcon,
+    image: "/Solutions/journey/run.webp",
+    alt: "Two people shaking hands over a laptop and a rising chart",
   },
   {
     stage: "Optimise",
@@ -102,7 +68,8 @@ const STAGES = [
     href: "/technology",
     detail:
       "Automation, analytics and AI layered onto what already runs, so the repetitive work leaves and the reporting arrives on its own.",
-    Icon: OptimiseIcon,
+    image: "/Solutions/journey/optimise.webp",
+    alt: "A hand holding a phone with a digital globe and business icons above it",
   },
   {
     stage: "Grow",
@@ -110,7 +77,8 @@ const STAGES = [
     href: "/industries",
     detail:
       "New channels and new markets, opened by digital platforms and demand generation that measure to the lead rather than the impression.",
-    Icon: GrowIcon,
+    image: "/Solutions/journey/grow.webp",
+    alt: "A person pointing at a target above a growing bar chart",
   },
 ];
 
@@ -201,22 +169,22 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
                   className="relative h-[46%] shrink-0 overflow-hidden"
                   style={{ borderRadius: "0 0 50% 50% / 0 0 26% 26%" }}
                 >
-                  {/* The pool. Opaque enough at the bottom that the cut reads. */}
+                  {/* The stage's photograph, filling the dome */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={withBasePath(s.image)}
+                    alt={s.alt}
+                    loading="lazy"
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+                  />
+                  {/* warmed into the brand: a light orange wash, deepest at the arc */}
                   <div
                     className="absolute inset-0"
                     style={{
-                      background: `radial-gradient(105% 88% at 50% 26%, ${glow.mid} 0%, ${glow.core} 46%, rgba(${glow.ch}, 0.42) 72%, rgba(${glow.ch}, 0.2) 100%)`,
+                      background: `linear-gradient(180deg, rgba(${glow.ch}, 0.08) 0%, rgba(${glow.ch}, 0.18) 55%, rgba(${glow.ch}, 0.55) 100%)`,
                     }}
                   />
-                  {/* The hot core the mark sits in. */}
-                  <div
-                    className="journey-core absolute left-1/2 top-[44%] h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-                    style={{
-                      background: "radial-gradient(circle, rgba(255,240,214,0.85) 0%, rgba(255,190,110,0.4) 40%, transparent 70%)",
-                    }}
-                  />
-                  {/* The mark, lit from behind. */}
-                  <s.Icon className="absolute left-1/2 top-[44%] h-[88px] w-[88px] -translate-x-1/2 -translate-y-1/2 text-white drop-shadow-[0_6px_22px_rgba(90,20,0,0.65)] transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.07]" />
                 </div>
 
                 {/* The light the dome throws down into the card, so the arc

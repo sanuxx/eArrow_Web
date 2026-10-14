@@ -318,7 +318,7 @@ function MobileDeck() {
     const root = ref.current;
     if (!root || prefersReducedMotion()) return;
     const mm = gsap.matchMedia();
-    mm.add("(max-width: 767px)", () => {
+    mm.add("(max-width: 1023px), (pointer: coarse)", () => {
       const cards = gsap.utils.toArray<HTMLElement>("[data-mcard]", root);
       gsap.fromTo("[data-m-h]", { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1, stagger: 0.08, ease: "expo.out" });
       gsap.fromTo("[data-m-copy]", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, delay: 0.35, ease: "expo.out" });
@@ -362,7 +362,7 @@ function MobileDeck() {
         </p>
       </div>
 
-      <div className="mt-10">
+      <div className="mx-auto mt-10 max-w-xl">
         {INDUSTRIES.map((ind, i) => {
           const Icon = INDUSTRY_ICONS[ind.icon];
           const sys = systemsFor(ind);
@@ -431,7 +431,7 @@ function Tunnel() {
   useEffect(() => {
     const track = trackRef.current;
     /* phones get MobileDeck instead; the tunnel never starts there */
-    if (!track || prefersReducedMotion() || window.matchMedia("(max-width: 767px)").matches) return;
+    if (!track || prefersReducedMotion() || window.matchMedia("(max-width: 1023px), (pointer: coarse)").matches) return;
     const q = gsap.utils.selector(track);
     const world = q("[data-world]")[0] as HTMLElement;
     const cam = q("[data-cam]")[0] as HTMLElement;
@@ -869,10 +869,10 @@ export default function IndustriesContent() {
   return (
     <>
       <IndustriesLanding />
-      <div className="hidden md:block motion-reduce:hidden">
+      <div className="hidden lg:block motion-reduce:hidden [@media(pointer:coarse)]:!hidden">
         <Tunnel />
       </div>
-      <div className="md:hidden motion-reduce:hidden">
+      <div className="lg:hidden motion-reduce:hidden [@media(pointer:coarse)_and_(prefers-reduced-motion:no-preference)]:!block">
         <MobileDeck />
       </div>
       <div className="hidden motion-reduce:block">

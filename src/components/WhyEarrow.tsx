@@ -2,8 +2,8 @@
 
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
-import { StackedRects, QMarkLight } from "./ArrowMark";
-import { SectionLabel, SectionHeading, GhostCta, CornerTicks } from "./ui";
+import { SectionLabel, SectionHeading, GhostCta } from "./ui";
+import { withBasePath } from "@/lib/basePath";
 import { SPRING_SOFT, CountUp } from "./motion-kit";
 
 /*
@@ -28,7 +28,7 @@ const PROOF = [
   { value: "Enterprise", label: "Expertise" },
 ];
 
-const FOUNDED = 2003;
+const FOUNDED = 2005;
 
 /*
  * The left column animates as one orchestrated group rather than as a set of
@@ -71,7 +71,6 @@ export default function WhyEarrow() {
    * appears to collide.
    */
   const yPlate = useTransform(p, [0, 1], [54, -54]);
-  const platePan = useTransform(p, [0, 1], ["58% 30%", "42% 70%"]);
   const railFill = useTransform(p, [0.15, 0.7], ["0%", "100%"]);
 
   /* Under reduced motion every plane sits still and the rail is simply full. */
@@ -172,88 +171,24 @@ export default function WhyEarrow() {
                  one screen. It also overhung its grid cell far enough that the
                  stat row below collided with it. A slightly landscape panel holds
                  the same composition and gives back ~110px. */
-              className="on-orange group relative aspect-[5/4] w-full overflow-hidden rounded-panel shadow-[var(--shadow-lift)]"
+              className="group relative aspect-[5/4] w-full overflow-hidden rounded-panel shadow-[var(--shadow-lift)] "
             >
-              {/*
-               * The gradient's focal point pans with the scroll, so the light on
-               * the plate appears to move as the camera passes it. Background
-               * position is cheap to animate; the fill itself never re-renders.
-               */}
-              <motion.span
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  /*
-                   * Literal, not tokenised, for the same reason as the final CTA:
-                   * this is a large orange *field*, not an accent on the canvas.
-                   * The dark-mode lift exists to rescue small marks that a black
-                   * page swallows; a plate this size is already the brightest
-                   * thing in frame, and lifting it would only cost the white
-                   * numeral sitting on top of it.
-                   */
-                  background:
-                    "radial-gradient(120% 120% at var(--pan, 50% 50%), #ffb13b 0%, #e83b00 62%, #c22e00 100%)",
-                  ["--pan" as string]: reduced ? "50% 50%" : platePan,
-                }}
+              {/* growth, as one photograph — public/Home/whyearrow/growth.webp;
+                  framed on the rising arrow and the hand that follows it */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={withBasePath("/Home/whyearrow/growth.webp")}
+                alt="A hand tracing a glowing arrow rising above a bar chart"
+                loading="lazy"
+                draggable={false}
+                className="absolute inset-0 h-full w-full object-cover object-[55%_28%] transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
               />
-
-              {/* fine grid over the orange, so the field has structure */}
-              <span
-                className="pointer-events-none absolute inset-0 opacity-25"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(to right, rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.5) 1px, transparent 1px)",
-                  backgroundSize: "48px 48px",
-                }}
-              />
-
-              {/* Rotating sheen — a wide, very low-opacity conic, so it reads as
-                  the light source turning rather than as a spinning shape. */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -inset-1/4 opacity-[0.18]"
-                style={{
-                  background:
-                    "conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.9) 40deg, transparent 110deg, transparent 360deg)",
-                  animation: "orbit-spin 26s linear infinite",
-                }}
-              />
-
-              {/* Specular bar crossing the plate. `mark-sweep` idles for most of
-                  its cycle on purpose — a sweep is an event, not a shimmer. */}
-              <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-                <span
-                  className="absolute inset-y-[-25%] w-[38%] -skew-x-12 blur-[6px]"
-                  style={{
-                    background:
-                      "linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent)",
-                    animation: "mark-sweep 9s ease-in-out infinite",
-                  }}
-                />
-              </span>
-
-              <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
-              {/* Vignette — the single cheapest thing that makes a flat field
-                  read as photographed rather than filled. */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(120% 100% at 50% 40%, transparent 45%, rgba(70,14,0,0.42) 100%)",
-                }}
-              />
-
-              <QMarkLight className="absolute -bottom-14 -right-10 h-auto w-[68%] opacity-30" />
-              <StackedRects className="absolute left-[10%] top-[12%] h-[40%] w-[40%] text-white opacity-90 transition-transform duration-700 group-hover:scale-105" />
-
-              <div className="absolute inset-6">
-                <CornerTicks className="!border-white/50 [&>span]:!border-white/45" />
-              </div>
+              {/* a little shade at the foot, so the slate line reads */}
+              <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 to-transparent" />
 
               {/* Slate line, bottom of frame. */}
-              <span className="absolute bottom-7 left-8 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/70">
-                <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+              <span className="absolute bottom-6 left-7 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-white/90" />
                 eArrow · est. {FOUNDED}
               </span>
             </motion.div>

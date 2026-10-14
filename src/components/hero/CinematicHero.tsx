@@ -401,8 +401,72 @@ export default function CinematicHero() {
     };
   }, []);
 
+  /*
+   * Phones: one swipe carries you past the hero.
+   *
+   * The push is scroll-scrubbed across a tall track, which on a touch screen
+   * took two or three flicks to get through. There the track is shorter (CSS)
+   * and, when a swipe comes to rest inside it, the page finishes the move by
+   * itself: on down to the next section — the push plays as it goes — or back
+   * up to the top if the swipe was upward. Touching the screen hands control
+   * straight back.
+   */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || prefersReducedMotion() || !window.matchMedia("(pointer: coarse)").matches) return;
+
+    let dir = 1;
+    let glide: gsap.core.Tween | null = null;
+    let settling = false;
+    const pos = { y: 0 };
+
+    const st = ScrollTrigger.create({
+      trigger: track,
+      start: "top top",
+      end: "bottom top",
+      onUpdate: (self) => {
+        if (!glide) dir = self.direction;
+      },
+    });
+
+    const stop = () => {
+      glide?.kill();
+      glide = null;
+    };
+
+    const onScrollEnd = () => {
+      if (glide || settling) return;
+      const y = window.scrollY;
+      const end = track.offsetTop + track.offsetHeight;
+      if (y <= 4 || y >= end - 4) return; // already at rest outside the hero
+      const target = dir > 0 ? end : 0;
+      pos.y = y;
+      glide = gsap.to(pos, {
+        y: target,
+        duration: Math.min(1.2, 0.45 + Math.abs(target - y) / 2000),
+        ease: "power2.inOut",
+        onUpdate: () => window.scrollTo(0, pos.y),
+        onComplete: () => {
+          glide = null;
+          // the glide's own scroll fires one more scrollEnd; let it pass
+          settling = true;
+          setTimeout(() => (settling = false), 250);
+        },
+      });
+    };
+
+    ScrollTrigger.addEventListener("scrollEnd", onScrollEnd);
+    window.addEventListener("touchstart", stop, { passive: true });
+    return () => {
+      stop();
+      st.kill();
+      ScrollTrigger.removeEventListener("scrollEnd", onScrollEnd);
+      window.removeEventListener("touchstart", stop);
+    };
+  }, []);
+
   return (
-    <section ref={trackRef} id="home" className="cine relative h-[340vh] bg-[#ffdcb5] motion-reduce:h-auto">
+    <section ref={trackRef} id="home" className="cine relative h-[340vh] bg-[#ffdcb5] motion-reduce:h-auto [@media(pointer:coarse)_and_(prefers-reduced-motion:no-preference)]:h-[200svh]">
       <div
         ref={stageRef}
         className="sticky top-0 h-[100svh] min-h-[640px] overflow-hidden text-white motion-reduce:relative motion-reduce:h-auto"
