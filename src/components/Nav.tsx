@@ -38,7 +38,6 @@ const VISIBLE_LINKS = enabledLinks(LINKS);
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [heroScrub, setHeroScrub] = useState(false);
   const [darkHero, setDarkHero] = useState(false);
   const [heroCine, setHeroCine] = useState(false);
   const lenis = useSmoothScroll();
@@ -59,24 +58,14 @@ export default function Nav() {
   }, []);
 
   /*
-   * Drop the backdrop blur while the hero is scrubbing.
-   *
-   * A full-width `backdrop-filter: blur(40px) saturate(1.5)` over a viewport of
-   * content that is being transformed every frame is the most expensive
-   * combination in the compositor — the blur region has to be re-read and
-   * re-blurred on each one. The bar flips to its lifted state at `scrollY > 40`,
-   * so without this it is blurred for the entire scrubbed sequence.
-   *
-   * Done in React rather than in CSS on purpose: the obvious
-   * `[data-hero-scrub="1"] header { backdrop-filter: none !important }` compiles
-   * away — Tailwind's CSS pipeline drops the declaration and leaves only the
-   * neighbouring `background`, so the rule looks present in the source, ships
-   * broken, and fails silently. HeroAct owns the attribute; this observes it.
+   * Mirror the hero's data attributes into state. `data-hero-tone` is set by
+   * `PageHero` while a `tone="dark"` masthead is mounted, so the links don't
+   * stay ink on a black hero; `data-hero-cine` is set by CinematicHero while
+   * its dark stage fills the viewport, so the bar stays transparent over it.
    */
   useEffect(() => {
     const root = document.documentElement;
     const read = () => {
-      setHeroScrub(root.dataset.heroScrub === "1");
       /* Set by `PageHero` while a `tone="dark"` masthead is mounted — see the
          note there. Without it the links would stay ink on a black hero. */
       setDarkHero(root.dataset.heroTone === "dark");
@@ -88,7 +77,7 @@ export default function Nav() {
     const mo = new MutationObserver(read);
     mo.observe(root, {
       attributes: true,
-      attributeFilter: ["data-hero-scrub", "data-hero-tone", "data-hero-cine"],
+      attributeFilter: ["data-hero-tone", "data-hero-cine"],
     });
     return () => mo.disconnect();
   }, []);
@@ -155,12 +144,11 @@ export default function Nav() {
          * rework switched it to a hardcoded black.
          */
         lifted
-          ? heroScrub
-            ? // Same lifted look, opaque instead of blurred, for the duration
-              // of the hero scrub. Visually near-identical; vastly cheaper —
-              // see the note on the observer above.
-              "border-b border-border bg-canvas"
-            : "border-b border-border bg-canvas/95 [@media(hover:hover)_and_(pointer:fine)]:bg-canvas/80 [@media(hover:hover)_and_(pointer:fine)]:backdrop-blur-2xl [@media(hover:hover)_and_(pointer:fine)]:backdrop-saturate-150"
+          ? // No backdrop blur: a full-width blur re-reads the page behind it
+            // on every composite for the whole length of the page, and was
+            // measured as the single largest scroll cost. 97% canvas is
+            // visually close to the old 80% + blur.
+            "border-b border-border bg-canvas/97"
           : "border-b border-transparent bg-transparent"
       }`}
     >
