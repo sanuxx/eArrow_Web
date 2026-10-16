@@ -41,6 +41,14 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 /** Frame rate cap for all GSAP-driven animation. Change here to retune the site. */
 export const ANIMATION_FPS = 30;
 
+/**
+ * Frame rate for endless decorative loops (`repeat: -1`): drifting clouds and
+ * glows, breathing lights, shimmer sweeps. They are slow, ambient and never the
+ * thing being looked at, so they advance at half the rate of everything else.
+ * Applied automatically to every endless GSAP loop — see `slowLoop` below.
+ */
+export const AMBIENT_FPS = 15;
+
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 
@@ -83,10 +91,46 @@ function pauseEndlessLoopsOffscreen() {
   const shown = new WeakMap<Element, boolean>();
   const pausedHere = new WeakSet<Anim>();
 
+  /* Endless loops run at AMBIENT_FPS rather than the ticker's rate. GSAP's
+     ticker is global, so a loop is held paused from GSAP's point of view and
+     stepped by hand from one shared tick instead. `held` is what a component
+     asked for through `loop.paused()` (that method is routed here so each
+     component keeps control of its own loop); `on` is whether any of its
+     scopes is on screen. It only advances while it is on screen and not held. */
+  const slowLoops = new WeakMap<Anim, { on: boolean; held: boolean }>();
+  const STEP_MS = 1000 / AMBIENT_FPS;
+  const slowLoop = (loop: Anim, startHeld: boolean) => {
+    const st = { on: true, held: startHeld };
+    slowLoops.set(loop, st);
+    loop.paused(true);
+    (loop as unknown as { paused: (v?: boolean) => unknown }).paused = (v?: boolean) => {
+      if (v === undefined) return st.held;
+      st.held = v;
+      return loop;
+    };
+    let acc = 0;
+    const tick = (_time: number, deltaMs: number) => {
+      if (!loop.parent) return void gsap.ticker.remove(tick); // killed or reverted
+      acc += deltaMs;
+      // a little under one step: ticks arrive at 30fps, so 2 ticks = 66ms must fire
+      if (acc < STEP_MS - 8) return;
+      const dt = acc / 1000;
+      acc = 0;
+      if (st.held || !st.on) return;
+      loop.totalTime(loop.totalTime() + dt, false);
+    };
+    gsap.ticker.add(tick);
+  };
+
   const apply = (loop: Anim) => {
     const scopes = scopesByLoop.get(loop);
     if (!scopes) return;
     const on = scopes.some((s) => shown.get(s) !== false);
+    const slow = slowLoops.get(loop);
+    if (slow) {
+      slow.on = on;
+      return;
+    }
     if (!on && !loop.paused()) {
       loop.paused(true);
       pausedHere.add(loop);
@@ -133,29 +177,37 @@ function pauseEndlessLoopsOffscreen() {
   };
 
   type Vars = gsap.TweenVars | gsap.TimelineVars | undefined;
-  const endless = (v: Vars) => !!v && v.repeat === -1 && !v.paused;
+  const endless = (v: Vars) => !!v && v.repeat === -1;
   /* On a budget device the ambient loops do not run at all: they hold their
-     first frame, which every loop here is designed to look right in. */
+     first frame, which every loop here is designed to look right in. Loops a
+     component creates paused are its own to run, so those are left still. */
   const still = isLowPower();
-  const watchOrHold = (t: Anim) => (still ? t.progress(0).pause() : watch(t));
+  const watchOrHold = (t: Anim, v: Vars) => {
+    if (still) {
+      if (!v?.paused) t.progress(0).pause();
+      return;
+    }
+    slowLoop(t, !!v?.paused);
+    watch(t);
+  };
   const g = gsap as unknown as Record<string, (...a: unknown[]) => Anim>;
   const to = g.to.bind(gsap);
   const fromTo = g.fromTo.bind(gsap);
   const timeline = g.timeline.bind(gsap);
   g.to = (targets, vars) => {
     const t = to(targets, vars);
-    if (endless(vars as Vars)) watchOrHold(t);
+    if (endless(vars as Vars)) watchOrHold(t, vars as Vars);
     return t;
   };
   g.fromTo = (targets, from, vars) => {
     const t = fromTo(targets, from, vars);
-    if (endless(vars as Vars)) watchOrHold(t);
+    if (endless(vars as Vars)) watchOrHold(t, vars as Vars);
     return t;
   };
   g.timeline = (vars) => {
     const t = timeline(vars);
     // a timeline's children are added after it is created
-    if (endless(vars as Vars)) setTimeout(() => watchOrHold(t), 0);
+    if (endless(vars as Vars)) setTimeout(() => watchOrHold(t, vars as Vars), 0);
     return t;
   };
 }
