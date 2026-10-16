@@ -38,12 +38,21 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
  *   framer-motion IntersectionObservers on shifted geometry. Lenis writes real
  *   native scroll instead, so everything already on the page keeps working.
  */
+/** Frame rate cap for all GSAP-driven animation. Change here to retune the site. */
+export const ANIMATION_FPS = 30;
+
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 
   // Mobile browsers fire resize when the URL bar shows/hides, which would
   // otherwise refresh every ScrollTrigger mid-scroll and jump the page.
   ScrollTrigger.config({ ignoreMobileResize: true });
+
+  // Every GSAP animation (hero scrub, timelines, reveals, ambient loops) ticks
+  // at 30fps instead of the display rate: half the main-thread and paint work.
+  // Scrolling itself is NOT capped — Lenis runs on its own frame loop (see
+  // SmoothScrollProvider), so the page still follows the wheel at full rate.
+  gsap.ticker.fps(ANIMATION_FPS);
 
   pauseEndlessLoopsOffscreen();
   // CSS can hold its decorative loops on budget devices too (globals.css)

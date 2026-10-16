@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { ArrowGlyph } from "./ArrowMark";
 import { SectionLabel, SectionHeading } from "./ui";
 import { SPRING_SOFT } from "./motion-kit";
@@ -74,10 +74,20 @@ const SOLUTIONS: Solution[] = [
 ];
 
 /** Tracks the cursor inside a card so the spotlight can follow it. */
+const pointerRects = new WeakMap<HTMLElement, { rect: DOMRect; at: number }>();
 function trackPointer(e: MouseEvent<HTMLAnchorElement>) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty("--mx", `${e.clientX - rect.left}px`);
-  e.currentTarget.style.setProperty("--my", `${e.clientY - rect.top}px`);
+  const el = e.currentTarget;
+  /* `getBoundingClientRect` forces a layout, and this fires on every mouse
+     move — often while the panels are mid-resize. A rect a few frames old is
+     indistinguishable for a soft spotlight, so refresh it ~8x a second. */
+  const now = performance.now();
+  let c = pointerRects.get(el);
+  if (!c || now - c.at > 120) {
+    c = { rect: el.getBoundingClientRect(), at: now };
+    pointerRects.set(el, c);
+  }
+  el.style.setProperty("--mx", `${e.clientX - c.rect.left}px`);
+  el.style.setProperty("--my", `${e.clientY - c.rect.top}px`);
 }
 
 /** Capability tag — the specifics that stop a card being three adjectives. */
@@ -188,10 +198,61 @@ function CtaRow({ label, pin = false }: { label: string; pin?: boolean }) {
  * ─────────────────────────────────────────────────────────────────────────
  */
 export default function Solutions() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  /* The frosted glass is a backdrop blur over the whole row, re-read on every
+     composite — the costliest thing here while scrolling. So while this
+     section is on screen and the page is moving, `data-scrolling` swaps the
+     blur for a denser tint (see `#solutions[data-scrolling]` in globals.css),
+     and the glass returns ~150ms after scrolling stops. */
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    let visible = false;
+    let timer: number | undefined;
+    const stop = () => el.removeAttribute("data-scrolling");
+    const onScroll = () => {
+      if (!visible) return;
+      el.setAttribute("data-scrolling", "");
+      window.clearTimeout(timer);
+      timer = window.setTimeout(stop, 150);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (!visible) stop();
+    });
+    io.observe(el);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(timer);
+    };
+  }, []);
+
   const [active, setActive] = useState(0);
 
+  /* Opening/closing a panel animates `flex-grow` for 700ms — every frame the
+     three panels re-layout, and a backdrop blur over a resizing box is
+     recomputed from scratch each time (measured: ~15fps on hover). So the glass
+     steps aside for the length of the move (`data-opening`, see globals.css)
+     and comes back once the panels have settled. Set synchronously, in the same
+     event that changes the panel, so not even the first frame pays for the blur. */
+  const openingTimer = useRef<number | undefined>(undefined);
+  const open = (i: number) => {
+    if (i === active) return;
+    const el = sectionRef.current;
+    if (el) {
+      el.setAttribute("data-opening", "");
+      window.clearTimeout(openingTimer.current);
+      openingTimer.current = window.setTimeout(() => el.removeAttribute("data-opening"), 780);
+    }
+    setActive(i);
+  };
+  useEffect(() => () => window.clearTimeout(openingTimer.current), []);
+
   return (
-    <section id="solutions" className="tech-grid relative overflow-hidden bg-canvas py-10 lg:py-16">
+    <section ref={sectionRef} id="solutions" className="tech-grid relative overflow-hidden bg-canvas py-10 lg:py-16">
       {/*
         The light the panels are made of.
 
@@ -291,8 +352,8 @@ export default function Solutions() {
                 key={s.title}
                 href={s.href}
                 onMouseMove={trackPointer}
-                onMouseEnter={() => setActive(i)}
-                onFocus={() => setActive(i)}
+                onMouseEnter={() => open(i)}
+                onFocus={() => open(i)}
                 aria-current={live ? "true" : undefined}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}

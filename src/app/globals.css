@@ -2027,6 +2027,16 @@ a:focus-visible, button:focus-visible {
     0 30px 70px -30px rgba(8, 8, 8, 0.16);
 }
 
+/* While the page is scrolling past, or a panel is opening (both set by
+   Solutions), trade the backdrop blur for a denser tint so the row isn't
+   re-blurred every frame. */
+#solutions[data-scrolling] .frost-card,
+#solutions[data-opening] .frost-card {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: color-mix(in oklab, var(--color-surface) 80%, transparent);
+}
+
 /* The bevel highlight, brightest in the middle of the top edge. */
 .frost-card::after {
   content: "";

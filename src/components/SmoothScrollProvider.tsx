@@ -2,25 +2,23 @@
 
 import { createContext, useContext, useEffect, useRef } from "react";
 import Lenis from "lenis";
-import { gsap, ScrollTrigger, isLowPower } from "@/lib/gsap";
+import { ScrollTrigger, isLowPower } from "@/lib/gsap";
 
 /**
- * Lenis smooth scroll, driven by GSAP's ticker.
+ * Lenis smooth scroll, on its own frame loop.
  *
- * Two things make this safe to drop under an existing framer-motion site.
- *
- * First, Lenis is *not* transform-based — `lenis.mjs` does
+ * Lenis is *not* transform-based — `lenis.mjs` does
  * `wrapper.scrollTo({ top, behavior: "instant" })` each frame, so it writes the
  * real native scroll position. `window.scrollY` stays truthful, native `scroll`
  * events keep firing, and IntersectionObserver keeps seeing real geometry.
  * Nav's `scrollY > 40` listener, its framer-motion `useScroll` progress bar and
  * every section's `whileInView` therefore keep working untouched.
  *
- * Second, one clock. Lenis on its own rAF loop updates scroll *after*
- * ScrollTrigger has already read it, so every scrubbed animation lags a frame.
- * Driving `lenis.raf` from `gsap.ticker` puts both on the same clock, and
- * `lagSmoothing(0)` stops GSAP from swallowing time after a long frame, which
- * would desync the two again.
+ * It used to be driven from `gsap.ticker` so scroll and ScrollTrigger shared a
+ * clock. That ticker is now capped at `ANIMATION_FPS` (lib/gsap.ts) so the
+ * site's animation runs at 30fps, and tying the scroll to it would have capped
+ * the scrolling too. So Lenis runs its own loop (full display rate) and tells
+ * ScrollTrigger about every new position via `ScrollTrigger.update` below.
  *
  * Deliberately hand-rolled rather than using `ReactLenis`: that wrapper's
  * deprecated `autoRaf` prop defaults to `true` and is applied as
@@ -72,7 +70,10 @@ export default function SmoothScrollProvider({
     if (window.matchMedia("(pointer: coarse)").matches || isLowPower()) return;
 
     const instance = new Lenis({
-      autoRaf: false, // we drive it from gsap.ticker below
+      // Lenis runs its own frame loop rather than gsap.ticker: that ticker is
+      // capped at ANIMATION_FPS (lib/gsap.ts), and scrolling should still follow
+      // the wheel at the display's full rate.
+      autoRaf: true,
       lerp: 0.1,
       // Restores hash-link smoothness now that `scroll-behavior: smooth` is
       // gone from globals.css. The offset clears the fixed nav.
@@ -87,16 +88,9 @@ export default function SmoothScrollProvider({
     // same frame Lenis wrote it rather than one frame later.
     instance.on("scroll", ScrollTrigger.update);
 
-    // gsap.ticker reports seconds; lenis.raf expects milliseconds.
-    const raf = (time: number) => instance.raf(time * 1000);
-    gsap.ticker.add(raf);
-    gsap.ticker.lagSmoothing(0);
-
     lenisRef.current = instance;
 
     return () => {
-      gsap.ticker.remove(raf);
-      gsap.ticker.lagSmoothing(500, 33); // GSAP's documented default
       instance.destroy();
       lenisRef.current = null;
     };

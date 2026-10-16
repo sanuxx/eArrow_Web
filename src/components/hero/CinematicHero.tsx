@@ -50,12 +50,13 @@ const PRODUCTS = [
   "Arrow School Management System",
 ];
 
-/* Every real screenshot, interleaved so one product never sits beside itself. */
+/* Twelve screenshots — all seven products, then five repeats — interleaved so
+   one product never sits beside itself. (Sixteen was measurably heavier: each
+   card is its own composited 3D layer.) */
 const CARDS: { src: string; product: number }[] = [
   ["workforce", 1, 0], ["education", 1, 1], ["ticketing", 1, 2], ["crm", 1, 3],
   ["uniconnect", 1, 4], ["workflow", 1, 5], ["school", 1, 6], ["workforce", 2, 0],
   ["education", 2, 1], ["ticketing", 2, 2], ["crm", 2, 3], ["uniconnect", 2, 4],
-  ["workflow", 2, 5], ["school", 2, 6], ["crm", 3, 3], ["uniconnect", 3, 4],
 ].map(([key, n, product]) => ({ src: `/products/${key}/${n}-sm.webp`, product: product as number }));
 
 const METRICS = [

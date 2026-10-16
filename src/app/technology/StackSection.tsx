@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 /*
  * The stack, as an exploded isometric diagram.
@@ -92,7 +92,16 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
       const glows = q("[data-glow]") as HTMLElement[];
       const edges = q("[data-edge]") as HTMLElement[];
       /* the glass catches light now and then */
-      gsap.fromTo("[data-sheen]", { xPercent: -150 }, { xPercent: 420, duration: 3.2, ease: "power2.inOut", stagger: 0.35, repeat: -1, repeatDelay: 3 });
+      const sheen = gsap.fromTo("[data-sheen]", { xPercent: -150 }, { xPercent: 420, duration: 3.2, ease: "power2.inOut", stagger: 0.35, repeat: -1, repeatDelay: 3, paused: true });
+      const dash = gsap.to("[data-perimeter]", { "--dash": "-40", duration: 2.4, ease: "none", repeat: -1, paused: true });
+      /* The shimmer loops only run while the page is still: during the scrub they
+         restyle/repaint every slab each frame for something nobody can see.
+         The dashed perimeter only exists once security wraps the stack. */
+      const settle = (self: ScrollTrigger) => {
+        const idle = self.isActive && Math.abs(self.getVelocity()) < 5;
+        sheen.paused(!idle);
+        dash.paused(!idle || self.progress < 0.8);
+      };
       const steps = q("[data-step]") as HTMLElement[];
       const dots = q("[data-dot]") as HTMLElement[];
 
@@ -103,7 +112,7 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
 
       const tl = gsap.timeline({
         defaults: { ease: "power2.inOut" },
-        scrollTrigger: { trigger: track, start: "top top", end: "bottom bottom", scrub: 1 },
+        scrollTrigger: { trigger: track, start: "top top", end: "bottom bottom", scrub: 1, onUpdate: settle, onToggle: settle, onScrubComplete: () => settle(tl.scrollTrigger as ScrollTrigger) },
       });
 
       /* the stack turns a little as it opens */
@@ -143,7 +152,7 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
         .to({}, { duration: 0.6 });
 
       /* the perimeter shimmers once visible */
-      gsap.to("[data-perimeter]", { "--dash": "-40", duration: 2.4, ease: "none", repeat: -1 });
+
     });
     return () => mm.revert();
   }, [order]);
@@ -201,7 +210,7 @@ export default function StackSection({ layers, security }: { layers: Layer[]; se
                     {/* thickness: a run of plates darkening downward, with an
                         orange edge-light line through the middle that wakes up
                         when the tier is live */}
-                    {[18, 15, 12, 9, 6, 3].map((d, k) => (
+                    {[18, 12, 6].map((d, k) => (
                       <div
                         key={d}
                         className="absolute inset-0 rounded-[38px]"

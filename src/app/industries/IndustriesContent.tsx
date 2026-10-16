@@ -559,13 +559,23 @@ function Tunnel() {
       .to(q("[data-glow='a']"), { xPercent: 14, yPercent: 10, scale: 1.15, rotation: 12, duration: 12, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0)
       .to(q("[data-glow='b']"), { xPercent: -12, yPercent: -9, scale: 1.12, rotation: -10, duration: 16, ease: "sine.inOut", yoyo: true, repeat: 2 }, 0)
       .to(q("[data-glow='c']"), { xPercent: -18, yPercent: 14, scale: 1.25, duration: 8, ease: "sine.inOut", yoyo: true, repeat: 5 }, 0);
+    /* The drifting glows only play while the section is on screen AND the page
+       is still: mid-flight they would repaint three viewport-sized layers every
+       frame for a drift nobody can see against the camera move. */
+    let onScreen = false;
+    let moving = false;
+    const syncWash = () => wash.paused(!onScreen || moving);
     const run = (on: boolean) => {
       cancelAnimationFrame(raf);
       prev = 0;
-      if (on) {
-        raf = requestAnimationFrame(tick);
-        wash.resume();
-      } else wash.pause();
+      onScreen = on;
+      if (on) raf = requestAnimationFrame(tick);
+      syncWash();
+    };
+    const setMoving = (m: boolean) => {
+      if (m === moving) return;
+      moving = m;
+      syncWash();
     };
     const hud = q("[data-hud]")[0] as HTMLElement;
     const hudName = q("[data-hud-name]")[0] as HTMLElement;
@@ -654,7 +664,14 @@ function Tunnel() {
           render(cameraZ.s);
           gsap.set(hudBar, { scaleX: this.progress() });
         },
-        scrollTrigger: { trigger: track, start: "top top", end: "bottom bottom", scrub: 0.6 },
+        scrollTrigger: {
+          trigger: track,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.6,
+          onUpdate: (self) => setMoving(Math.abs(self.getVelocity()) > 5),
+          onScrubComplete: () => setMoving(false),
+        },
       });
 
       const onResize = () => {
