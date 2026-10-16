@@ -56,7 +56,7 @@ const CARDS: { src: string; product: number }[] = [
   ["uniconnect", 1, 4], ["workflow", 1, 5], ["school", 1, 6], ["workforce", 2, 0],
   ["education", 2, 1], ["ticketing", 2, 2], ["crm", 2, 3], ["uniconnect", 2, 4],
   ["workflow", 2, 5], ["school", 2, 6], ["crm", 3, 3], ["uniconnect", 3, 4],
-].map(([key, n, product]) => ({ src: `/products/${key}/${n}.webp`, product: product as number }));
+].map(([key, n, product]) => ({ src: `/products/${key}/${n}-sm.webp`, product: product as number }));
 
 const METRICS = [
   { value: 20, suffix: "+", label: "Years of technology experience" },
@@ -104,7 +104,7 @@ function CloudBank({ id, seed, density, className }: { id: string; seed: number;
     <svg aria-hidden className={className} style={{ willChange: "transform" }} preserveAspectRatio="none" viewBox="0 0 1600 500">
       <defs>
         <filter id={`${id}-f`} x="0" y="0" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.0032 0.0085" numOctaves="5" seed={seed} />
+          <feTurbulence type="fractalNoise" baseFrequency="0.0032 0.0085" numOctaves="3" seed={seed} />
           <feColorMatrix
             values={`0 0 0 0 1
                      0 0 0 0 0.97
@@ -175,11 +175,21 @@ export default function CinematicHero() {
          a CSS animation on [data-ring-turn], so it runs on the compositor) ── */
       /* phones and budget devices keep the still sky: the drift is subtle and
          every moving layer here is full-width */
+      /* kept so they can be paused while the scroll scrub owns the frame */
+      const ambient: gsap.core.Tween[] = [];
       if (!lite) {
-        gsap.to("[data-cloud-wrap=back] svg", { xPercent: -6, duration: 38, ease: "sine.inOut", yoyo: true, repeat: -1 });
-        gsap.to("[data-cloud-wrap=front] svg", { xPercent: 7, duration: 26, ease: "sine.inOut", yoyo: true, repeat: -1 });
-        gsap.to("[data-sun-core]", { scale: 1.06, opacity: 0.9, duration: 5, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        ambient.push(
+          gsap.to("[data-cloud-wrap=back] svg", { xPercent: -6, duration: 38, ease: "sine.inOut", yoyo: true, repeat: -1 }),
+          gsap.to("[data-cloud-wrap=front] svg", { xPercent: 7, duration: 26, ease: "sine.inOut", yoyo: true, repeat: -1 }),
+          gsap.to("[data-sun-core]", { scale: 1.06, opacity: 0.9, duration: 5, ease: "sine.inOut", yoyo: true, repeat: -1 })
+        );
       }
+      let ambientPaused = false;
+      const setAmbientPaused = (paused: boolean) => {
+        if (paused === ambientPaused) return;
+        ambientPaused = paused;
+        ambient.forEach((t) => t.paused(paused));
+      };
 
       /* ── ACT ONE ──────────────────────────────────────────────────────── */
       const intro = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
@@ -213,7 +223,9 @@ export default function CinematicHero() {
            It moves the whole 3D scene every frame, so phones and budget devices
            skip it */
         if (!lite)
-          ctx.add(() => gsap.to(camera, { scale: 1.03, duration: 16, ease: "sine.inOut", yoyo: true, repeat: -1 }));
+          ctx.add(() => {
+            ambient.push(gsap.to(camera, { scale: 1.03, duration: 16, ease: "sine.inOut", yoyo: true, repeat: -1, paused: ambientPaused }));
+          });
       });
 
       const release = curtainActive() ? onCurtainLift(() => intro.play()) : (intro.play(), () => {});
@@ -264,8 +276,18 @@ export default function CinematicHero() {
          position. It can't wait for act two's ScrollTrigger: that is only
          built once the opening finishes, and a visitor who scrolls away
          before then would leave the nav stuck transparent over the page. */
+      /* Every dataset write is a document-root mutation the Nav observes, so
+         only write on a real change; the track's height is cached, not read
+         from layout on every scroll event. */
+      const setAttr = (key: "heroCine" | "heroScrub", v: string) => {
+        if (root.dataset[key] !== v) root.dataset[key] = v;
+      };
+      let heroLimit = track.offsetHeight - window.innerHeight;
+      const measureHero = () => {
+        heroLimit = track.offsetHeight - window.innerHeight;
+      };
       const navOverHero = () => {
-        root.dataset.heroCine = window.scrollY < track.offsetHeight - window.innerHeight ? "1" : "0";
+        setAttr("heroCine", window.scrollY < heroLimit ? "1" : "0");
       };
       navOverHero();
       window.addEventListener("scroll", navOverHero, { passive: true });
@@ -283,13 +305,15 @@ export default function CinematicHero() {
             scrub: 1,
             invalidateOnRefresh: true,
             onToggle: (self) => {
-              root.dataset.heroCine = self.isActive ? "1" : "0";
+              setAttr("heroCine", self.isActive ? "1" : "0");
             },
             onScrubComplete: () => {
-              root.dataset.heroScrub = "0";
+              setAttr("heroScrub", "0");
             },
             onUpdate: (self) => {
-              root.dataset.heroScrub = self.isActive && self.getVelocity() !== 0 ? "1" : "0";
+              setAttr("heroScrub", self.isActive && self.getVelocity() !== 0 ? "1" : "0");
+              /* the endless drift/push tweens stop competing with the scrub */
+              setAmbientPaused(self.progress > 0.02);
             },
           },
         });
@@ -379,6 +403,7 @@ export default function CinematicHero() {
       }
 
       const onResize = () => {
+        measureHero();
         layoutRing();
         ScrollTrigger.refresh();
       };
@@ -577,6 +602,10 @@ export default function CinematicHero() {
                           <img
                             src={withBasePath(c.src)}
                             alt=""
+                            width={820}
+                            height={425}
+                            decoding="async"
+                            loading={i < 6 ? "eager" : "lazy"}
                             draggable={false}
                             className="h-full w-full select-none object-cover object-left-top"
                           />

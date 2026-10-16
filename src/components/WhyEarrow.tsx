@@ -179,7 +179,10 @@ export default function WhyEarrow() {
               <img
                 src={withBasePath("/Home/whyearrow/growth.webp")}
                 alt="A hand tracing a glowing arrow rising above a bar chart"
+                width={1000}
+                height={1250}
                 loading="lazy"
+                decoding="async"
                 draggable={false}
                 className="absolute inset-0 h-full w-full object-cover object-[55%_28%] transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
               />

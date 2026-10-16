@@ -1,15 +1,20 @@
+import dynamic from "next/dynamic";
 import Nav from "@/components/Nav";
 import CinematicHero from "@/components/hero/CinematicHero";
 import ClientTicker from "@/components/ClientTicker";
 import Solutions from "@/components/Solutions";
-import ProductEcosystem from "@/components/ProductEcosystem";
-import FeaturedProduct from "@/components/FeaturedProduct";
 import TickerBand from "@/components/TickerBand";
-import WhyEarrow from "@/components/WhyEarrow";
-import Insights from "@/components/Insights";
-import FinalCta from "@/components/FinalCta";
-import Footer from "@/components/Footer";
 import { FEATURES } from "@/lib/features";
+
+/* Below-the-fold sections are split out of the initial bundle. They still
+   server-render into the static HTML, but their JS (GSAP dashboard, framer
+   scroll effects) loads after the hero instead of competing with it. */
+const ProductEcosystem = dynamic(() => import("@/components/ProductEcosystem"));
+const FeaturedProduct = dynamic(() => import("@/components/FeaturedProduct"));
+const WhyEarrow = dynamic(() => import("@/components/WhyEarrow"));
+const Insights = dynamic(() => import("@/components/Insights"));
+const FinalCta = dynamic(() => import("@/components/FinalCta"));
+const Footer = dynamic(() => import("@/components/Footer"));
 
 export default function Home() {
   return (

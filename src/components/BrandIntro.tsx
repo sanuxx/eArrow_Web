@@ -123,6 +123,10 @@ export default function BrandIntro() {
       },
     });
 
+    /* The whole curtain plays at 1.5s instead of T.end: a uniform speed-up keeps
+       every beat's relative timing, so nothing here needs retiming. */
+    if (!reduced) tl.timeScale(T.end / 1.5);
+
     if (reduced) {
       /* Same introduction, no motion in it. The logo is presented and taken
          away; nothing racks, scales, blooms or travels. */

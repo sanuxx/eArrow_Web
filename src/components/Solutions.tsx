@@ -133,6 +133,7 @@ function Well({
         src={withBasePath(s.image)}
         alt={s.alt}
         loading="lazy"
+        decoding="async"
         draggable={false}
         className={`relative h-full w-full object-contain drop-shadow-[0_18px_30px_rgba(120,40,0,0.22)] ${svgClassName ?? ""}`}
       />
