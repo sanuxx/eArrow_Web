@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowGlyph } from "./ArrowMark";
 import { SectionLabel, SectionHeading } from "./ui";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { withBasePath } from "@/lib/basePath";
+import { PRODUCT_MARKS } from "./ProductMarks";
 
 /*
  * Brief §05 — "One ecosystem, multiple possibilities"
@@ -198,26 +200,24 @@ function MobileCarousel() {
   );
 }
 
-/* ── The accordion (tablet and up) ───────────────────────────────────────
+/* ── Tablet and up: a bento grid ─────────────────────────────────────────
  *
- * Seven tall panels in a row, each carrying its product's real screenshot.
- * The open one widens: its screenshot sits in a browser frame and the
- * product's details rise in beneath it. The others narrow to slim strips —
- * screenshot dimmed, name running up the side. Hover or click to open a
- * panel; left alone, it moves on by itself, a progress line timing it.
- *
- * Width is animated with CSS flex-grow on one property; the content inside
- * each panel fades/slides with GSAP. Reduced motion: no auto-advance.
+ * One large tile shows the featured product in full — screenshot, what it
+ * does, its modules, the way in — and six smaller tiles around it carry the
+ * rest, each with its mark, name, domain and a cropped glimpse of its real
+ * screen. Choosing a small tile brings that product into the large one; the
+ * tiles re-flow into place (framer-motion layout). Left alone it moves on by
+ * itself, a progress line timing it, and only while it is on screen.
  */
-
 export default function ProductEcosystem() {
   const [active, setActive] = useState(0);
   const [engaged, setEngaged] = useState(false);
   const [inView, setInView] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const first = useRef(true);
+  const barRef = useRef<HTMLSpanElement>(null);
+  const reduce = useReducedMotion();
 
-  /* the accordion only runs while it is on screen */
+  /* runs only while on screen */
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -226,12 +226,11 @@ export default function ProductEcosystem() {
     return () => io.disconnect();
   }, []);
 
-  /* auto-advance, timed by the progress line in the open panel */
+  /* auto-advance, timed by the progress line in the large tile */
   useEffect(() => {
     if (engaged || !inView || prefersReducedMotion()) return;
-    const bar = rootRef.current?.querySelector<HTMLElement>(`[data-acc-bar="${active}"]`);
     const t = gsap.fromTo(
-      bar ?? {},
+      barRef.current ?? {},
       { scaleX: 0 },
       { scaleX: 1, duration: DWELL, ease: "none", onComplete: () => setActive((a) => (a + 1) % COUNT) },
     );
@@ -240,63 +239,11 @@ export default function ProductEcosystem() {
     };
   }, [active, engaged, inView]);
 
-  /* the open panel's content arrives in turn */
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || prefersReducedMotion()) return;
-    const panel = root.querySelector(`[data-acc="${active}"]`);
-    if (!panel) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        panel.querySelector("[data-acc-shot]"),
-        { y: 30, opacity: 0, scale: 0.97 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out", delay: first.current ? 0 : 0.25 },
-      );
-      gsap.fromTo(
-        panel.querySelectorAll("[data-acc-in]"),
-        { y: 18, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, ease: "power3.out", delay: first.current ? 0.1 : 0.35 },
-      );
-    }, root);
-    first.current = false;
-    return () => ctx.revert();
-  }, [active]);
-
-  /* entrance: the panels rise in turn */
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        "[data-acc]",
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1, stagger: 0.07, ease: "power4.out", scrollTrigger: { trigger: root, start: "top 80%", once: true } },
-      );
-      /* liquid motion: each blob rides two sines at different periods (a
-         Lissajous loop), so the paths never visibly repeat; the colour swirl
-         underneath flows upward, and each panel is phase-shifted from its neighbours */
-      gsap.utils.toArray<HTMLElement>("[data-blob]").forEach((bl, k) => {
-        const panel = Math.floor(k / 4);
-        const ax = gsap.utils.random(40, 90);
-        const ay = gsap.utils.random(60, 140);
-        gsap.fromTo(bl, { x: -ax }, { x: ax, duration: gsap.utils.random(3.2, 5.2), ease: "sine.inOut", yoyo: true, repeat: -1, delay: -panel * 0.9 - k * 0.37 });
-        gsap.fromTo(bl, { y: -ay }, { y: ay, duration: gsap.utils.random(4.4, 7.4), ease: "sine.inOut", yoyo: true, repeat: -1, delay: -panel * 1.3 - k * 0.53 });
-        gsap.to(bl, { scale: gsap.utils.random(1.2, 1.6), duration: gsap.utils.random(2.6, 4.2), ease: "sine.inOut", yoyo: true, repeat: -1 });
-      });
-      gsap.utils.toArray<HTMLElement>("[data-swirl]").forEach((sw, k) => {
-        /* one period of the bands is a third of the layer, so this loops seamlessly */
-        gsap.fromTo(sw, { yPercent: 0 }, { yPercent: -33.3334, duration: 9 + (k % 3) * 1.4, ease: "none", repeat: -1, delay: -k * 2.1 });
-      });
-    }, root);
-    return () => ctx.revert();
-  }, []);
-
-  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-    if (!d) return;
-    e.preventDefault();
-    setActive((a) => (a + d + COUNT) % COUNT);
-  }, []);
+  const p = PRODUCTS[active];
+  const Mark = PRODUCT_MARKS[p.key];
+  /* the six others, in their usual order */
+  const others = PRODUCTS.map((q, i) => ({ q, i })).filter(({ i }) => i !== active);
+  const spring = { type: "spring" as const, stiffness: 260, damping: 32, mass: 0.9 };
 
   return (
     <section id="products" className="tech-grid relative overflow-hidden bg-canvas-alt py-10 lg:py-16">
@@ -307,7 +254,7 @@ export default function ProductEcosystem() {
             <SectionHeading>One ecosystem, multiple possibilities</SectionHeading>
           </div>
           <p className="hidden max-w-xs text-[15px] leading-relaxed text-ink-muted md:block lg:text-right">
-            Seven platforms on one shared core. Hover a panel to explore it.
+            Seven platforms on one shared core. Select a product to explore it.
           </p>
         </div>
 
@@ -315,134 +262,123 @@ export default function ProductEcosystem() {
 
         <div
           ref={rootRef}
-          data-loop-scope
-          role="tablist"
-          aria-label="Product ecosystem"
-          onKeyDown={onKeyDown}
           onPointerEnter={() => setEngaged(true)}
           onPointerLeave={() => setEngaged(false)}
-          className="mt-12 hidden h-[560px] gap-3 md:flex"
+          className="mt-12 hidden gap-4 md:grid md:grid-cols-2 lg:h-[600px] lg:grid-cols-4 lg:grid-rows-3"
         >
-          {PRODUCTS.map((p, i) => {
-            const on = i === active;
-            return (
-              <div
+          {/* ── the featured product ── */}
+          <motion.article
+            layout
+            transition={spring}
+            className="relative flex flex-col overflow-hidden rounded-[28px] bg-surface p-6 shadow-[0_34px_70px_-36px_rgba(var(--orange-ch),0.55)] ring-1 ring-border md:col-span-2 lg:row-span-3 lg:p-7"
+          >
+            {/* warm light in the corner */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full"
+              style={{ background: "radial-gradient(closest-side, rgba(var(--orange-ch),0.18), transparent)" }}
+            />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
                 key={p.key}
-                data-acc={i}
-                role="tab"
-                tabIndex={on ? 0 : -1}
-                aria-selected={on}
-                aria-label={`Arrow ${p.label}`}
-                onPointerEnter={() => setActive(i)}
-                onClick={() => setActive(i)}
-                onFocus={() => setActive(i)}
-                className={`group relative min-w-0 cursor-pointer overflow-hidden rounded-[26px] outline-none transition-[flex-grow,box-shadow] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  on
-                    ? "bg-surface shadow-[0_34px_70px_-34px_rgba(var(--orange-ch),0.55)] ring-1 ring-border"
-                    : "bg-[#e83b00] shadow-[0_18px_36px_-24px_rgba(var(--orange-ch),0.6)] hover:-translate-y-1 hover:shadow-[0_28px_50px_-22px_rgba(var(--orange-ch),0.75)]"
-                }`}
-                style={{ flexGrow: on ? 6.5 : 1, flexBasis: 0 }}
+                initial={reduce ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduce ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="relative flex min-h-0 flex-1 flex-col"
               >
-                {/* ── closed: frosted glass over drifting gradient light, the name up the side ──
-                    The blobs are pre-softened radial gradients moved by transform (no
-                    blur filters, no backdrop-filter), so seven of them stay cheap. */}
-                <div className={`absolute inset-0 overflow-hidden rounded-[26px] transition-opacity duration-500 ${on ? "opacity-0" : "opacity-100"}`}>
-                  <span className="absolute inset-0" style={{ background: "linear-gradient(160deg, #ff8a3d 0%, #e83b00 55%, #b52a00 100%)" }} />
-                  {/* bands of colour flowing up the slab in a seamless loop */}
-                  <span
-                    data-swirl
-                    className="absolute inset-x-0 top-0 h-[300%] will-change-transform"
-                    style={{
-                      background: "linear-gradient(180deg, #ff6a1a 0%, #ffb13b 22%, #e83b00 45%, #ffcf8a 62%, #c22e00 82%, #ff6a1a 100%)",
-                      backgroundSize: "100% 33.3334%",
-                    }}
+                <div className="flex items-center justify-between gap-4">
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange/10 text-orange">
+                      {Mark && <Mark className="h-6 w-6" />}
+                    </span>
+                    <span>
+                      <span className="block text-[12px] font-semibold text-orange">{p.domain}</span>
+                      <span className="block font-heading text-[1.35rem] font-bold leading-tight tracking-[-0.025em] text-ink">
+                        Arrow {p.label}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="text-[13px] font-semibold text-ink-soft">
+                    {num(active)} / {num(COUNT - 1)}
+                  </span>
+                </div>
+
+                <div className="mt-5 min-h-0 flex-1 overflow-hidden rounded-[16px] border border-border bg-surface-sunken shadow-[0_24px_50px_-30px_rgba(var(--orange-ch),0.6)]">
+                  <div className="flex items-center gap-1.5 border-b border-border px-3 py-2">
+                    <span className="h-2 w-2 rounded-full bg-orange" />
+                    <span className="h-2 w-2 rounded-full bg-amber/70" />
+                    <span className="h-2 w-2 rounded-full bg-border-strong" />
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={withBasePath(`/products/${p.key}/1-sm.webp`)}
+                    alt={`Arrow ${p.label} screen`}
+                    className="aspect-[2.1] h-auto w-full bg-white object-cover object-left-top md:aspect-[1.9] lg:aspect-auto lg:h-full"
                   />
-                  <span className="absolute inset-0" style={{ background: "linear-gradient(160deg, rgba(255,138,61,0.55), rgba(232,59,0,0.35) 55%, rgba(150,30,0,0.55))" }} />
-                  {/* liquid light: soft blobs on looping paths, sized off the panel's height */}
-                  {[
-                    { c: "rgba(255,230,180,0.95)", x: "10%", y: "8%" },
-                    { c: "rgba(255,80,10,0.95)", x: "60%", y: "30%" },
-                    { c: "rgba(255,180,70,0.9)", x: "20%", y: "58%" },
-                    { c: "rgba(200,40,0,0.85)", x: "70%", y: "80%" },
-                  ].map((bl, k) => (
-                    <span
-                      key={k}
-                      data-blob
-                      className="absolute aspect-square h-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full will-change-transform"
-                      style={{ left: bl.x, top: bl.y, background: `radial-gradient(circle, ${bl.c} 0%, transparent 62%)` }}
-                    />
+                </div>
+
+                <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-muted">{p.blurb}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {p.modules.map((m) => (
+                    <span key={m} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-sunken px-3 py-1.5 text-xs font-medium text-ink">
+                      <span className="h-1 w-1 rounded-full bg-orange" />
+                      {m}
+                    </span>
                   ))}
-                  {/* the glass: frost, a lit top edge and a soft inner rim */}
-                  <span className="absolute inset-0 bg-white/20" />
-                  <span className="absolute inset-0 rounded-[26px] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_0_0_1px_rgba(255,255,255,0.35),inset_0_-30px_60px_-30px_rgba(120,30,0,0.45)]" />
-                  <span className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
-                  <span className="cine-grain absolute inset-0 opacity-[0.04]" />
-                  <span className="absolute left-1/2 top-5 -translate-x-1/2 text-[12px] font-semibold text-white/90">{num(i)}</span>
-                  <span className="absolute bottom-6 left-1/2 origin-bottom-left -rotate-90 translate-x-2 whitespace-nowrap font-spartan text-[1.15rem] font-semibold text-white drop-shadow-[0_2px_8px_rgba(120,30,0,0.45)]">
-                    {p.label}
+                </div>
+                <div className="mt-5 flex items-center justify-between gap-4">
+                  <a
+                    href={`/products#${p.key}`}
+                    className="group/cta inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(232,59,0,0.7)] transition-transform duration-300 hover:-translate-y-0.5"
+                  >
+                    Discover Arrow {p.label}
+                    <ArrowGlyph className="h-3 w-3 transition-transform duration-300 group-hover/cta:translate-x-1" />
+                  </a>
+                  <span className="hidden text-[12.5px] text-ink-soft xl:block">
+                    Up next · <span className="font-semibold text-ink">{PRODUCTS[(active + 1) % COUNT].label}</span>
                   </span>
                 </div>
+              </motion.div>
+            </AnimatePresence>
+            {/* the timer */}
+            <span aria-hidden className="absolute inset-x-7 bottom-0 h-[3px] overflow-hidden rounded-full bg-border">
+              <span ref={barRef} className="block h-full origin-left bg-orange" style={{ transform: "scaleX(0)" }} />
+            </span>
+          </motion.article>
 
-                {/* ── open: the product ──
-                    The copy and its button keep their natural height; the
-                    screenshot takes whatever is left (cropped from the top), so
-                    the button never drops out of the panel at any width. */}
-                <div className={`absolute inset-0 flex flex-col p-6 transition-opacity duration-500 lg:p-7 ${on ? "opacity-100" : "pointer-events-none opacity-0"}`}>
-                  <div data-acc-shot className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] border border-border bg-surface-sunken shadow-[0_24px_50px_-30px_rgba(var(--orange-ch),0.6)]">
-                    <div className="flex items-center gap-1.5 border-b border-border px-3 py-2">
-                      <span className="h-2 w-2 rounded-full bg-orange" />
-                      <span className="h-2 w-2 rounded-full bg-amber/70" />
-                      <span className="h-2 w-2 rounded-full bg-border-strong" />
-                      <span className="ml-2 text-[11px] font-medium text-ink-soft">Arrow {p.label}</span>
-                    </div>
-                    <div className="relative min-h-0 flex-1 overflow-hidden bg-white">
-                      {on && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={withBasePath(`/products/${p.key}/1-sm.webp`)} alt={`Arrow ${p.label} screen`} className="h-full w-full object-cover object-left-top" />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex shrink-0 flex-col">
-                    <div className="flex items-baseline justify-between gap-4">
-                      <div className="min-w-0">
-                        <p data-acc-in className="text-[13px] font-semibold text-orange">{p.domain}</p>
-                        <h3 data-acc-in className="mt-1 truncate font-heading text-[1.6rem] font-bold leading-tight tracking-[-0.03em] text-ink">
-                          Arrow {p.label}
-                        </h3>
-                      </div>
-                      <span data-acc-in className="shrink-0 text-[13px] font-semibold text-ink-soft">
-                        {num(i)} / {num(COUNT - 1)}
-                      </span>
-                    </div>
-                    <p data-acc-in className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink-muted">{p.blurb}</p>
-                    <div data-acc-in className="mt-4 flex flex-wrap gap-2">
-                      {p.modules.map((m) => (
-                        <span key={m} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-sunken px-3 py-1.5 text-xs font-medium text-ink">
-                          <span className="h-1 w-1 rounded-full bg-orange" />
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                    <div data-acc-in className="flex items-center justify-between gap-4 pt-5">
-                      <a
-                        href={`/products#${p.key}`}
-                        className="group/cta inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#d13400] via-[#ff5417] to-[#ff9820] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(232,59,0,0.7)] transition-transform duration-300 hover:-translate-y-0.5"
-                      >
-                        Discover Arrow {p.label}
-                        <ArrowGlyph className="h-3 w-3 transition-transform duration-300 group-hover/cta:translate-x-1" />
-                      </a>
-                      <span className="hidden text-[12.5px] text-ink-soft xl:block">
-                        Up next · <span className="font-semibold text-ink">{PRODUCTS[(i + 1) % COUNT].label}</span>
-                      </span>
-                    </div>
-                  </div>
-                  {/* the timer */}
-                  <span aria-hidden className="absolute inset-x-6 bottom-0 h-[3px] overflow-hidden rounded-full bg-border lg:inset-x-7">
-                    <span data-acc-bar={i} className="block h-full origin-left bg-orange" style={{ transform: "scaleX(0)" }} />
+          {/* ── the other six ── */}
+          {others.map(({ q, i }) => {
+            const M = PRODUCT_MARKS[q.key];
+            return (
+              <motion.button
+                key={q.key}
+                layout
+                transition={spring}
+                type="button"
+                onClick={() => setActive(i)}
+                aria-label={`Show Arrow ${q.label}`}
+                className="group relative flex min-h-[150px] flex-col overflow-hidden rounded-[22px] bg-surface p-4 text-left ring-1 ring-border transition-shadow duration-300 hover:shadow-[0_24px_44px_-26px_rgba(var(--orange-ch),0.6)] hover:ring-orange/40"
+              >
+                {/* a glimpse of the real screen, sliding up on hover */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={withBasePath(`/products/${q.key}/1-sm.webp`)}
+                  alt=""
+                  loading="lazy"
+                  className="pointer-events-none absolute -bottom-6 -right-8 w-[78%] rotate-[-4deg] rounded-lg border border-border object-cover object-left-top opacity-80 shadow-[0_16px_30px_-16px_rgba(0,0,0,0.35)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-2 group-hover:rotate-[-2deg]"
+                  style={{ aspectRatio: "1.7" }}
+                />
+                <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-surface via-surface/85 to-transparent" />
+                <span className="relative flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange/10 text-orange transition-colors duration-300 group-hover:bg-orange group-hover:text-white">
+                    {M && <M className="h-5 w-5" />}
                   </span>
-                </div>
-              </div>
+                  <span className="text-[11px] font-semibold text-ink-soft">{num(i)}</span>
+                </span>
+                <span className="relative mt-3 block font-heading text-[1.05rem] font-bold leading-tight tracking-[-0.02em] text-ink">{q.label}</span>
+                <span className="relative mt-0.5 block text-[12px] text-ink-muted">{q.domain}</span>
+              </motion.button>
             );
           })}
         </div>
