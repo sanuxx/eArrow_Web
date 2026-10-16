@@ -150,7 +150,7 @@ export default function CinematicHero() {
     const camera = q("[data-camera]")[0] as HTMLElement;
     const reel = q("[data-reel]")[0] as HTMLElement;
     const reelName = q("[data-reel-name]")[0] as HTMLElement;
-    let reelTick: (() => void) | null = null;
+    let reelTick: ((time: number) => void) | null = null;
     /* phones and budget devices get the same story with fewer per-frame costs */
     const lite = window.matchMedia("(pointer: coarse)").matches || isLowPower();
 
@@ -374,12 +374,16 @@ export default function CinematicHero() {
 
         /* Which card is the one in front: measured, not derived. Perspective
            and the ring's tilt shift where a card appears, so the answer is the
-           largest card nearest the middle of the frame. Sampled every few
-           frames, and only while the subtitle is up. */
+           largest card nearest the middle of the frame. The ring turns ~3deg/s,
+           so 4 samples a second is plenty; each one reads layout for all 16
+           cards, so it runs on a clock rather than every few frames, and only
+           while the subtitle is up. */
         let shown = -1;
-        let frame = 0;
-        reelTick = () => {
-          if (++frame % 4 || Number(gsap.getProperty(reel, "opacity")) === 0) return;
+        let last = 0;
+        reelTick = (time: number) => {
+          if (time - last < 0.25) return;
+          last = time;
+          if (Number(gsap.getProperty(reel, "opacity")) === 0) return;
           const cx = window.innerWidth / 2;
           let idx = -1;
           let best = -Infinity;
