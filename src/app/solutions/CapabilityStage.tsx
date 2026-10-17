@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 import { SectionLabel } from "@/components/ui";
 import { SOLUTION_ART } from "@/components/solution-art";
 import { ArrowUpRight, QMarkLight } from "@/components/ArrowMark";
@@ -44,6 +44,11 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
   /* Once the reader picks a domain the carousel is theirs, permanently. */
   const [taken, setTaken] = useState(false);
   const [paused, setPaused] = useState(false);
+  /* The carousel only runs while the section is on screen. Off-screen it used to
+     keep cycling every 5.2s and re-rendering the whole stage (and its progress
+     bar) for nobody — the main reason an idle /solutions held a phone's CPU. */
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef, { margin: "0px 0px -10% 0px" });
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const group = groups[active];
@@ -66,13 +71,13 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
    * most one timeout outstanding.
    */
   useEffect(() => {
-    if (taken || paused || prefersReducedMotion()) return;
+    if (taken || paused || !inView || prefersReducedMotion()) return;
     const id = window.setTimeout(
       () => setActive((i) => (i + 1) % groups.length),
       CYCLE_MS,
     );
     return () => window.clearTimeout(id);
-  }, [active, taken, paused, groups.length]);
+  }, [active, taken, paused, inView, groups.length]);
 
   /* on phones the index is a sideways row: keep the live pill in view */
   const indexRef = useRef<HTMLDivElement>(null);
@@ -113,6 +118,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
 
   return (
     <section
+      ref={sectionRef}
       id="capabilities"
       className="on-black grain relative overflow-hidden py-12 scroll-mt-24 lg:py-20"
       style={{ background: "#080808" }}
@@ -192,7 +198,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
                     actually running, so it never promises a change that is not
                     coming.
                   */}
-                  {live && !taken && !paused && (
+                  {live && !taken && !paused && inView && (
                     <motion.span
                       aria-hidden
                       key={active}
