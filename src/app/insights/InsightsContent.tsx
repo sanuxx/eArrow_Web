@@ -53,7 +53,7 @@ export default function InsightsContent() {
               className="surface-card edge-sweep group relative flex flex-col overflow-hidden rounded-card px-7 py-5 transition-colors duration-400 hover:border-orange/30"
             >
               <div className="flex items-start justify-between gap-4">
-                <span className="font-mono text-[10px] tracking-[0.22em] text-ink-soft">
+                <span className="font-mono text-[11px] tracking-[0.22em] text-ink-soft">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <ArrowUpRight className="h-4 w-4 text-ink-soft transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-orange" />
@@ -71,7 +71,7 @@ export default function InsightsContent() {
 
         {/* An honest empty state rather than fabricated article cards. */}
         <div className="mt-8 rounded-card border border-dashed border-border-strong bg-surface px-8 py-6 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-orange">
+          <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-orange">
             Publishing soon
           </p>
           <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-ink-muted">

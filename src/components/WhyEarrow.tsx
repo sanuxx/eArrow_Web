@@ -190,7 +190,7 @@ export default function WhyEarrow() {
               <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/35 to-transparent" />
 
               {/* Slate line, bottom of frame. */}
-              <span className="absolute bottom-6 left-7 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/80">
+              <span className="absolute bottom-6 left-7 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-white/80">
                 <span className="h-1.5 w-1.5 rounded-full bg-white/90" />
                 eArrow · est. {FOUNDED}
               </span>
@@ -227,7 +227,7 @@ export default function WhyEarrow() {
               <p className="relative font-heading text-[1.161rem] font-extrabold leading-none tracking-[-0.03em] text-ink sm:text-[1.505rem]">
                 <CountUp value={item.value} />
               </p>
-              <p className="relative mt-3 font-mono text-[10px] font-medium uppercase tracking-[0.24em] text-ink-soft">
+              <p className="relative mt-3 font-mono text-[11px] font-medium uppercase tracking-[0.24em] text-ink-soft">
                 {item.label}
               </p>
             </motion.div>
@@ -238,14 +238,14 @@ export default function WhyEarrow() {
             A timeline that fills as the section passes: the span from founding
             to now, drawn rather than asserted. */}
         <div className="mt-9 flex items-center gap-5">
-          <span className="font-mono text-[10px] tracking-[0.22em] text-ink-soft">{FOUNDED}</span>
+          <span className="font-mono text-[11px] tracking-[0.22em] text-ink-soft">{FOUNDED}</span>
           <span className="relative h-px flex-1 overflow-hidden bg-border">
             <motion.span
               className="absolute inset-y-0 left-0 bg-gradient-to-r from-orange to-amber"
               style={{ width: reduced ? "100%" : railFill }}
             />
           </span>
-          <span className="font-mono text-[10px] tracking-[0.22em] text-ink">Today</span>
+          <span className="font-mono text-[11px] tracking-[0.22em] text-ink">Today</span>
         </div>
       </div>
     </section>

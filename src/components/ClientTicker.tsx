@@ -201,7 +201,7 @@ function FlipWall() {
           );
         })}
       </ul>
-      <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+      <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-[0.28em] text-white/45">
         All {WALL.length} clients turn through the wall
       </p>
     </div>
@@ -249,7 +249,7 @@ export default function ClientTicker() {
         <p className="mx-auto max-w-xl font-heading text-[1.15rem] font-semibold leading-snug tracking-[-0.01em] text-white/85 sm:text-[1.35rem]">
           Proud to power progress for businesses that trust us.
         </p>
-        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.3em] text-white/55">
+        <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.3em] text-white/55">
           Organizations across Sri Lanka
         </p>
       </div>

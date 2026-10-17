@@ -169,7 +169,7 @@ export default function RewireScene() {
       <QMarkLight className="pointer-events-none absolute -right-24 -top-12 h-auto w-[520px] opacity-[0.035]" />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber">
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-amber">
           Case Study
         </p>
 
@@ -180,11 +180,11 @@ export default function RewireScene() {
         {/* The column headers do the naming once, so the rows below carry no
             repeated "before"/"after" labels. */}
         <div className="mt-14 hidden grid-cols-[1fr_auto_1fr] gap-8 lg:grid">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/35">
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-white/35">
             Before
           </p>
           <span className="w-[clamp(80px,12vw,190px)]" />
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber">
+          <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-amber">
             After
           </p>
         </div>

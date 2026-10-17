@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
 
           <div className="row-span-2 sm:row-span-1">
-            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.26em] text-ink-soft">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.26em] text-ink-soft">
               Explore
             </p>
             <ul className="mt-3 space-y-2 sm:mt-4 sm:space-y-2.5">
@@ -61,7 +61,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.26em] text-ink-soft">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.26em] text-ink-soft">
               Company
             </p>
             <ul className="mt-3 space-y-2 sm:mt-4 sm:space-y-2.5">
@@ -79,7 +79,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.26em] text-ink-soft">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.26em] text-ink-soft">
               Contact
             </p>
             <a
@@ -95,10 +95,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-5 sm:mt-14 sm:gap-4 sm:pt-7">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
             &copy; {new Date().getFullYear()} eArrow. All rights reserved.
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
             Empowering People · Enabling Growth
           </p>
         </div>

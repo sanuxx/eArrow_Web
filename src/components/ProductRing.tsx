@@ -187,7 +187,7 @@ export default function ProductRing({
                               </span>
                             )}
 
-                            <span className="relative px-1 text-center text-[10.5px] font-semibold leading-tight text-ink transition-colors duration-300 group-hover:text-orange lg:text-[11.5px]">
+                            <span className="relative px-1 text-center text-[11px] font-semibold leading-tight text-ink transition-colors duration-300 group-hover:text-orange lg:text-[11.5px]">
                               {item.label}
                             </span>
                           </a>

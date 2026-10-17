@@ -88,7 +88,7 @@ export default function Insights() {
               <Cover index={i} />
 
               <div className="p-7">
-                <div className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.16em]">
+                <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.16em]">
                   <span className="text-orange">{a.category}</span>
                   <span className="text-ink-soft">·</span>
                   <span className="text-ink-soft">{a.date}</span>
@@ -97,7 +97,7 @@ export default function Insights() {
                 <h3 className="mt-4 font-heading text-base font-bold leading-snug tracking-[-0.015em] text-ink">
                   {a.title}
                 </h3>
-                <span className="mt-6 inline-flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-orange">
+                <span className="mt-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-orange">
                   Read More
                   <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </span>

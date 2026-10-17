@@ -87,7 +87,7 @@ export default function FinalCta() {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="relative mx-auto max-w-3xl px-6 text-center"
       >
-        <p className="font-mono text-[10px] font-medium uppercase tracking-[0.42em] text-white/80">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.42em] text-white/80">
           Ready to move forward?
         </p>
 

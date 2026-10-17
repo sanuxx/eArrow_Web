@@ -109,7 +109,7 @@ export default function ProductStory({
       {/* ── Identity row ── */}
       <motion.div variants={item} className="relative flex items-center gap-4">
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-          <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-orange">
+          <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-orange">
             {domain}
           </span>
         </div>
@@ -144,7 +144,7 @@ export default function ProductStory({
         className="relative mt-8 grid grid-cols-1 overflow-hidden rounded-card border border-border bg-surface shadow-[0_22px_50px_-26px_rgba(var(--orange-ch),0.45)] sm:grid-cols-[1fr_auto_1.25fr]"
       >
         <div className="p-5">
-          <p className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-ink-muted">
+          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-ink-muted">
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-ink-soft/15 text-ink-soft">
               <Cross className="h-2.5 w-2.5" />
             </span>
@@ -187,7 +187,7 @@ export default function ProductStory({
               "linear-gradient(135deg, rgba(var(--orange-ch),0.09), rgba(var(--orange-ch),0.02) 70%)",
           }}
         >
-          <p className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.22em] text-orange">
+          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-orange">
             <span
               className="flex h-4 w-4 items-center justify-center rounded-full text-white"
               style={{ background: BRAND_GRADIENT }}
@@ -205,7 +205,7 @@ export default function ProductStory({
         <motion.div variants={item} className="relative mt-8 space-y-6">
           {moduleGroups.map((group) => (
             <div key={group.title}>
-              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
                 {group.title}{" "}
                 <span className="text-orange">· {group.items.length}</span>
               </p>
@@ -215,7 +215,7 @@ export default function ProductStory({
                     key={m}
                     className="group flex items-center gap-3 rounded-tile border border-border bg-surface px-3.5 py-2.5 shadow-[0_8px_20px_-16px_rgba(var(--orange-ch),0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange/40"
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-orange/10 font-mono text-[10px] font-semibold text-orange transition-colors duration-300 group-hover:bg-orange group-hover:text-white">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-orange/10 font-mono text-[11px] font-semibold text-orange transition-colors duration-300 group-hover:bg-orange group-hover:text-white">
                       {String(k + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[13px] font-medium leading-snug text-ink">
@@ -229,7 +229,7 @@ export default function ProductStory({
         </motion.div>
       ) : (
         <motion.div variants={item} className="relative mt-8">
-          <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-soft">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-ink-soft">
             What&apos;s inside{" "}
             <span className="text-orange">· {modules.length} modules</span>
           </p>

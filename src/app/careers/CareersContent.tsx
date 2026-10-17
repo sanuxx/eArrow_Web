@@ -80,7 +80,7 @@ export default function CareersContent() {
             the honest version of that until the client supplies one is an open
             application route. */}
         <div className="mt-12 rounded-card border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-orange">
+          <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-orange">
             Positions updating
           </p>
           <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-ink-muted">

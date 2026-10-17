@@ -23,7 +23,7 @@ export function SectionLabel({
 }) {
   return (
     <div
-      className={`flex items-center gap-3 font-mono text-[10px] font-medium uppercase tracking-[0.28em] text-orange ${className ?? ""}`}
+      className={`flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-orange ${className ?? ""}`}
     >
       <span className="h-px w-6 bg-orange/50" />
       <span>{children}</span>
@@ -41,7 +41,7 @@ export function StatusChip({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-ink-muted ${className ?? ""}`}
+      className={`inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-ink-muted ${className ?? ""}`}
     >
       <span className="relative flex h-1.5 w-1.5">
         <span

@@ -438,7 +438,7 @@ export function CapabilityGroup({
         {items.map((item) => (
           <li
             key={item}
-            className="rounded-full border border-border bg-surface-sunken px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted transition-colors duration-500 group-hover:border-orange/25 group-hover:text-ink"
+            className="rounded-full border border-border bg-surface-sunken px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted transition-colors duration-500 group-hover:border-orange/25 group-hover:text-ink"
           >
             {item}
           </li>

@@ -474,7 +474,7 @@ function Portrait({ p, large }: { p: Person; large?: boolean }) {
           <h3 className={`font-spartan font-semibold leading-tight text-white ${large ? "text-[1.15rem] sm:text-[1.5rem]" : "text-[13px] sm:text-[1.05rem]"}`}>
             {p.name}
           </h3>
-          <p className={`mt-1 font-medium leading-snug text-[#ffb070] ${large ? "text-[13px] sm:text-sm" : "text-[10.5px] sm:text-[13px]"}`}>
+          <p className={`mt-1 font-medium leading-snug text-[#ffb070] ${large ? "text-[13px] sm:text-sm" : "text-[11px] sm:text-[13px]"}`}>
             {p.role}
           </p>
           <p className="mt-0 hidden max-h-0 overflow-hidden text-[13px] leading-relaxed text-white/70 opacity-0 transition-all duration-500 group-hover:mt-2 group-hover:max-h-24 group-hover:opacity-100 sm:block">

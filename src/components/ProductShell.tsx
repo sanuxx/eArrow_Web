@@ -50,10 +50,10 @@ function Bars({ module }: { module: Extract<ShellModule, { type: "bars" }> }) {
   return (
     <div className="mt-3 rounded-xl border border-border bg-canvas p-4">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink-soft">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
           {module.caption}
         </span>
-        <span className="font-mono text-[9px] tracking-[0.14em] text-ink-soft">
+        <span className="font-mono text-[11px] tracking-[0.14em] text-ink-soft">
           {module.unit}
         </span>
       </div>
@@ -87,7 +87,7 @@ function Bars({ module }: { module: Extract<ShellModule, { type: "bars" }> }) {
 function Rows({ module }: { module: Extract<ShellModule, { type: "rows" }> }) {
   return (
     <div className="mt-3 rounded-xl border border-border bg-canvas p-4">
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink-soft">
+      <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
         {module.caption}
       </span>
       <ul className="mt-3 space-y-2">
@@ -102,7 +102,7 @@ function Rows({ module }: { module: Extract<ShellModule, { type: "rows" }> }) {
           >
             <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${TONE[row.tone]}`} />
             <span className="truncate text-[11px] font-medium text-ink">{row.label}</span>
-            <span className="ml-auto shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-soft">
+            <span className="ml-auto shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-soft">
               {row.meta}
             </span>
           </motion.li>
@@ -146,7 +146,7 @@ function Ring({ module }: { module: Extract<ShellModule, { type: "ring" }> }) {
         </span>
       </div>
       <div className="min-w-0">
-        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink-soft">
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
           {module.caption}
         </p>
         <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">{module.note}</p>
@@ -165,10 +165,10 @@ export default function ProductShell({ config }: { config: ShellConfig }) {
           <span className="h-2 w-2 rounded-full bg-amber/70" />
           <span className="h-2 w-2 rounded-full bg-border-strong" />
         </span>
-        <span className="truncate font-mono text-[10px] tracking-[0.16em] text-ink-soft">
+        <span className="truncate font-mono text-[11px] tracking-[0.16em] text-ink-soft">
           {config.path}
         </span>
-        <span className="ml-auto flex shrink-0 items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-ink-soft">
+        <span className="ml-auto flex shrink-0 items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
           <span
             className="h-1.5 w-1.5 rounded-full bg-orange"
             style={{ animation: "pulse-dot 2.4s ease-in-out infinite" }}
@@ -221,7 +221,7 @@ export default function ProductShell({ config }: { config: ShellConfig }) {
                 </p>
                 {m.delta && (
                   <p
-                    className={`tnum mt-1.5 font-mono text-[9px] ${
+                    className={`tnum mt-1.5 font-mono text-[11px] ${
                       m.up ? "text-orange" : "text-ink-soft"
                     }`}
                   >
@@ -238,11 +238,11 @@ export default function ProductShell({ config }: { config: ShellConfig }) {
 
           {/* the live action strip — the brief's orange gradient on an active element */}
           <div className="mt-4 flex items-center gap-3 rounded-xl bg-gradient-to-r from-orange to-amber px-4 py-3 text-white">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/20 font-mono text-[10px] font-bold">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/20 font-mono text-[11px] font-bold">
               ▶
             </span>
             <span className="truncate text-[13px] font-semibold">{config.action.label}</span>
-            <span className="ml-auto shrink-0 font-mono text-[9px] uppercase tracking-[0.16em] text-white/85">
+            <span className="ml-auto shrink-0 font-mono text-[11px] uppercase tracking-[0.16em] text-white/85">
               {config.action.state}
             </span>
           </div>

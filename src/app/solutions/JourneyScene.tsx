@@ -223,7 +223,7 @@ export default function JourneyScene({ covers }: { covers: string[][] }) {
                       under the 4.5 floor — and these are domain names, not
                       decoration. At /50 it reads 5.4:1 and is still plainly
                       quieter than the paragraph above it. */}
-                  <p className="mt-4 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.16em] text-white/50">
+                  <p className="mt-4 font-mono text-[11px] uppercase leading-relaxed tracking-[0.16em] text-white/50">
                     {covers[i]?.join("  ·  ")}
                   </p>
 

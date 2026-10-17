@@ -523,18 +523,18 @@ export default function ProductsContent() {
           so it reads as one sequence instead of seven separate pills.
         */}
         <div className="mt-10 flex flex-col gap-x-6 gap-y-3 border-t border-border pt-7 lg:flex-row lg:items-baseline">
-          <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-soft">
+          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.24em] text-ink-soft">
             Every product page covers
           </p>
 
           <ol className="flex flex-wrap items-baseline gap-x-2.5 gap-y-2">
             {ANATOMY.map((step, i) => (
               <li key={step} className="flex items-baseline gap-2.5">
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink">
+                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink">
                   {step}
                 </span>
                 {i < ANATOMY.length - 1 && (
-                  <span aria-hidden className="font-mono text-[10px] text-orange">
+                  <span aria-hidden className="font-mono text-[11px] text-orange">
                     →
                   </span>
                 )}

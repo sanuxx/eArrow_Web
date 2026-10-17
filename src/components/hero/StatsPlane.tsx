@@ -79,7 +79,7 @@ export default function StatsPlane({ ref }: { ref?: React.Ref<HTMLDivElement> })
                 />
               )}
 
-              <span className="mb-5 hidden font-mono text-[10px] uppercase tracking-[0.28em] text-ink-soft sm:block">
+              <span className="mb-5 hidden font-mono text-[11px] uppercase tracking-[0.28em] text-ink-soft sm:block">
                 0{i + 1}
               </span>
 

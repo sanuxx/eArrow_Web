@@ -93,7 +93,7 @@ function trackPointer(e: MouseEvent<HTMLAnchorElement>) {
 /** Capability tag — the specifics that stop a card being three adjectives. */
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full border border-border bg-surface-sunken px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted transition-colors duration-500 group-hover:border-orange/25 group-hover:text-ink">
+    <span className="rounded-full border border-border bg-surface-sunken px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted transition-colors duration-500 group-hover:border-orange/25 group-hover:text-ink">
       {children}
     </span>
   );
@@ -135,7 +135,7 @@ function Well({
           {s.n}
         </span>
       )}
-      <span className="absolute right-4 top-4 font-mono text-[10px] tracking-[0.2em] text-ink-soft">
+      <span className="absolute right-4 top-4 font-mono text-[11px] tracking-[0.2em] text-ink-soft">
         {s.id}
       </span>
       {/* eslint-disable-next-line @next/next/no-img-element */}

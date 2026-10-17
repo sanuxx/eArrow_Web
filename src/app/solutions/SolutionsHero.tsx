@@ -209,7 +209,7 @@ export default function SolutionsHero({
                 </p>
                 <Ring value={c.value} of={c.of} colour={c.colour} />
               </div>
-              <p className="mt-2 text-[10px] text-ink-soft">
+              <p className="mt-2 text-[11px] text-ink-soft">
                 Days remaining · <span className="font-semibold text-[#16a34a]">On track</span>
               </p>
             </div>

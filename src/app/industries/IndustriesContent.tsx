@@ -403,7 +403,7 @@ function MobileDeck() {
                 </ul>
 
                 {/* ── then the systems it runs on ── */}
-                <p data-m-txt className="mt-6 px-1 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Runs on</p>
+                <p data-m-txt className="mt-6 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft">Runs on</p>
                 <div className="mt-2.5 space-y-2">
                   {sys.map((p) => (
                     <div key={p} data-m-sys className="flex items-center gap-3 rounded-2xl border border-border bg-surface-sunken p-2 pr-3">

@@ -773,7 +773,7 @@ export default function CinematicHero() {
         <div aria-hidden className="cine-grain pointer-events-none absolute inset-0 opacity-[0.035]" />
 
         {/* scroll cue */}
-        <div data-cue className="cine-cue pointer-events-none absolute bottom-6 right-8 z-30 hidden flex-col items-center gap-3 text-[10px] font-semibold tracking-[0.24em] text-[#6b2306] lg:flex">
+        <div data-cue className="cine-cue pointer-events-none absolute bottom-6 right-8 z-30 hidden flex-col items-center gap-3 text-[11px] font-semibold tracking-[0.24em] text-[#6b2306] lg:flex">
           SCROLL
           <span className="relative h-10 w-px overflow-hidden bg-[#6b2306]/25">
             <span className="cine-cue-dot absolute inset-x-0 top-0 h-3 bg-[#6b2306]" />

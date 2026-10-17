@@ -211,7 +211,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
 
                   <span className="flex items-center gap-2.5">
                     <span
-                      className={`hidden font-mono text-[10px] tracking-[0.2em] transition-colors duration-300 lg:inline ${
+                      className={`hidden font-mono text-[11px] tracking-[0.2em] transition-colors duration-300 lg:inline ${
                         live ? "text-amber" : "text-white/25"
                       }`}
                     >
@@ -225,7 +225,7 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
                       {g.name}
                     </span>
                     <span
-                      className={`ml-auto font-mono text-[10px] tabular-nums transition-colors duration-300 ${
+                      className={`ml-auto font-mono text-[11px] tabular-nums transition-colors duration-300 ${
                         live ? "text-amber" : "text-white/25"
                       }`}
                     >

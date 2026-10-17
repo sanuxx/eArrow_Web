@@ -35,7 +35,7 @@ export default function FeaturedProduct() {
           <div className="relative grid grid-cols-1 gap-12 p-8 sm:p-12 lg:grid-cols-[0.62fr_1.38fr] lg:items-center lg:gap-12 lg:p-12">
             {/* ── Copy ── */}
             <div>
-              <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em]">
+              <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
                 <span className="font-bold text-ink">Arrow HR &amp; Payroll</span>
                 <span className="rounded-full border border-orange/30 bg-orange/[0.08] px-3 py-1 text-orange">
                   Product Solution

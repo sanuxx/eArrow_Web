@@ -32,7 +32,7 @@ function Collage() {
         <div className="flex items-center gap-2 rounded-t-md bg-[#1f7a45] px-3 py-1.5 text-[11px] font-semibold text-white">
           <span className="rounded bg-white/25 px-1">X</span> payroll_v7_FINAL(2).xlsx
         </div>
-        <div className="grid grid-cols-5 text-[10px] text-[#444]">
+        <div className="grid grid-cols-5 text-[11px] text-[#444]">
           {Array.from({ length: 30 }).map((_, i) => (
             <span key={i} className={`border-b border-r border-[#e3e3e3] px-1.5 py-1 ${i < 5 ? "bg-[#f1f5f2] font-semibold" : ""} ${i === 13 ? "bg-[#ffd7d7] text-[#c00]" : ""}`}>
               {i < 5 ? ["Name", "Dept", "Days", "OT", "Net"][i] : i === 13 ? "#REF!" : i % 5 === 0 ? "—" : "··"}
@@ -55,10 +55,10 @@ function Collage() {
       {/* email chain */}
       <div className="absolute left-[46%] top-[56%] w-[40%] -rotate-1 rounded-lg bg-white p-3 shadow-[0_18px_30px_-14px_rgba(0,0,0,0.45)]">
         <p className="text-[11px] font-semibold text-[#222]">RE: RE: RE: FW: Payroll for this month</p>
-        <p className="mt-1 text-[10px] text-[#666]">Can someone send the latest version? I have three different ones…</p>
+        <p className="mt-1 text-[11px] text-[#666]">Can someone send the latest version? I have three different ones…</p>
         <div className="mt-2 flex gap-1">
           {[1, 2, 3].map((k) => (
-            <span key={k} className="rounded bg-[#eef2f7] px-1.5 py-0.5 text-[9px] text-[#456]">payroll_v{k + 4}.xlsx</span>
+            <span key={k} className="rounded bg-[#eef2f7] px-1.5 py-0.5 text-[11px] text-[#456]">payroll_v{k + 4}.xlsx</span>
           ))}
         </div>
       </div>
@@ -70,7 +70,7 @@ function Collage() {
             <span key={k} className="block h-[2px] bg-[#ccc]" />
           ))}
         </div>
-        <span className="absolute -right-2 -top-3 rotate-12 rounded border-2 border-[#c0392b] px-1.5 text-[10px] font-bold text-[#c0392b]">PENDING</span>
+        <span className="absolute -right-2 -top-3 rotate-12 rounded border-2 border-[#c0392b] px-1.5 text-[11px] font-bold text-[#c0392b]">PENDING</span>
       </div>
     </div>
   );

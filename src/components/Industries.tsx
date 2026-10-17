@@ -71,7 +71,7 @@ export default function Industries() {
               <QMarkLight className="pointer-events-none absolute -right-4 -top-8 h-auto w-40 opacity-0 transition-opacity duration-500 group-hover:opacity-25" />
 
               <span className="relative flex items-baseline gap-5">
-                <span className="font-mono text-[10px] tracking-[0.2em] text-white/30 transition-colors duration-300 group-hover:text-white/70">
+                <span className="font-mono text-[11px] tracking-[0.2em] text-white/30 transition-colors duration-300 group-hover:text-white/70">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="font-heading text-[1.075rem] font-bold tracking-[-0.02em] text-white sm:text-[1.182rem]">
