@@ -28,7 +28,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="col-span-2 lg:col-span-1">
             <Image
-              src={withBasePath("/earrow-logo-trim.png")}
+              src={withBasePath("/earrow-logo-trim.webp")}
               alt="eArrow"
               width={1200}
               height={292}

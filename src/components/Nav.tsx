@@ -167,7 +167,7 @@ export default function Nav() {
           */}
           {/* cropped to the wordmark, so the size set here is the size you see */}
           <Image
-            src={withBasePath("/earrow-logo-trim.png")}
+            src={withBasePath("/earrow-logo-trim.webp")}
             alt="eArrow"
             width={1200}
             height={292}
@@ -217,7 +217,7 @@ export default function Nav() {
               bar and in dark mode alike */}
           <span className="flex h-10 items-center rounded-xl bg-white px-2.5 shadow-md ring-1 ring-black/5 sm:h-11 sm:px-3">
             <Image
-              src={withBasePath("/badges/iso-27001.png")}
+              src={withBasePath("/badges/iso-27001.webp")}
               alt="ISO 27001 certified"
               width={1033}
               height={410}

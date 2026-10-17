@@ -278,7 +278,7 @@ export default function BrandIntro() {
           would produce a black logo on a black screen.
         */}
         <Image
-          src={withBasePath("/earrow-logo-white.png")}
+          src={withBasePath("/earrow-logo-white.webp")}
           alt=""
           width={1520}
           height={626}

@@ -25,7 +25,7 @@ type Props = { className?: string };
 export function QMark({ className, style }: Props & { style?: React.CSSProperties }) {
   return (
     <Image
-      src={withBasePath("/logos/earrow-q.png")}
+      src={withBasePath("/logos/earrow-q.webp")}
       alt=""
       aria-hidden
       width={500}
@@ -40,7 +40,7 @@ export function QMark({ className, style }: Props & { style?: React.CSSPropertie
 export function QMarkLight({ className, style }: Props & { style?: React.CSSProperties }) {
   return (
     <Image
-      src={withBasePath("/logos/earrow-q.png")}
+      src={withBasePath("/logos/earrow-q.webp")}
       alt=""
       aria-hidden
       width={500}

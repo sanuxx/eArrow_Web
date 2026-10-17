@@ -430,7 +430,7 @@ export default function HeroAct() {
                 only the declaration was throwing it away.
               */}
               <Image
-                src={withBasePath("/earrow-logo-white.png")}
+                src={withBasePath("/earrow-logo-white.webp")}
                 alt=""
                 width={1520}
                 height={626}
@@ -439,7 +439,7 @@ export default function HeroAct() {
                 className="h-auto w-full"
                 style={{ filter: "var(--logo-filter)" }}
               />
-              <LightSweep mask={withBasePath("/earrow-logo-white.png")} />
+              <LightSweep mask={withBasePath("/earrow-logo-white.webp")} />
             </div>
           </div>
         </div>
