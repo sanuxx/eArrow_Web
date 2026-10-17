@@ -2261,7 +2261,11 @@ a:focus-visible, button:focus-visible {
    keyframes) so it runs on the compositor rather than the main thread. */
 .cine-ring-turn {
   transform-style: preserve-3d;
-  animation: cine-ring-turn 110s linear infinite;
+  /* steps(): the ring turns ~3deg/s, so updating it 30 times a second instead of
+     every display frame is invisible but halves the compositing work. The
+     keyframes have three stops, so the count applies per half-turn: 1650 steps
+     in 55s = 30 updates/s. (15/s measured no cheaper and starts to judder.) */
+  animation: cine-ring-turn 110s steps(1650) infinite;
 }
 @keyframes cine-ring-turn {
   0% {
