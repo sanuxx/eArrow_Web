@@ -2267,6 +2267,13 @@ a:focus-visible, button:focus-visible {
      in 55s = 30 updates/s. (15/s measured no cheaper and starts to judder.) */
   animation: cine-ring-turn 110s steps(1650) infinite;
 }
+/* Touch devices: the ring holds still (the visitor swipes it instead — see the
+   touch strip in CinematicHero). Saves the continuous compositing on phones. */
+@media (pointer: coarse) {
+  .cine-ring-turn {
+    animation: none;
+  }
+}
 @keyframes cine-ring-turn {
   0% {
     transform: rotateY(0deg);

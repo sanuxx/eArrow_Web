@@ -158,10 +158,12 @@ export default function CinematicHero() {
     // `ctx` is read inside the intro's onComplete, which only fires after this assignment.
     const ctx: gsap.Context = gsap.context(() => {
       /* ── The arc: a ring seen from outside, so only its near half shows ── */
+      let ringR = 1; // the ring's radius in px, for the swipe's finger-to-degrees ratio
       const layoutRing = () => {
         const vw = window.innerWidth;
         const cardW = vw < 768 ? vw * 0.44 : Math.min(300, vw * 0.19);
         const radius = (cardW * 1.06 * cards.length) / (2 * Math.PI);
+        ringR = radius;
         /* Written as a string, not gsap.set: GSAP always translates before it
            rotates, which would stack every card at the same point. */
         cards.forEach((c, i) => {
@@ -271,6 +273,65 @@ export default function CinematicHero() {
         };
       });
 
+      /* ── Touch devices: the ring is still; swipe it sideways to turn it ──
+         The idle turn is a CSS animation that touch screens switch off (see
+         `.cine-ring-turn` in globals.css), so nothing moves until the visitor
+         does. A horizontal drag on the strip over the ring turns it with the
+         finger, and on release it glides on and settles with a card square to
+         the viewer. The strip is `touch-action: pan-y`, so a vertical drag still
+         scrolls the page. */
+      let offTouch = () => {};
+      const touchZone = q("[data-ring-touch]")[0] as HTMLElement | undefined;
+      const turnEl = q(".cine-ring-turn")[0] as HTMLElement | undefined;
+      if (touchZone && turnEl && window.matchMedia("(pointer: coarse)").matches) {
+        const STEP = 360 / cards.length;
+        const spin = { a: 0 }; // degrees the ring has been turned by the visitor
+        const apply = () => gsap.set(turnEl, { rotationY: spin.a });
+        let down = false;
+        let x0 = 0;
+        let a0 = 0;
+        let lastX = 0;
+        let lastT = 0;
+        let vel = 0; // px/ms, smoothed
+        const degPerPx = () => 180 / (Math.PI * ringR); // 1:1 with the card under the finger
+        const onDown = (e: PointerEvent) => {
+          down = true;
+          gsap.killTweensOf(spin);
+          x0 = lastX = e.clientX;
+          a0 = spin.a;
+          lastT = e.timeStamp;
+          vel = 0;
+          touchZone.setPointerCapture(e.pointerId);
+        };
+        const onMoveT = (e: PointerEvent) => {
+          if (!down) return;
+          const dt = Math.max(1, e.timeStamp - lastT);
+          vel = 0.8 * vel + 0.2 * ((e.clientX - lastX) / dt);
+          lastX = e.clientX;
+          lastT = e.timeStamp;
+          spin.a = a0 + (e.clientX - x0) * degPerPx();
+          apply();
+        };
+        const onUp = () => {
+          if (!down) return;
+          down = false;
+          // carry the flick a little further, then land on a whole card
+          const target = Math.round((spin.a + vel * degPerPx() * 280) / STEP) * STEP;
+          gsap.to(spin, { a: target, duration: 0.9, ease: "power3.out", onUpdate: apply });
+        };
+        touchZone.addEventListener("pointerdown", onDown);
+        touchZone.addEventListener("pointermove", onMoveT);
+        touchZone.addEventListener("pointerup", onUp);
+        touchZone.addEventListener("pointercancel", onUp);
+        offTouch = () => {
+          gsap.killTweensOf(spin);
+          touchZone.removeEventListener("pointerdown", onDown);
+          touchZone.removeEventListener("pointermove", onMoveT);
+          touchZone.removeEventListener("pointerup", onUp);
+          touchZone.removeEventListener("pointercancel", onUp);
+        };
+      }
+
       /* ── ACT TWO ──────────────────────────────────────────────────────── */
       counters.forEach((c) => (c.textContent = "0"));
       /* Whether the nav sits over the hero, read straight from the scroll
@@ -315,6 +376,9 @@ export default function CinematicHero() {
               setAttr("heroScrub", self.isActive && self.getVelocity() !== 0 ? "1" : "0");
               /* the endless drift/push tweens stop competing with the scrub */
               setAmbientPaused(self.progress > 0.02);
+              /* past the opening frame the strip would sit over the stats, so it
+                 hands the touches back to the page */
+              if (touchZone) touchZone.style.pointerEvents = self.progress > 0.03 ? "none" : "auto";
             },
           },
         });
@@ -416,6 +480,7 @@ export default function CinematicHero() {
 
       return () => {
         release();
+        offTouch();
         stage.removeEventListener("pointermove", onMove);
         magnets.forEach((off) => off());
         window.removeEventListener("resize", onResize);
@@ -587,6 +652,14 @@ export default function CinematicHero() {
 
           {/* ── The arc of product screens ── */}
           <div data-px="16" className="pointer-events-none absolute inset-0 motion-reduce:hidden">
+            {/* swipe strip: touch devices only, over the band the ring sits in,
+                clear of the buttons above and the trust row below */}
+            <div
+              data-ring-touch
+              aria-hidden
+              className="pointer-events-auto absolute inset-x-0 z-10 hidden [@media(pointer:coarse)]:block"
+              style={{ top: "57%", height: "27%", touchAction: "pan-y" }}
+            />
             <div data-wall className="cine-wall absolute inset-0" style={{ perspective: "1500px" }}>
               <div data-wall-lift className="cine-wall-lift absolute left-1/2 top-[71%] h-0 w-0 [@media(min-aspect-ratio:16/9)]:top-[77%] [@media(min-aspect-ratio:2/1)]:top-[80%]" style={{ transformStyle: "preserve-3d" }}>
                 <div style={{ transform: "rotateX(-7deg)", transformStyle: "preserve-3d" }}>
