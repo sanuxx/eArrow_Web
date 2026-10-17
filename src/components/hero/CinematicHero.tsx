@@ -658,7 +658,7 @@ export default function CinematicHero() {
               data-ring-touch
               aria-hidden
               className="pointer-events-auto absolute inset-x-0 z-10 hidden [@media(pointer:coarse)]:block"
-              style={{ top: "57%", height: "27%", touchAction: "pan-y" }}
+              style={{ top: "57%", height: "22%", touchAction: "pan-y" }}
             />
             <div data-wall className="cine-wall absolute inset-0" style={{ perspective: "1500px" }}>
               <div data-wall-lift className="cine-wall-lift absolute left-1/2 top-[71%] h-0 w-0 [@media(min-aspect-ratio:16/9)]:top-[77%] [@media(min-aspect-ratio:2/1)]:top-[80%]" style={{ transformStyle: "preserve-3d" }}>

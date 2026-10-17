@@ -277,7 +277,7 @@ export default function ProductStory({
         </a>
         <a
           href="/contact"
-          className="group inline-flex items-center gap-2 text-sm font-semibold text-ink transition-colors hover:text-orange"
+          className="tap [--tap-y:12px] group inline-flex items-center gap-2 text-sm font-semibold text-ink transition-colors hover:text-orange"
         >
           Ask about {short}
           <span

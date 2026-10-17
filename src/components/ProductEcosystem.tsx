@@ -184,14 +184,14 @@ function MobileCarousel() {
       </div>
 
       {/* dots, in step with the swipe; tap to jump */}
-      <div className="mt-3 flex items-center justify-center gap-1.5">
+      <div className="mt-3 flex items-center justify-center gap-1.5 [@media(pointer:coarse)]:gap-3.5">
         {PRODUCTS.map((p, i) => (
           <button
             key={p.key}
             type="button"
             aria-label={`Show Arrow ${p.label}`}
             onClick={() => goTo(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-6 bg-orange" : "w-1.5 bg-ink-soft/40"}`}
+            className={`tap [--tap-x:7px] [--tap-y:19px] h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-6 bg-orange" : "w-1.5 bg-ink-soft/40"}`}
           />
         ))}
       </div>

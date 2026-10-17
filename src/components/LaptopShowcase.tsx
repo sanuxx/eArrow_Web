@@ -182,7 +182,7 @@ export default function LaptopShowcase({ screens }: { screens: Screen[] }) {
       />
 
       {multi && (
-        <div className="mt-4 flex justify-center gap-2">
+        <div className="mt-4 flex justify-center gap-2 [@media(pointer:coarse)]:gap-3.5">
           {screens.map((s, i) => (
             <button
               key={s.src}
@@ -190,7 +190,7 @@ export default function LaptopShowcase({ screens }: { screens: Screen[] }) {
               onClick={() => setIndex(i)}
               aria-label={`Show screen ${i + 1} of ${screens.length}`}
               aria-current={i === index}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
+              className={`tap [--tap-x:7px] [--tap-y:19px] h-1.5 rounded-full transition-all duration-300 ${
                 i === index ? "w-6 bg-orange" : "w-1.5 bg-ink-soft/40 hover:bg-ink-soft"
               }`}
             />

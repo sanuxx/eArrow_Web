@@ -2416,3 +2416,26 @@ a:focus-visible, button:focus-visible {
 @media (prefers-reduced-motion: no-preference) {
   .ind-landing .lnd-fade { opacity: 0; }
 }
+
+/*
+ * Bigger tap areas for small controls, on touch devices only.
+ *
+ * Phone fingers need roughly 44px; dots, icon buttons and text links here are
+ * 6-36px. `.tap` stretches an invisible hit area around the control (an ::after
+ * that the pointer hits as part of the element) without changing how it looks or
+ * lays out. Reach is set per control: `[--tap-x:8px] [--tap-y:12px]` is how far
+ * the area extends past each side. Mouse users keep the exact hit areas.
+ */
+@media (pointer: coarse) {
+  .tap {
+    position: relative;
+  }
+  .tap::after {
+    content: "";
+    position: absolute;
+    top: calc(-1 * var(--tap-y, 0px));
+    bottom: calc(-1 * var(--tap-y, 0px));
+    left: calc(-1 * var(--tap-x, 0px));
+    right: calc(-1 * var(--tap-x, 0px));
+  }
+}

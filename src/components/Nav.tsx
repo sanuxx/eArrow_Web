@@ -153,7 +153,7 @@ export default function Nav() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-12">
-        <Link prefetch={false} href="/" onClick={() => setMenuOpen(false)}>
+        <Link prefetch={false} href="/" onClick={() => setMenuOpen(false)} className="tap [--tap-x:6px] [--tap-y:9px]">
           {/*
             One asset, two appearances. The logo is white artwork on
             transparency, so on the dark hero it is used as-is and on the
@@ -229,7 +229,7 @@ export default function Nav() {
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors hover:border-orange lg:hidden ${
+            className={`tap [--tap-x:4px] [--tap-y:4px] flex h-9 w-9 items-center justify-center rounded-full border transition-colors hover:border-orange lg:hidden ${
               onDark ? "border-white/20 text-white" : "border-border-strong text-ink"
             }`}
           >

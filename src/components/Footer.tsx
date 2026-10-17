@@ -51,7 +51,7 @@ export default function Footer() {
                 <li key={l.label}>
                   <Link prefetch={false}
                     href={l.href}
-                    className="text-sm text-ink transition-colors hover:text-orange"
+                    className="tap [--tap-y:5px] text-sm text-ink transition-colors hover:text-orange"
                   >
                     {l.label}
                   </Link>
@@ -69,7 +69,7 @@ export default function Footer() {
                 <li key={l.label}>
                   <Link prefetch={false}
                     href={l.href}
-                    className="text-sm text-ink transition-colors hover:text-orange"
+                    className="tap [--tap-y:5px] text-sm text-ink transition-colors hover:text-orange"
                   >
                     {l.label}
                   </Link>
@@ -84,7 +84,7 @@ export default function Footer() {
             </p>
             <a
               href="mailto:sales@earrow.lk"
-              className="group mt-3 inline-flex items-center gap-1.5 text-sm sm:mt-4 text-ink transition-colors hover:text-orange"
+              className="tap [--tap-y:12px] group mt-3 inline-flex items-center gap-1.5 text-sm sm:mt-4 text-ink transition-colors hover:text-orange"
             >
               sales@earrow.lk
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

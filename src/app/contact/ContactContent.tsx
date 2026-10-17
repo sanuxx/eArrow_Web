@@ -188,14 +188,14 @@ export default function ContactContent() {
               <li className="flex items-center justify-between gap-4 py-4">
                 <span>
                   <span className="block text-[12px] font-medium text-ink-soft">Email</span>
-                  <a href={`mailto:${SALES_EMAIL}`} className="mt-0.5 block font-heading text-[17px] font-semibold tracking-[-0.01em] text-ink transition-colors hover:text-orange">
+                  <a href={`mailto:${SALES_EMAIL}`} className="tap [--tap-y:9px] mt-0.5 block font-heading text-[17px] font-semibold tracking-[-0.01em] text-ink transition-colors hover:text-orange">
                     {SALES_EMAIL}
                   </a>
                 </span>
                 <button
                   type="button"
                   onClick={copyEmail}
-                  className="shrink-0 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-orange/40 hover:text-orange"
+                  className="tap [--tap-y:6px] [--tap-x:4px] shrink-0 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-orange/40 hover:text-orange"
                   aria-live="polite"
                 >
                   {copied ? "Copied" : "Copy"}
@@ -204,11 +204,11 @@ export default function ContactContent() {
               <li className="flex items-center justify-between gap-4 py-4">
                 <span>
                   <span className="block text-[12px] font-medium text-ink-soft">Phone</span>
-                  <a href={PHONE.href} className="mt-0.5 block font-heading text-[17px] font-semibold tracking-[-0.01em] text-ink transition-colors hover:text-orange">
+                  <a href={PHONE.href} className="tap [--tap-y:9px] mt-0.5 block font-heading text-[17px] font-semibold tracking-[-0.01em] text-ink transition-colors hover:text-orange">
                     {PHONE.v}
                   </a>
                 </span>
-                <a href={PHONE.href} className="shrink-0 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-orange/40 hover:text-orange">
+                <a href={PHONE.href} className="tap [--tap-y:6px] [--tap-x:4px] shrink-0 rounded-full border border-border bg-surface px-3.5 py-1.5 text-[12px] font-semibold text-ink transition-colors hover:border-orange/40 hover:text-orange">
                   Call
                 </a>
               </li>

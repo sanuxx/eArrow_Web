@@ -28,7 +28,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Toggle color theme"
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-orange hover:text-orange"
+      className="tap [--tap-x:4px] [--tap-y:4px] flex h-9 w-9 items-center justify-center rounded-full border border-border text-ink-muted transition-colors hover:border-orange hover:text-orange"
     >
       {!mounted || theme === "light" ? (
         // light mode is active -> offer the moon
