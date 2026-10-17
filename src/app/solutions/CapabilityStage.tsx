@@ -134,7 +134,11 @@ export default function CapabilityStage({ groups }: { groups: Group[] }) {
       */}
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute h-[70%] w-[62%] rounded-full"
+        /* On a phone this section is very tall and narrow, so "70% of the height by
+          62% of the width" made a ~240px-wide, 1000px-tall stripe. Below `lg` it is
+          a round wash 130% of the width instead, centred (framer's inline `left`
+          is overridden — the glow still drifts down the page with the selection). */
+        className="pointer-events-none absolute h-[70%] w-[62%] rounded-full max-lg:left-[-15%]! max-lg:aspect-square max-lg:h-auto max-lg:w-[130%]"
         animate={{
           left: `${28 + (active / (groups.length - 1)) * 44}%`,
           top: `${18 + (active % 3) * 16}%`,
